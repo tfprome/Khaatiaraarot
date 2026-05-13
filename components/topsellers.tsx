@@ -3,8 +3,8 @@
 import Image from "next/image";
 import { ShoppingCart, Lightning } from "@phosphor-icons/react";
 import type { ImageProps } from "next/image";
-import CHINIGURA_CHAL from "../public/images/ChiniguraChalproducts.png"
-import Mustardoil from "../public/images/MustardOilProducts.png"
+import CHINIGURA_CHAL from "../public/Images/ChiniguraChalproducts.png"
+import Mustardoil from "../public/Images/MustardOilProducts.png"
 
 type Product = {
     id: number;
