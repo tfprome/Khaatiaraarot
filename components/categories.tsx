@@ -3,11 +3,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "@phosphor-icons/react";
-import OilPhoto from '../public/images/Oil Categories.jpg';
+import OilPhoto from '../public/images/OilCategories.jpg';
 import FruitsPhoto from '../public/images/khatiarotlogo.jpg';
-import CropsPhoto from '../public/images/Crops Categories.jpg';
-import SpicePhoto from '../public/images/Spices Categories.jpg';
-import ImportedPhoto from '../public/images/Imported Goods Categories.jpg';
+import CropsPhoto from '../public/images/CropsCategories.jpg';
+import SpicePhoto from '../public/images/SpicesCategories.jpg';
+import ImportedPhoto from '../public/images/ImportedGoodsCategories.jpg';
 import { Category } from "@/Types/Homepagetypes";
 
 const categories: Category[] = [
