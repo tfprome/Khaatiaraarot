@@ -158,6 +158,14 @@ export default function LoginPage() {
                             </Link>
                         </p>
 
+                        {/* Continue as guest */}
+                        <Link
+                            href="/"
+                            className="w-full flex items-center justify-center gap-2 text-[#a07850] hover:text-[#8B0000] font-semibold text-sm"
+                        >
+                            Continue as a Guest
+                        </Link>
+
                     </div>
                 </div>
 

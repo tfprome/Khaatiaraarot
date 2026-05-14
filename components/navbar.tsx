@@ -47,12 +47,12 @@ export default function Navbar() {
                     </p>
                     <div className="flex items-center gap-3">
                         <Link href='/login'
-                            className="flex items-center gap-1 cursor-pointer hover:text-green-300 transition-colors">
+                            className="flex items-center gap-1 cursor-pointer hover:text-[#5B1A18] transition-colors">
                             <SignInIcon size={13} />
                             Login
                         </Link>
                         <span className="opacity-40">|</span>
-                        <span className="flex items-center gap-1 cursor-pointer hover:text-green-300 transition-colors">
+                        <span className="flex items-center gap-1 cursor-pointer hover:text-[#5B1A18] transition-colors">
                             <UserCirclePlusIcon size={13} />
                             Register
                         </span>
