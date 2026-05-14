@@ -1,21 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { ShoppingCart, Lightning } from "@phosphor-icons/react";
-import type { ImageProps } from "next/image";
+import { ShoppingCartIcon, LightningIcon } from "@phosphor-icons/react";
 import CHINIGURA_CHAL from "../public/Images/ChiniguraChalproducts.png"
 import Mustardoil from "../public/Images/MustardOilProducts.png"
-
-type Product = {
-    id: number;
-    name: string;
-    unit: string;
-    price: number;
-    originalPrice?: number;
-    image: ImageProps["src"];
-    source: string;
-    isBestSelling?: boolean;
-};
+import { Product } from "../Types/Homepagetypes";
 
 const products: Product[] = [
     {
@@ -71,13 +60,13 @@ function ProductCard({ product }: { product: Product }) {
             {/* Best Selling badge */}
             {product.isBestSelling && (
                 <div className="absolute top-3 right-3 z-10 flex items-center gap-1 bg-[#8B0000] text-white text-[10px] font-semibold px-2.5 py-1 rounded-full">
-                    <Lightning size={10} weight="fill" />
+                    <LightningIcon size={10} weight="fill" />
                     Best Selling
                 </div>
             )}
 
             {/* Image — left side */}
-            <div className="group relative w-[120px] sm:w-[140px] md:w-[160px] shrink-0 self-stretch bg-[#fdf5ee]">
+            <div className="group relative w-30 sm:w-35 md:w-40 shrink-0 self-stretch bg-[#fdf5ee]">
                 <Image
                     src={product.image}
                     alt={product.name}
@@ -122,11 +111,11 @@ function ProductCard({ product }: { product: Product }) {
                 {/* Buttons */}
                 <div className="flex items-center gap-2 flex-wrap">
                     <button className="flex items-center gap-1.5 text-[12px] sm:text-[13px] font-semibold text-[#8B0000] border border-[#8B0000] px-3 sm:px-4 py-2 rounded-lg hover:bg-[#8B0000] hover:text-white transition-all duration-200">
-                        <ShoppingCart size={14} weight="bold" />
+                        <ShoppingCartIcon size={14} weight="bold" />
                         Add to Cart
                     </button>
                     <button className="flex items-center gap-1.5 text-[12px] sm:text-[13px] font-semibold text-white bg-[#8B0000] px-3 sm:px-4 py-2 rounded-lg hover:bg-[#6e0000] transition-all duration-200">
-                        <Lightning size={14} weight="fill" />
+                        <LightningIcon size={14} weight="fill" />
                         Buy now
                     </button>
                 </div>

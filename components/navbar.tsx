@@ -46,10 +46,11 @@ export default function Navbar() {
                         🚀 Free delivery on orders above ৳500
                     </p>
                     <div className="flex items-center gap-3">
-                        <span className="flex items-center gap-1 cursor-pointer hover:text-green-300 transition-colors">
+                        <Link href='/login'
+                            className="flex items-center gap-1 cursor-pointer hover:text-green-300 transition-colors">
                             <SignInIcon size={13} />
                             Login
-                        </span>
+                        </Link>
                         <span className="opacity-40">|</span>
                         <span className="flex items-center gap-1 cursor-pointer hover:text-green-300 transition-colors">
                             <UserCirclePlusIcon size={13} />
@@ -73,13 +74,13 @@ export default function Navbar() {
                             </div> */}
                             <div className="mb-2">
                                 <Image
-                                        src={Khaatiarotlogo}
-                                        alt="Grocery Store Logo"
-                                        width={100}
-                                        height={50}
-                                        //className="w-full h-full object-contain"
-                                        priority
-                                        >
+                                    src={Khaatiarotlogo}
+                                    alt="Grocery Store Logo"
+                                    width={100}
+                                    height={50}
+                                    //className="w-full h-full object-contain"
+                                    priority
+                                >
                                 </Image>
                             </div>
                         </div>
