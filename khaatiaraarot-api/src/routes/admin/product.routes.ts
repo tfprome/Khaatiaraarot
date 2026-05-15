@@ -10,6 +10,7 @@ import {
   setProductImagePrimary,
 } from '../../controllers/admin/product.controller';
 import { handleUpload } from '../../middleware/upload.middleware';
+import { uploadLimiter } from '../../middleware/rateLimiter.middleware';
 
 const router = Router();
 
@@ -19,7 +20,7 @@ router.put('/:id', updateProduct);
 router.delete('/:id', deleteProduct);
 router.put('/:id/stock', adjustStock);
 
-router.post('/:id/images', handleUpload('image'), uploadProductImage);
+router.post('/:id/images', uploadLimiter, handleUpload('image'), uploadProductImage);
 router.delete('/:id/images/:imageId', deleteProductImage);
 router.patch('/:id/images/:imageId/primary', setProductImagePrimary);
 

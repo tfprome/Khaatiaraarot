@@ -12,17 +12,24 @@ import orderRoutes from "./routes/order.routes";
 import cartRoutes from "./routes/cart.routes";
 import adminRoutes from "./routes/admin";
 import { errorHandler } from "./middleware/error.middleware";
+import { requestLogger } from "./middleware/requestLogger.middleware";
+import { generalLimiter, authLimiter } from "./middleware/rateLimiter.middleware";
 import { startWorkers } from "./queues/workers";
+import { logger } from "./config/logger";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+
+app.set('trust proxy', 1);
 
 app.use(helmet());
 app.use(cors({ origin: process.env.ALLOWED_ORIGIN, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
+app.use(requestLogger);
+app.use(generalLimiter);
 
-app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/auth", authLimiter, authRoutes);
 app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/banners", bannerRoutes);
@@ -33,7 +40,7 @@ app.use("/api/v1/admin", adminRoutes);
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(`API running on port ${PORT}`);
+  logger.info(`API running on port ${PORT}`);
   startWorkers();
 });
 

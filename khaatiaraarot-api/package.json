@@ -21,6 +21,7 @@
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.45.2",
     "express": "^4.19.2",
+    "express-rate-limit": "^8.5.2",
     "helmet": "^7.1.0",
     "ioredis": "^5.10.1",
     "jsonwebtoken": "^9.0.3",
@@ -28,6 +29,8 @@
     "nodemailer": "^8.0.7",
     "pdfkit": "^0.18.0",
     "pg": "^8.20.0",
+    "rate-limit-redis": "^5.0.0",
+    "winston": "^3.19.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -41,6 +44,7 @@
     "@types/nodemailer": "^8.0.0",
     "@types/pdfkit": "^0.17.6",
     "@types/pg": "^8.20.0",
+    "@types/winston": "^2.4.4",
     "drizzle-kit": "^0.31.10",
     "tsx": "^4.15.7",
     "typescript": "^5.4.5"

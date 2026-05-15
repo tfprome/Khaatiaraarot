@@ -7,6 +7,7 @@ import {
   uploadBannerImage,
 } from '../../controllers/admin/banner.controller';
 import { handleUpload } from '../../middleware/upload.middleware';
+import { uploadLimiter } from '../../middleware/rateLimiter.middleware';
 
 const router = Router();
 
@@ -14,6 +15,6 @@ router.get('/', listBanners);
 router.post('/', createBanner);
 router.put('/:id', updateBanner);
 router.delete('/:id', deleteBanner);
-router.post('/:id/image', handleUpload('image'), uploadBannerImage);
+router.post('/:id/image', uploadLimiter, handleUpload('image'), uploadBannerImage);
 
 export default router;
