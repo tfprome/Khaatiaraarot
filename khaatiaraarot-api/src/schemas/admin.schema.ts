@@ -114,3 +114,17 @@ export const listInventoryQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(50),
   lowStockOnly: z.coerce.boolean().default(false),
 });
+
+// ── Reports ──────────────────────────────────────────────────────────────────
+
+export const salesReportQuerySchema = z.object({
+  from: z.string().datetime().optional(),
+  to: z.string().datetime().optional(),
+  group: z.enum(['day', 'month']).default('day'),
+});
+
+export const topProductsQuerySchema = z.object({
+  from: z.string().datetime().optional(),
+  to: z.string().datetime().optional(),
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+});
