@@ -8,3 +8,11 @@ export interface AuthRequest extends Request {
     jti: string;
   };
 }
+
+declare global {
+  namespace Express {
+    interface Request {
+      sessionId?: string;
+    }
+  }
+}

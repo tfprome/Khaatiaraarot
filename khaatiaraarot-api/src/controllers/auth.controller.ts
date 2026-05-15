@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthRequest } from '../types';
 import * as authService from '../services/auth.service';
+import { mergeGuestCart } from '../services/cart.service';
+import { SESSION_COOKIE } from '../middleware/session.middleware';
 
 const REFRESH_COOKIE = 'kha_refresh';
 
@@ -40,6 +42,13 @@ export async function login(req: Request, res: Response, next: NextFunction) {
   try {
     const { email, password } = req.body;
     const { accessToken, refreshToken, user } = await authService.login(email, password);
+
+    const sessionId = req.cookies?.[SESSION_COOKIE] as string | undefined;
+    if (sessionId) {
+      await mergeGuestCart(sessionId, user.id).catch(() => {});
+      res.clearCookie(SESSION_COOKIE, { path: '/' });
+    }
+
     res.cookie(REFRESH_COOKIE, refreshToken, refreshCookieOptions());
     res.status(200).json({
       success: true,
