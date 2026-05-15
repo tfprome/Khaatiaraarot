@@ -15,9 +15,9 @@ app.use(helmet());
 app.use(cors({ origin: process.env.ALLOWED_ORIGIN }));
 app.use(express.json());
 
-app.use("/api/auth", authRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/orders", orderRoutes);
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/products", productRoutes);
+app.use("/api/v1/orders", orderRoutes);
 
 app.use(errorHandler);
 
