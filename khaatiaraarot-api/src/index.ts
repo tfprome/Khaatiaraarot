@@ -12,6 +12,7 @@ import orderRoutes from "./routes/order.routes";
 import cartRoutes from "./routes/cart.routes";
 import adminRoutes from "./routes/admin";
 import { errorHandler } from "./middleware/error.middleware";
+import { startWorkers } from "./queues/workers";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -33,6 +34,7 @@ app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`API running on port ${PORT}`);
+  startWorkers();
 });
 
 export default app;

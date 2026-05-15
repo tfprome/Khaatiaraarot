@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, numeric, integer, jsonb, index } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, numeric, integer, jsonb, index, primaryKey } from 'drizzle-orm/pg-core';
 import { users } from './users';
 import { products } from './products';
 
@@ -52,6 +52,13 @@ export const orderStatusHistory = pgTable('order_status_history', {
   changedBy: uuid('changed_by').references(() => users.id),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const orderNumberCounter = pgTable('order_number_counter', {
+  year: integer('year').notNull(),
+  lastSeq: integer('last_seq').notNull().default(0),
+}, (table) => ({
+  pk: primaryKey({ columns: [table.year] }),
+}));
 
 export type Order = typeof orders.$inferSelect;
 export type NewOrder = typeof orders.$inferInsert;
