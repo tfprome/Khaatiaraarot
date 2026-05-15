@@ -1,16 +1,95 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from 'express';
+import { AuthRequest } from '../types';
+import * as authService from '../services/auth.service';
 
-export async function register(req: Request, res: Response) {
-  // TODO: implement
-  res.status(201).json({ message: "register" });
+const REFRESH_COOKIE = 'kha_refresh';
+
+function refreshCookieOptions() {
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict' as const,
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+    path: '/api/v1/auth',
+  };
 }
 
-export async function login(req: Request, res: Response) {
-  // TODO: implement
-  res.status(200).json({ message: "login" });
+export async function register(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { email, password, fullName, phone } = req.body;
+    const { accessToken, refreshToken, user } = await authService.register(
+      email,
+      password,
+      fullName,
+      phone,
+    );
+    res.cookie(REFRESH_COOKIE, refreshToken, refreshCookieOptions());
+    res.status(201).json({
+      success: true,
+      data: {
+        accessToken,
+        user: { id: user.id, email: user.email, role: user.role, fullName: user.fullName },
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
 }
 
-export async function logout(req: Request, res: Response) {
-  // TODO: implement
-  res.status(200).json({ message: "logout" });
+export async function login(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { email, password } = req.body;
+    const { accessToken, refreshToken, user } = await authService.login(email, password);
+    res.cookie(REFRESH_COOKIE, refreshToken, refreshCookieOptions());
+    res.status(200).json({
+      success: true,
+      data: {
+        accessToken,
+        user: { id: user.id, email: user.email, role: user.role, fullName: user.fullName },
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function refreshToken(req: Request, res: Response, next: NextFunction) {
+  try {
+    const token = req.cookies?.[REFRESH_COOKIE];
+    if (!token) {
+      res.status(401).json({
+        success: false,
+        error: { code: 'NO_REFRESH_TOKEN', message: 'No refresh token provided' },
+      });
+      return;
+    }
+    const { accessToken, refreshToken: newRefresh, user } = await authService.refresh(token);
+    res.cookie(REFRESH_COOKIE, newRefresh, refreshCookieOptions());
+    res.status(200).json({
+      success: true,
+      data: {
+        accessToken,
+        user: { id: user.id, email: user.email, role: user.role, fullName: user.fullName },
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function logout(req: AuthRequest, res: Response, next: NextFunction) {
+  try {
+    const refreshToken = req.cookies?.[REFRESH_COOKIE];
+    const accessJti = req.user?.jti;
+    const accessToken = req.headers.authorization?.split(' ')[1];
+
+    if (refreshToken) {
+      await authService.logout(refreshToken, accessJti, accessToken);
+    }
+
+    res.clearCookie(REFRESH_COOKIE, { path: '/api/v1/auth' });
+    res.status(200).json({ success: true, data: null });
+  } catch (err) {
+    next(err);
+  }
 }
