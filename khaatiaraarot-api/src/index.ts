@@ -6,6 +6,8 @@ import "dotenv/config";
 
 import authRoutes from "./routes/auth.routes";
 import productRoutes from "./routes/product.routes";
+import categoryRoutes from "./routes/category.routes";
+import bannerRoutes from "./routes/banner.routes";
 import orderRoutes from "./routes/order.routes";
 import { errorHandler } from "./middleware/error.middleware";
 
@@ -19,6 +21,8 @@ app.use(cookieParser());
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/products", productRoutes);
+app.use("/api/v1/categories", categoryRoutes);
+app.use("/api/v1/banners", bannerRoutes);
 app.use("/api/v1/orders", orderRoutes);
 
 app.use(errorHandler);
