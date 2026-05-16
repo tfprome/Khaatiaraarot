@@ -16,6 +16,8 @@ import { requestLogger } from "./middleware/requestLogger.middleware";
 import { generalLimiter, authLimiter } from "./middleware/rateLimiter.middleware";
 import { startWorkers } from "./queues/workers";
 import { logger } from "./config/logger";
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./config/swagger";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -28,6 +30,8 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(requestLogger);
 app.use(generalLimiter);
+
+app.use("/api/v1/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use("/api/v1/auth", authLimiter, authRoutes);
 app.use("/api/v1/products", productRoutes);
