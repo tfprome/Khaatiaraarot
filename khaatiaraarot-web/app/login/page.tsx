@@ -1,15 +1,41 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { EyeIcon, EyeSlashIcon, LockKeyIcon, EnvelopeSimpleIcon } from "@phosphor-icons/react";
 import logo from "../../public/Images/khatiarotlogo-removebg.png";
 
 export default function LoginPage() {
+    const router = useRouter();
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+
+    async function handleSubmit() {
+        setError('');
+        setLoading(true);
+        try {
+            const res = await fetch(`${BASE}/api/v1/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+            const json = await res.json() as { success?: boolean; data?: { accessToken: string; user: { role: string; fullName: string } }; message?: string };
+            if (!res.ok) throw new Error(json.message ?? 'Login failed');
+            localStorage.setItem('userToken', json.data!.accessToken);
+            localStorage.setItem('userName', json.data!.user.fullName);
+            router.replace('/');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Login failed');
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return (
         <main className="h-screen bg-[#fdf5ee] flex items-center justify-center px-4 py-12">
@@ -131,11 +157,14 @@ export default function LoginPage() {
                         </div>
 
                         {/* Submit */}
+                        {error && <p className="text-[11px] text-red-500 text-center">{error}</p>}
                         <button
                             type="button"
+                            onClick={handleSubmit}
+                            disabled={loading}
                             className="w-full bg-[#8B0000] hover:bg-[#6e0000] text-white font-semibold text-sm py-3 rounded-xl transition-colors duration-200 mt-2 cursor-pointer"
                         >
-                            Sign in
+                            {loading ? 'Signing in…' : 'Sign in'}
                         </button>
 
                         {/* Divider */}

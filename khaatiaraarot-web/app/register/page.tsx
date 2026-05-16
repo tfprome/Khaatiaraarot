@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { z } from "zod";
@@ -61,9 +62,13 @@ type FormErrors = Partial<Record<keyof FormData, string>>;
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const [errors, setErrors] = useState<FormErrors>({});
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState('');
+  const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
   const [formData, setFormData] = useState<FormData>({
     fullName: "",
     // phone: "",
@@ -87,7 +92,7 @@ export default function RegisterPage() {
     }
   };
 
-  const handleSubmit = (): void => {
+  const handleSubmit = async (): Promise<void> => {
     const result = refinedschema.safeParse(formData);
 
     if (!result.success) {
@@ -110,8 +115,24 @@ export default function RegisterPage() {
     //   return;
     // }
 
-    // ✅ all valid — call your API here
-    console.log("Register payload:", result.data);
+    setLoading(true);
+    setApiError('');
+    try {
+      const res = await fetch(`${BASE}/api/v1/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: result.data.email, password: result.data.password, fullName: result.data.fullName }),
+      });
+      const json = await res.json() as { success?: boolean; data?: { accessToken: string; user: { role: string; fullName: string } }; message?: string };
+      if (!res.ok) throw new Error(json.message ?? 'Registration failed');
+      localStorage.setItem('userToken', json.data!.accessToken);
+      localStorage.setItem('userName', json.data!.user.fullName);
+      router.replace('/');
+    } catch (err) {
+      setApiError(err instanceof Error ? err.message : 'Registration failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ── Input wrapper class helper ────────────────────────────────────────────
@@ -331,12 +352,14 @@ export default function RegisterPage() {
             </div> */}
 
             {/* Submit */}
+            {apiError && <p className="text-[11px] text-red-500 text-center">{apiError}</p>}
             <button
               type="button"
               onClick={handleSubmit}
+              disabled={loading}
               className="w-full bg-[#8B0000] hover:bg-[#6e0000] disabled:bg-[#c8a882] disabled:cursor-not-allowed text-white font-semibold text-sm py-3 rounded-xl transition-colors duration-200 mt-2 cursor-pointer"
             >
-              Create Account
+              {loading ? 'Creating account…' : 'Create Account'}
             </button>
 
             {/* Divider */}
