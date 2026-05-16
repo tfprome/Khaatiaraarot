@@ -25,13 +25,13 @@ const registerSchema = z
       .max(50, "Full name must be under 50 characters")
       .regex(/^[a-zA-Z\s]+$/, "Full name can only contain letters and spaces"),
 
-    phone: z
-      .string()
-      .min(1, "Phone number is required")
-      .regex(
-        /^[0-9+\-\s]{7,15}$/,
-        "Enter a valid phone number"
-      ),
+    // phone: z
+    //   .string()
+    //   .min(1, "Phone number is required")
+    //   .regex(
+    //     /^[0-9+\-\s]{7,15}$/,
+    //     "Enter a valid phone number"
+    //   ),
 
     email: z
       .string()
@@ -66,7 +66,7 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [formData, setFormData] = useState<FormData>({
     fullName: "",
-    phone: "",
+    // phone: "",
     email: "",
     password: "",
     confirmPassword: "",

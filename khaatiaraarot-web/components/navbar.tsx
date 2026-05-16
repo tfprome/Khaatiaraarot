@@ -55,7 +55,7 @@ export default function Navbar() {
                         <Link href='/register'
                             className="flex items-center gap-1 cursor-pointer hover:text-[#5B1A18] transition-colors">
                             <UserCirclePlusIcon size={13} />
-                            Regidter
+                            Register
                         </Link>
                     </div>
                 </div>
