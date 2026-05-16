@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { ShoppingCartIcon, LightningIcon } from "@phosphor-icons/react";
-import CHINIGURA_CHAL from "../public/Images/ChiniguraChalproducts.png"
-import Mustardoil from "../public/Images/MustardOilProducts.png"
+import CHINIGURA_CHAL from "../public/Images/ChiniguraChalproducts.png";
+import Mustardoil from "../public/Images/MustardOilProducts.png";
 import { Product } from "../Types/Homepagetypes";
 
 const products: Product[] = [
@@ -55,47 +55,49 @@ function ProductCard({ product }: { product: Product }) {
         : 0;
 
     return (
-        <div className="relative bg-white rounded-2xl border border-[#e8d5c4] overflow-hidden flex flex-row items-center gap-0 hover:shadow-md transition-shadow duration-200">
+        <div className="relative bg-white rounded-2xl border border-[#e8d5c4] overflow-hidden flex flex-row items-center hover:shadow-md transition-shadow duration-200">
 
             {/* Best Selling badge */}
             {product.isBestSelling && (
-                <div className="absolute top-3 right-3 z-10 flex items-center gap-1 bg-[#8B0000] text-white text-[10px] font-semibold px-2.5 py-1 rounded-full">
-                    <LightningIcon size={10} weight="fill" />
-                    Best Selling
+                <div className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-[#8B0000] text-white text-[9px] lg:text-[10px] font-semibold px-2 py-0.5 lg:py-1 rounded-full">
+                    <LightningIcon size={9} weight="fill" />
+                    <span className="hidden sm:inline md:hidden lg:inline">Best Selling</span>
+                    <span className="sm:hidden lg:hidden">Best Selling</span>
                 </div>
             )}
 
-            {/* Image — left side */}
-            <div className="group relative w-30 sm:w-35 md:w-40 shrink-0 self-stretch bg-[#fdf5ee]">
+            {/* Image */}
+            <div className="relative w-22.5 sm:w-27.5 md:w-32.5 lg:w-42.5 shrink-0 self-stretch bg-[#fdf5ee] overflow-hidden rounded-l-2xl">
                 <Image
                     src={product.image}
                     alt={product.name}
                     fill
-                    className="object-cover p-3 transition-transform duration-300 group-hover:scale-105"
+                    className="object-contain p-2 sm:p-3 transition-transform duration-300 hover:scale-105"
                 />
             </div>
 
-            {/* Content — right side */}
-            <div className="flex flex-col justify-center px-4 py-4 flex-1 min-w-0">
-                <p className="text-[11px] text-[#a07850] mb-1 font-medium">
+            {/* Content */}
+            <div className="flex flex-col justify-center px-3 sm:px-3 md:px-4 lg:px-5 py-3 md:py-4 lg:py-5 flex-1 min-w-0">
+
+                <p className="text-[10px] lg:text-[12px] text-[#a07850] mb-0.5 font-medium truncate">
                     {product.source}
                 </p>
 
-                <h3 className="text-sm sm:text-[15px] font-bold text-[#2c1a0e] leading-tight mb-0.5">
+                <h3 className="text-[12px] sm:text-[13px] md:text-sm lg:text-[15px] font-bold text-[#2c1a0e] leading-tight mb-0.5">
                     {product.name}
                 </h3>
 
-                <p className="text-[12px] text-[#a07850] mb-3">
+                <p className="text-[11px] lg:text-[12px] text-[#a07850] mb-1.5 md:mb-2 lg:mb-3">
                     {product.unit}
                 </p>
 
-                {/* Price row */}
-                <div className="flex items-center gap-2 mb-2 flex-wrap">
-                    <span className="text-base sm:text-lg font-bold text-[#8B0000]">
+                {/* Price */}
+                <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
+                    <span className="text-sm md:text-base lg:text-lg font-bold text-[#8B0000]">
                         ৳{product.price.toLocaleString()}
                     </span>
                     {product.originalPrice && (
-                        <span className="text-[12px] text-gray-400 line-through">
+                        <span className="text-[10px] sm:text-[11px] text-gray-400 line-through">
                             ৳{product.originalPrice.toLocaleString()}
                         </span>
                     )}
@@ -103,22 +105,23 @@ function ProductCard({ product }: { product: Product }) {
 
                 {/* Save badge */}
                 {saving > 0 && (
-                    <span className="inline-block w-fit text-[11px] font-semibold text-[#BA7517] bg-[#faf5e4] border border-[#eedfa0] px-2.5 py-0.5 rounded-full mb-4">
+                    <span className="inline-block w-fit text-[10px] font-semibold text-[#BA7517] bg-[#faf5e4] border border-[#eedfa0] px-2 py-0.5 rounded-full mb-2 lg:mb-4">
                         Save ৳{saving}
                     </span>
                 )}
 
                 {/* Buttons */}
-                <div className="flex items-center gap-2 flex-wrap">
-                    <button className="flex items-center gap-1.5 text-[12px] sm:text-[13px] font-semibold text-[#8B0000] border border-[#8B0000] px-3 sm:px-4 py-2 rounded-lg hover:bg-[#8B0000] hover:text-white transition-all duration-200">
-                        <ShoppingCartIcon size={14} weight="bold" />
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5">
+                    <button className="flex items-center justify-center gap-1 text-[10px] sm:text-[11px] lg:text-[13px] font-semibold text-[#8B0000] border border-[#8B0000] px-2 sm:px-2.5 lg:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-[#8B0000] hover:text-white transition-all duration-200 whitespace-nowrap">
+                        <ShoppingCartIcon size={11} weight="bold" />
                         Add to Cart
                     </button>
-                    <button className="flex items-center gap-1.5 text-[12px] sm:text-[13px] font-semibold text-white bg-[#8B0000] px-3 sm:px-4 py-2 rounded-lg hover:bg-[#6e0000] transition-all duration-200">
-                        <LightningIcon size={14} weight="fill" />
+                    <button className="flex items-center justify-center gap-1 text-[10px] sm:text-[11px] lg:text-[13px] font-semibold text-white bg-[#8B0000] px-2 sm:px-2.5 lg:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-[#6e0000] transition-all duration-200 whitespace-nowrap">
+                        <LightningIcon size={11} weight="fill" />
                         Buy now
                     </button>
                 </div>
+
             </div>
         </div>
     );
@@ -126,24 +129,24 @@ function ProductCard({ product }: { product: Product }) {
 
 export default function TopSellingProducts() {
     return (
-        <section className="bg-white py-10 px-4 sm:px-6">
+        <section className="bg-white py-8 sm:py-10 px-4 sm:px-6">
             <div className="max-w-7xl mx-auto">
 
-                {/* ── Header ── */}
-                <div className="text-center mb-8">
-                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#2c1a0e]">
+                {/* Header */}
+                <div className="text-center mb-6 sm:mb-8">
+                    <h2 className="text-lg sm:text-2xl lg:text-3xl font-bold text-[#2c1a0e]">
                         Top Selling Products
                     </h2>
                     <p className="text-sm text-[#a07850] mt-2">
-                        Our customers' most loved picks
+                        Our customers&apos; most loved picks
                     </p>
                     <div className="mx-auto mt-3 w-12 h-0.5 rounded-full bg-[#8B0000]" />
                 </div>
 
-                {/* ── 2-column grid of product cards ── */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {products.map((product) => (product.isBestSelling &&
-                        (<ProductCard key={product.id} product={product} />)
+                {/* Grid — 1 col mobile, 2 col sm+ */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    {products.map((product) => (product.isBestSelling && (
+                        <ProductCard key={product.id} product={product} />)
                     ))}
                 </div>
 
@@ -151,3 +154,5 @@ export default function TopSellingProducts() {
         </section>
     );
 }
+
+
