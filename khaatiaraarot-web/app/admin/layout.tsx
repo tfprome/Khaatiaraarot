@@ -11,6 +11,7 @@ import {
   Stack,
   ChartBar,
   SignOut,
+  Truck,
 } from '@phosphor-icons/react';
 
 const NAV = [
@@ -20,6 +21,7 @@ const NAV = [
   { label: 'Banners', href: '/admin/banners', icon: ImageIcon },
   { label: 'Orders', href: '/admin/orders', icon: ShoppingCart },
   { label: 'Inventory', href: '/admin/inventory', icon: Stack },
+  { label: 'Delivery', href: '/admin/delivery', icon: Truck },
   { label: 'Reports', href: '/admin/reports', icon: ChartBar },
 ];
 

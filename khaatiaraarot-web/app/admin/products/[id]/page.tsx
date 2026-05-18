@@ -7,11 +7,13 @@ import { ArrowLeft, Trash, Star } from '@phosphor-icons/react';
 import NextImage from 'next/image';
 
 interface Category { id: string; name: string; }
+interface RatePlan { id: string; name: string; isActive: boolean; }
 interface ProductImage { id: string; url: string; isPrimary: boolean; }
 interface Product {
   id: string; name: string; slug: string; description?: string; unit: string;
-  sourceRegion?: string; categoryId?: string; price: string | number;
-  originalPrice?: string | number; stockQty: number; lowStockThreshold: number;
+  sourceRegion?: string; categoryId?: string; ratePlanId?: string;
+  price: string | number; originalPrice?: string | number;
+  stockQty: number; lowStockThreshold: number;
   isBestSelling: boolean; isActive: boolean;
   images?: ProductImage[];
 }
@@ -38,6 +40,7 @@ export default function EditProductPage() {
   const { id } = useParams() as { id: string };
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [ratePlans, setRatePlans] = useState<RatePlan[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -47,22 +50,25 @@ export default function EditProductPage() {
 
   const [form, setForm] = useState({
     name: '', slug: '', description: '', unit: '', sourceRegion: '',
-    categoryId: '', price: '', originalPrice: '', stockQty: '0',
+    categoryId: '', ratePlanId: '', price: '', originalPrice: '', stockQty: '0',
     lowStockThreshold: '5', isBestSelling: false, isActive: true,
   });
 
   useEffect(() => {
     Promise.all([
       adminApi.get<{ data: Category[] }>('/categories'),
+      adminApi.get<{ data: RatePlan[] }>('/rate-plans'),
       fetch(`${BASE}/api/v1/products/${id}`).then(r => r.json()) as Promise<{ data: Product }>,
-    ]).then(([cats, prod]) => {
+    ]).then(([cats, plans, prod]) => {
       setCategories(cats.data);
+      setRatePlans(plans.data.filter((p: RatePlan) => p.isActive));
       const p = prod.data;
       setImages(p.images ?? []);
       setForm({
         name: p.name, slug: p.slug, description: p.description ?? '',
         unit: p.unit, sourceRegion: p.sourceRegion ?? '',
-        categoryId: p.categoryId ?? '', price: String(p.price),
+        categoryId: p.categoryId ?? '', ratePlanId: p.ratePlanId ?? '',
+        price: String(p.price),
         originalPrice: p.originalPrice ? String(p.originalPrice) : '',
         stockQty: String(p.stockQty), lowStockThreshold: String(p.lowStockThreshold),
         isBestSelling: p.isBestSelling, isActive: p.isActive,
@@ -88,6 +94,7 @@ export default function EditProductPage() {
         description: form.description || undefined,
         unit: form.unit, sourceRegion: form.sourceRegion || undefined,
         categoryId: form.categoryId || undefined,
+        ratePlanId: form.ratePlanId || undefined,
         price: parseFloat(form.price),
         originalPrice: form.originalPrice ? parseFloat(form.originalPrice) : undefined,
         stockQty: parseInt(form.stockQty),
@@ -161,6 +168,12 @@ export default function EditProductPage() {
           <select value={form.categoryId} onChange={e => set('categoryId', e.target.value)} className={inputCls}>
             <option value="">— Select category —</option>
             {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        </Field>
+        <Field label="Delivery Rate Plan">
+          <select value={form.ratePlanId} onChange={e => set('ratePlanId', e.target.value)} className={inputCls}>
+            <option value="">— No delivery / free —</option>
+            {ratePlans.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
         </Field>
         <div className="grid grid-cols-2 gap-4">
