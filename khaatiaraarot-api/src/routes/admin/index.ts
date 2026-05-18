@@ -7,6 +7,7 @@ import bannerRoutes from './banner.routes';
 import orderRoutes from './order.routes';
 import inventoryRoutes from './inventory.routes';
 import reportRoutes from './report.routes';
+import ratePlanRoutes from './ratePlan.routes';
 
 const router = Router();
 
@@ -18,5 +19,6 @@ router.use('/banners', bannerRoutes);
 router.use('/orders', orderRoutes);
 router.use('/inventory', inventoryRoutes);
 router.use('/reports', reportRoutes);
+router.use('/rate-plans', ratePlanRoutes);
 
 export default router;

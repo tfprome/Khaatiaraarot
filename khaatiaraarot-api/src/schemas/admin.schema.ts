@@ -1,9 +1,32 @@
 import { z } from 'zod';
+import { BANGLADESH_DISTRICTS } from '../constants/districts';
+
+// ── Rate Plans ────────────────────────────────────────────────────────────────
+
+export const districtRateSchema = z.object({
+  district: z.enum(BANGLADESH_DISTRICTS as unknown as [string, ...string[]]),
+  costPerUnit: z.number().positive(),
+});
+
+export const createRatePlanSchema = z.object({
+  name: z.string().min(2),
+  description: z.string().optional(),
+  isActive: z.boolean().default(true),
+  rates: z.array(districtRateSchema).min(1),
+});
+
+export const updateRatePlanSchema = z.object({
+  name: z.string().min(2).optional(),
+  description: z.string().optional(),
+  isActive: z.boolean().optional(),
+  rates: z.array(districtRateSchema).min(1).optional(),
+});
 
 // ── Products ─────────────────────────────────────────────────────────────────
 
 export const createProductSchema = z.object({
   categoryId: z.string().uuid().optional(),
+  ratePlanId: z.string().uuid().optional(),
   name: z.string().min(2),
   slug: z
     .string()
