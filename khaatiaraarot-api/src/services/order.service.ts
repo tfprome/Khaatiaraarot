@@ -14,6 +14,7 @@ import {
 } from '../db/schema';
 import { AppError } from '../utils/errors';
 import { invoiceQueue, stockAlertQueue } from '../queues';
+import { getDeliveryFee } from './admin/ratePlan.service';
 import type { PlaceOrderInput } from '../schemas/order.schema';
 
 const IDEMPOTENCY_TTL = 86400; // 24 hours
@@ -65,6 +66,7 @@ async function getCartWithItems(userId: string) {
       sourceRegion: products.sourceRegion,
       stockQty: products.stockQty,
       isActive: products.isActive,
+      ratePlanId: products.ratePlanId,
     })
     .from(cartItems)
     .innerJoin(products, eq(cartItems.productId, products.id))
@@ -115,11 +117,21 @@ export async function placeOrder(
   }
 
   const addressSnapshot = await resolveAddressSnapshot(userId, input);
+  const district = addressSnapshot.district as string;
 
   const subtotal = items.reduce(
     (sum, item) => sum + parseFloat(item.price) * item.quantity,
     0,
   );
+
+  const deliveryFees = await Promise.all(
+    items.map((item) =>
+      item.ratePlanId
+        ? getDeliveryFee(item.ratePlanId, district, item.quantity)
+        : Promise.resolve(0),
+    ),
+  );
+  const deliveryFee = deliveryFees.reduce((sum, fee) => sum + fee, 0);
 
   const order = await db.transaction(async (tx) => {
     // Atomic order number
@@ -142,9 +154,9 @@ export async function placeOrder(
         orderNumber,
         paymentMethod: input.paymentMethod,
         subtotal: subtotal.toFixed(2),
-        deliveryFee: '0',
+        deliveryFee: deliveryFee.toFixed(2),
         discount: '0',
-        total: subtotal.toFixed(2),
+        total: (subtotal + deliveryFee).toFixed(2),
         source: 'web',
         shippingAddressSnapshot: addressSnapshot,
         notes: input.notes,
