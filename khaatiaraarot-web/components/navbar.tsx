@@ -20,6 +20,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import Khaatiarotlogo from '../public/Images/khatiarotlogo-removebg.png';
+import { useEffect, useState } from "react";
 
 const navLinks = [
     { label: "Home", href: "/", icon: HouseIcon },
@@ -31,6 +32,62 @@ const navLinks = [
 ];
 
 export default function Navbar() {
+    const [token, setToken] = useState<string | null>(null);
+
+    useEffect(() => {
+        setToken(localStorage.getItem("userToken"));
+    }, []);
+
+    // const handleLogout = async () => {
+    //     if (token) {
+    //         try {
+    //             await logout(token);
+    //             setToken(null);
+    //         } catch (error) {
+    //             console.error("Logout failed", error);
+    //         }
+    //     }
+    // };
+
+    const handleLogout = async () => {
+        try {
+            const token = localStorage.getItem("userToken");
+
+            if (!token) return;
+
+            const BASE =
+                process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+
+            const res = await fetch(`${BASE}/api/v1/auth/logout`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                credentials: "include",
+            });
+
+            const json = await res.json();
+
+            console.log("Logout response:", json);
+
+            if (!res.ok) {
+                throw new Error(json?.message || json?.error?.message || "Logout failed");
+            }
+
+            // clear frontend storage
+            localStorage.removeItem("userToken");
+            localStorage.removeItem("userName");
+
+            setToken(null); // update UI
+
+            // optional redirect
+            // router.push("/login");
+
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
+    };
+
     return (
         <header className="sticky top-0 z-50 shadow-sm">
 
@@ -43,14 +100,26 @@ export default function Navbar() {
                         <span className="font-semibold">+880 170-000-0000</span>
                     </div>
                     <p className="hidden md:block text-white text-xs">
-                        🚀 Free delivery on orders above ৳500
+                        Big savings on orders above ৳500
                     </p>
                     <div className="flex items-center gap-3">
-                        <Link href='/login'
-                            className="flex items-center gap-1 cursor-pointer hover:text-[#5B1A18] transition-colors">
-                            <SignInIcon size={13} />
-                            Login
-                        </Link>
+                        {token ? (
+                            <button
+                                onClick={handleLogout}
+                                className="flex items-center gap-1 cursor-pointer hover:text-[#5B1A18] transition-colors"
+                            >
+                                <SignInIcon size={13} />
+                                Logout
+                            </button>
+                        ) : (
+                            <Link
+                                href="/login"
+                                className="flex items-center gap-1 cursor-pointer hover:text-[#5B1A18] transition-colors"
+                            >
+                                <SignInIcon size={13} />
+                                Login
+                            </Link>
+                        )}
                         <span className="opacity-40">|</span>
                         <Link href='/register'
                             className="flex items-center gap-1 cursor-pointer hover:text-[#5B1A18] transition-colors">
@@ -108,21 +177,21 @@ export default function Navbar() {
 
                         {/* Action Icons */}
                         <div className="flex items-center shrink-0">
-                            <div className="relative flex flex-col items-center gap-0.5 px-2.5 py-2 rounded-xl hover:bg-red-50 group transition-colors duration-200 cursor-pointer">
-                                <HeartIcon size={22} className="text-white group-hover:text-red-500 transition-colors duration-200" />
-                                <span className="hidden lg:block text-[10px] text-white group-hover:text-red-500 font-medium transition-colors">
+                            <div className="relative flex flex-col items-center gap-0.5 px-2.5 py-2 rounded-xl group transition-colors duration-200 cursor-pointer">
+                                <HeartIcon size={22} className="text-white transition-colors duration-200" />
+                                <span className="hidden lg:block text-[10px] text-white font-medium transition-colors">
                                     Wishlist
                                 </span>
                             </div>
-                            <div className="relative flex flex-col items-center gap-0.5 px-2.5 py-2 rounded-xl hover:bg-green-50 group transition-colors duration-200 cursor-pointer">
-                                <ShoppingCartIcon size={22} className="text-white group-hover:text-green-600 transition-colors duration-200" />
-                                <span className="hidden lg:block text-[10px] text-white group-hover:text-green-600 font-medium transition-colors">
+                            <div className="relative flex flex-col items-center gap-0.5 px-2.5 py-2 rounded-xl group transition-colors duration-200 cursor-pointer">
+                                <ShoppingCartIcon size={22} className="text-white transition-colors duration-200" />
+                                <span className="hidden lg:block text-[10px] text-white font-medium transition-colors">
                                     Cart
                                 </span>
                             </div>
-                            <div className="flex flex-col items-center gap-0.5 px-2.5 py-2 rounded-xl hover:bg-blue-50 group transition-colors duration-200 cursor-pointer">
-                                <UserIcon size={22} className="text-white group-hover:text-blue-600 transition-colors duration-200" />
-                                <span className="hidden lg:block text-[10px] text-white group-hover:text-blue-600 font-medium transition-colors">
+                            <div className="flex flex-col items-center gap-0.5 px-2.5 py-2 rounded-xl group transition-colors duration-200 cursor-pointer">
+                                <UserIcon size={22} className="text-white transition-colors duration-200" />
+                                <span className="hidden lg:block text-[10px] text-white font-medium transition-colors">
                                     Account
                                 </span>
                             </div>
