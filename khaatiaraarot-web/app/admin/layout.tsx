@@ -3,24 +3,24 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
-  House,
-  Package,
-  Tag,
-  Image as ImageIcon,
-  ShoppingCart,
-  Stack,
-  ChartBar,
-  SignOut,
+  HouseIcon,
+  PackageIcon,
+  TagIcon,
+  ImageIcon,
+  ShoppingCartIcon,
+  StackIcon,
+  ChartBarIcon,
+  UserCircleIcon
 } from '@phosphor-icons/react';
 
 const NAV = [
-  { label: 'Dashboard', href: '/admin/dashboard', icon: House },
-  { label: 'Products', href: '/admin/products', icon: Package },
-  { label: 'Categories', href: '/admin/categories', icon: Tag },
+  { label: 'Dashboard', href: '/admin/dashboard', icon: HouseIcon },
+  { label: 'Products', href: '/admin/products', icon: PackageIcon },
+  { label: 'Categories', href: '/admin/categories', icon: TagIcon },
   { label: 'Banners', href: '/admin/banners', icon: ImageIcon },
-  { label: 'Orders', href: '/admin/orders', icon: ShoppingCart },
-  { label: 'Inventory', href: '/admin/inventory', icon: Stack },
-  { label: 'Reports', href: '/admin/reports', icon: ChartBar },
+  { label: 'Orders', href: '/admin/orders', icon: ShoppingCartIcon },
+  { label: 'Inventory', href: '/admin/inventory', icon: StackIcon },
+  { label: 'Reports', href: '/admin/reports', icon: ChartBarIcon },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -28,6 +28,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const isLogin = pathname === '/admin/login';
   const [ready, setReady] = useState(isLogin);
+  const [adminName, setAdminName] = useState<string | null>(null);
+  const [role, setRole] = useState<string>('');
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     if (isLogin) { setReady(true); return; }
@@ -37,6 +40,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       router.replace('/admin/login');
     } else {
       setReady(true);
+      setAdminName(localStorage.getItem('adminName'));
+      setRole(role);
     }
   }, [isLogin, router]);
 
@@ -46,6 +51,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   function logout() {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminRole');
+    localStorage.removeItem('adminName');
     router.replace('/admin/login');
   }
 
@@ -75,14 +81,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             );
           })}
         </nav>
-        <div className="px-3 pb-5">
-          <button
-            onClick={logout}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-[#c4a07a] hover:bg-[#3d2010] hover:text-white transition-colors"
-          >
-            <SignOut size={17} />
-            Logout
-          </button>
+        <div className="p-4 border-t border-gray-400">
+          <div className="flex items-center space-x-3 px-2 py-2">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center">
+              <UserCircleIcon size={32}
+                className='cursor-pointer text-gray-600 hover:text-gray-800 transition'
+                onClick={() => setIsOpen(prev => !prev)} />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-[#FDF5EE]">{adminName}</p>
+              <p className="text-xs text-[#FDF5EE]">{role}</p>
+            </div>
+          </div>
+          {isOpen && (
+            <div className="fixed bottom-16 left-4 bg-white rounded-lg shadow-lg p-4 w-48">
+              <button className="w-full text-left px-3 py-2 text-sm text-gray-700 cursor-not-allowed  rounded-md transition">Profile</button>
+              <button className="w-full text-left px-3 py-2 text-sm text-gray-700 cursor-not-allowed  rounded-md transition">Settings</button>
+              <button className="w-full text-left px-3 py-2 text-sm font-semibold cursor-pointer hover:bg-gray-100 rounded-md transition"
+                onClick={logout}>Logout</button>
+            </div>
+          )
+
+          }
         </div>
       </aside>
       <main className="ml-60 flex-1 p-8 min-h-screen">

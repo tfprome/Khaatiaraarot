@@ -23,11 +23,12 @@ export default function AdminLoginPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-      const json = await res.json() as { success?: boolean; data?: { accessToken: string; user: { role: string } }; message?: string };
+      const json = await res.json() as { success?: boolean; data?: { accessToken: string; user: { role: string, fullName: string } }; message?: string };
       if (!res.ok) throw new Error(json.message ?? 'Login failed');
       if (json.data?.user?.role !== 'admin') throw new Error('Not authorized as admin');
       localStorage.setItem('adminToken', json.data!.accessToken);
       localStorage.setItem('adminRole', json.data!.user.role);
+      localStorage.setItem('adminName', json.data!.user.fullName);
       router.replace('/admin/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
