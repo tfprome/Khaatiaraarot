@@ -21,6 +21,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Khaatiarotlogo from '../public/Images/khatiarotlogo-removebg.png';
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 const navLinks = [
     { label: "Home", href: "/", icon: HouseIcon },
@@ -37,17 +38,6 @@ export default function Navbar() {
     useEffect(() => {
         setToken(localStorage.getItem("userToken"));
     }, []);
-
-    // const handleLogout = async () => {
-    //     if (token) {
-    //         try {
-    //             await logout(token);
-    //             setToken(null);
-    //         } catch (error) {
-    //             console.error("Logout failed", error);
-    //         }
-    //     }
-    // };
 
     const handleLogout = async () => {
         try {
@@ -71,17 +61,50 @@ export default function Navbar() {
             console.log("Logout response:", json);
 
             if (!res.ok) {
-                throw new Error(json?.message || json?.error?.message || "Logout failed");
+                toast.error(json.error?.message ?? "Logout failed.Please try again", {
+                    position: "bottom-right",
+                    autoClose: 1500,
+                    hideProgressBar: true,
+                    style: {
+                        background: "#f00808",
+                        color: "#ffffff",
+                        fontSize: "15px",
+                        fontWeight: "600",
+                        padding: "16px",
+                        minWidth: "320px",
+                        minHeight: "70px",
+                        borderRadius: "12px",
+                    },
+                });
+
+                throw new Error(json.error?.message ?? "Login failed");
             }
+            
+            else if (res.ok) {
 
-            // clear frontend storage
-            localStorage.removeItem("userToken");
-            localStorage.removeItem("userName");
+                localStorage.removeItem("userToken");
+                localStorage.removeItem("userName");
 
-            setToken(null); // update UI
-
-            // optional redirect
-            // router.push("/login");
+                setToken(null);
+                toast("You're logged out! See you soon.", {
+                    position: "bottom-right",
+                    autoClose: 1000, // 0.5 second
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: false,
+                    style: {
+                        background: "#5B1A18", // dark green
+                        color: "#ffffff",
+                        fontSize: "16px",
+                        fontWeight: "600",
+                        padding: "16px",
+                        minWidth: "320px",
+                        minHeight: "70px",
+                        borderRadius: "12px",
+                    },
+                });
+            }
 
         } catch (error) {
             console.error("Logout failed:", error);
