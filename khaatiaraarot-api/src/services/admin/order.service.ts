@@ -92,6 +92,10 @@ export async function updateOrderStatus(
     });
   });
 
+  if (input.status === 'confirmed') {
+    await invoiceQueue.add('generate-invoice', { orderId: id });
+  }
+
   return getOrderById(id);
 }
 
@@ -179,7 +183,6 @@ export async function createManualOrder(adminId: string, input: CreateManualInpu
     return newOrder;
   });
 
-  await invoiceQueue.add('generate-invoice', { orderId: order.id });
   return getOrderById(order.id);
 }
 

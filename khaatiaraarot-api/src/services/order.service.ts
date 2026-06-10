@@ -13,7 +13,7 @@ import {
   products,
 } from '../db/schema';
 import { AppError } from '../utils/errors';
-import { invoiceQueue, stockAlertQueue } from '../queues';
+import { stockAlertQueue } from '../queues';
 import { getDeliveryFee } from './admin/ratePlan.service';
 import type { PlaceOrderInput } from '../schemas/order.schema';
 
@@ -214,9 +214,6 @@ export async function placeOrder(
   if (idempotencyKey) {
     await storeIdempotency(userId, idempotencyKey, order.id);
   }
-
-  // Dispatch invoice generation (async — never blocks the response)
-  await invoiceQueue.add('generate-invoice', { orderId: order.id });
 
   // Dispatch low-stock alerts for products that dropped below threshold
   const updatedStocks = await db
