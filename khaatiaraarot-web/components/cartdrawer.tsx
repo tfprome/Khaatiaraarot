@@ -9,19 +9,12 @@ import {
   MinusIcon,
   LockKeyIcon
 } from "@phosphor-icons/react";
-
-export interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  quantity: number;
-  unit: string;
-  image: string;
-}
+import { CartItem } from "@/Types/cartTypes";
+import { useAppDispatch } from "@/store/hooks";
+import { useAppSelector } from "@/store/hooks";
+import { closeCart, openCart, removeItem, updateQuantity } from "@/store/cartSlice";
 
 interface CartDrawerProps {
-  items: CartItem[];
   onUpdateQuantity: (id: string, quantity: number) => void;
   onRemoveItem: (id: string) => void;
   onCheckout?: () => void;
@@ -114,16 +107,18 @@ function ItemRow({
 }
 
 export default function CartDrawer({
-  items,
-  onUpdateQuantity,
-  onRemoveItem,
   onCheckout,
   onViewCart,
+  onUpdateQuantity,
+  onRemoveItem,
 }: CartDrawerProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  // const [isOpen, setIsOpen] = useState(false);
   const [badgePulse, setBadgePulse] = useState(false);
   const prevCount = useRef(0);
   const drawerRef = useRef<HTMLDivElement>(null);
+  const dispatch = useAppDispatch();
+  const isOpen = useAppSelector((state) => state.cart.isOpen);
+  const items = useAppSelector((state) => state.cart.items);
 
   const totalQty = items.reduce((s, i) => s + i.quantity, 0);
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
@@ -148,7 +143,7 @@ export default function CartDrawer({
     if (!isOpen) return;
     const handler = (e: MouseEvent) => {
       if (drawerRef.current && !drawerRef.current.contains(e.target as Node))
-        setIsOpen(false);
+        dispatch(closeCart());
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -156,7 +151,7 @@ export default function CartDrawer({
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setIsOpen(false);
+      if (e.key === "Escape") dispatch(closeCart());
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
@@ -167,25 +162,31 @@ export default function CartDrawer({
     return () => { document.body.style.overflow = ""; };
   }, [isOpen]);
 
+  function handleIncrease(id: string, qty: number) {
+    dispatch(updateQuantity({ id, quantity: qty + 1 }));
+  }
+
   function handleDecrease(id: string, qty: number) {
-    if (qty <= 1) onRemoveItem(id);
-    else onUpdateQuantity(id, qty - 1);
+    if (qty <= 1) {
+      dispatch(removeItem(id));
+    } else {
+      dispatch(updateQuantity({ id, quantity: qty - 1 }));
+    }
   }
 
   return (
     <>
       {/* Floating button */}
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={() => dispatch(openCart())}
         aria-label={`Open cart, ${totalQty} items`}
         className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-[#5A1A18] cursor-pointer shadow-lg flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-transform"
       >
         <ShoppingBagIcon size={24} weight="bold" />
         {totalQty > 0 && (
           <span
-            className={`absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full text-[11px] font-semibold flex items-center justify-center bg-[#d4611e] text-white transition-transform duration-200 ${
-              badgePulse ? "scale-150" : "scale-100"
-            }`}
+            className={`absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full text-[11px] font-semibold flex items-center justify-center bg-[#d4611e] text-white transition-transform duration-200 ${badgePulse ? "scale-150" : "scale-100"
+              }`}
           >
             {totalQty}
           </span>
@@ -194,9 +195,8 @@ export default function CartDrawer({
 
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-50 bg-black/30 transition-opacity duration-300 ${
-          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 z-50 bg-black/30 transition-opacity duration-300 ${isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          }`}
         aria-hidden="true"
       />
 
@@ -206,9 +206,8 @@ export default function CartDrawer({
         role="dialog"
         aria-modal="true"
         aria-label="Shopping cart"
-        className={`fixed top-0 right-0 h-full z-60 w-90 max-w-full flex flex-col bg-[#fafcf7] shadow-2xl transition-transform duration-300 ease-in-out ${
-          isOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-0 right-0 h-full z-70 w-90 max-w-full flex flex-col bg-[#fafcf7] shadow-2xl transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"
+          }`}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 bg-[#5B1A18] shrink-0">
@@ -221,7 +220,7 @@ export default function CartDrawer({
             </p>
           </div>
           <button
-            onClick={() => setIsOpen(false)}
+            onClick={() => dispatch(closeCart())}
             aria-label="Close cart"
             className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center text-white transition-colors"
           >
@@ -230,7 +229,7 @@ export default function CartDrawer({
         </div>
 
         {/* Delivery banner */}
-        {totalQty > 0 && remaining > 0 && (
+        {/* {totalQty > 0 && remaining > 0 && (
           <div className="px-5 py-3 bg-[#fffbf0] border-b border-[#f0e8c0] shrink-0">
             <p className="text-[11px] text-[#7a6010] mb-1.5">
               Add{" "}
@@ -251,7 +250,7 @@ export default function CartDrawer({
               You unlocked free delivery!
             </p>
           </div>
-        )}
+        )} */}
 
         {/* Items */}
         <div className="flex-1 overflow-y-auto px-5 py-1">
@@ -269,7 +268,7 @@ export default function CartDrawer({
                 </p>
               </div>
               <button
-                onClick={() => setIsOpen(false)}
+                onClick={() => dispatch(closeCart())}
                 className="mt-1 px-5 py-2 rounded-full bg-[#5B1A18] text-white text-[12px] font-semibold hover:scale-105 active:scale-95 transition-transform"
               >
                 Start shopping
@@ -280,9 +279,9 @@ export default function CartDrawer({
               <ItemRow
                 key={item.id}
                 item={item}
-                onIncrease={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                onIncrease={() => handleIncrease(item.id, item.quantity)}
                 onDecrease={() => handleDecrease(item.id, item.quantity)}
-                onRemove={() => onRemoveItem(item.id)}
+                onRemove={() => dispatch(removeItem(item.id))}
               />
             ))
           )}
@@ -305,14 +304,14 @@ export default function CartDrawer({
               Delivery calculated at checkout
             </p>
             <button
-              onClick={() => { onCheckout?.(); setIsOpen(false); }}
+              onClick={() => { onCheckout?.(); dispatch(closeCart()); }}
               className="w-full py-3 rounded-xl bg-[#5B1A18] hover:bg-[#5B1A18] text-white font-semibold text-[13px] flex items-center justify-center gap-2 transition-colors active:scale-[0.98]"
             >
               <LockKeyIcon size={15} weight="bold" />
               Checkout
             </button>
             <button
-              onClick={() => { onViewCart?.(); setIsOpen(false); }}
+              onClick={() => { onViewCart?.(); dispatch(closeCart()); }}
               className="w-full py-2.5 rounded-xl border border-[#FCEBEB] text-[#5B1A18] font-semibold text-[12px] flex items-center justify-center gap-2 hover:bg-[#eef6e4] transition-colors"
             >
               <ShoppingBagIcon size={14} weight="regular" />

@@ -228,7 +228,7 @@ export default function Navbar() {
                             placeholder="Search for groceries, vegetables…"
                             className="flex-1 px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 outline-none bg-transparent min-w-0"
                         />
-                        <button className="flex items-center bg-[#5B1A18] hover:bg-[#5B1A18] text-white px-4 py-2.5 transition-colors duration-200 shrink-0">
+                        <button className="flex items-center text-black px-4 py-2.5 transition-colors duration-200 cursor-pointer shrink-0">
                             <MagnifyingGlassIcon size={17} weight="bold" />
                         </button>
                     </div>
@@ -241,11 +241,11 @@ export default function Navbar() {
                 <div className="max-w-7xl mx-auto px-4 flex items-center">
 
                     {/* All Categories */}
-                    <div className="flex items-center gap-2 bg-[#5B1A18] hover:bg-[#5B1A18] text-white px-4 py-3 text-sm font-semibold transition-colors duration-200 cursor-pointer shrink-0">
+                    {/* <div className="flex items-center gap-2 bg-[#5B1A18] hover:bg-[#5B1A18] text-white px-4 py-3 text-sm font-semibold transition-colors duration-200 cursor-pointer shrink-0">
                         <ListIcon size={18} />
                         <span className="hidden sm:inline">All Categories</span>
                         <CaretDownIcon size={13} />
-                    </div>
+                    </div> */}
 
                     {/* Nav Links — icon only on md, icon+label on lg+ */}
                     <nav className="hidden md:flex items-center min-w-0">

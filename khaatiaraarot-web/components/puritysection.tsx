@@ -35,7 +35,7 @@ export default function PuritySection() {
             </p>
 
             {/* Heading */}
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#2c1a0e] leading-tight mb-4">
+            <h2 className="font-retro font-bold text-2xl sm:text-3xl text-[#2c1a0e] leading-tight mb-4">
               Where Purity{" "}
               <span className="text-[#8B0000]">Meets Purpose</span>
             </h2>
@@ -44,7 +44,7 @@ export default function PuritySection() {
             <div className="w-10 h-0.5 rounded-full bg-[#8B0000] mb-5" />
 
             {/* Body */}
-            <p className="text-sm sm:text-[15px] text-[#6b4c2a] leading-relaxed mb-8">
+            <p className="font-moglan text-sm sm:text-[15px] text-[#6b4c2a] leading-relaxed mb-8">
               We believe that real health starts at the root — quite literally.
               Our mission is to deliver fresh, preservative-free fruits and
               crops directly from the fields to your doorstep. Grown with care,

@@ -5,6 +5,8 @@ import { ShoppingCartIcon, LightningIcon } from "@phosphor-icons/react";
 import CHINIGURA_CHAL from "../public/Images/ChiniguraChalproducts.png";
 import Mustardoil from "../public/Images/MustardOilProducts.png";
 import { Product } from "../Types/Homepagetypes";
+import { useAppDispatch } from "@/store/hooks";
+import { addItem } from "@/store/cartSlice";
 
 const products: Product[] = [
     {
@@ -50,6 +52,22 @@ const products: Product[] = [
 ];
 
 function ProductCard({ product }: { product: Product }) {
+
+    const dispatch = useAppDispatch();
+
+    const handleAddToCart = () => {
+        dispatch(addItem({
+            id: product.id.toString(),
+            name: product.name,
+            price: product.price,
+            originalPrice: product.originalPrice,
+            unit: product.unit,
+            image:
+                typeof product.image === "string"
+                    ? product.image
+                    : product.image.src,
+        }));
+    };
     const saving = product.originalPrice
         ? product.originalPrice - product.price
         : 0;
@@ -112,7 +130,8 @@ function ProductCard({ product }: { product: Product }) {
 
                 {/* Buttons */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5">
-                    <button className="flex items-center justify-center gap-1 text-[10px] sm:text-[11px] lg:text-[13px] font-semibold text-[#8B0000] border border-[#8B0000] px-2 sm:px-2.5 lg:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-[#8B0000] hover:text-white transition-all duration-200 whitespace-nowrap">
+                    <button onClick={handleAddToCart}
+                        className="flex items-center justify-center gap-1 text-[10px] sm:text-[11px] lg:text-[13px] font-semibold text-[#8B0000] border border-[#8B0000] px-2 sm:px-2.5 lg:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-[#8B0000] hover:text-white transition-all duration-200 whitespace-nowrap">
                         <ShoppingCartIcon size={11} weight="bold" />
                         Add to Cart
                     </button>

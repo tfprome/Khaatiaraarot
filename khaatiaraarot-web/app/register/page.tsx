@@ -14,6 +14,7 @@ import {
   PhoneIcon,
 } from "@phosphor-icons/react";
 import logo from "../../public/Images/khatiarotlogo-removebg.png";
+import { toast } from "react-toastify";
 
 // ── Zod Schema ──────────────────────────────────────────────────────────────
 
@@ -49,10 +50,10 @@ const registerSchema = z
 
     confirmPassword: z.string().min(1, "Please confirm your password"),
   })
-  const refinedschema=registerSchema.refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+const refinedschema = registerSchema.refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -97,15 +98,15 @@ export default function RegisterPage() {
 
     if (!result.success) {
       const fieldErrors: FormErrors = {};
-    
+
       result.error.issues.forEach((err) => {
         const field = err.path[0] as keyof FormData;
-    
+
         if (!fieldErrors[field]) {
           fieldErrors[field] = err.message;
         }
       });
-    
+
       setErrors(fieldErrors);
       return;
     }
@@ -123,10 +124,46 @@ export default function RegisterPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: result.data.email, password: result.data.password, fullName: result.data.fullName }),
       });
-      const json = await res.json() as { success?: boolean; data?: { accessToken: string; user: { role: string; fullName: string } }; message?: string };
-      if (!res.ok) throw new Error(json.message ?? 'Registration failed');
+      const json = await res.json() as { success?: boolean; data?: { accessToken: string; user: { role: string; fullName: string } }; error?: { message?: string } };
+      if (!res.ok) {
+        toast.error(json.error?.message ?? "Registration failed.Please try again", {
+          position: "bottom-right",
+          autoClose: 1500,
+          hideProgressBar: true,
+          style: {
+            background: "#f00808",
+            color: "#ffffff",
+            fontSize: "15px",
+            fontWeight: "600",
+            padding: "16px",
+            minWidth: "320px",
+            minHeight: "70px",
+            borderRadius: "12px",
+          },
+        });
+        throw new Error(json.error?.message ?? 'Registration failed');
+      }
       localStorage.setItem('userToken', json.data!.accessToken);
       localStorage.setItem('userName', json.data!.user.fullName);
+
+      toast("Welcome to the family!", {
+        position: "bottom-right",
+        autoClose: 1000, // 0.5 second
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        style: {
+          background: "#5B1A18", // dark green
+          color: "#ffffff",
+          fontSize: "16px",
+          fontWeight: "600",
+          padding: "16px",
+          minWidth: "320px",
+          minHeight: "70px",
+          borderRadius: "12px",
+        },
+      });
       router.replace('/');
     } catch (err) {
       setApiError(err instanceof Error ? err.message : 'Registration failed');
@@ -326,30 +363,6 @@ export default function RegisterPage() {
                 <p className="text-[11px] text-red-500">{errors.confirmPassword}</p>
               )}
             </div>
-
-            {/* Terms */}
-            {/* <div className="flex items-start gap-2 mt-1">
-              <input
-                id="terms"
-                type="checkbox"
-                checked={agreed}
-                onChange={(e) => setAgreed(e.target.checked)}
-                className="w-4 h-4 mt-0.5 rounded border-[#e8d5c4] accent-[#8B0000] cursor-pointer shrink-0"
-              />
-              <label
-                htmlFor="terms"
-                className="text-sm text-[#a07850] cursor-pointer select-none leading-relaxed"
-              >
-                I agree to the{" "}
-                <Link href="/terms" className="text-[#8B0000] font-semibold hover:text-[#6e0000] transition-colors duration-200">
-                  Terms of Use
-                </Link>{" "}
-                and{" "}
-                <Link href="/privacy" className="text-[#8B0000] font-semibold hover:text-[#6e0000] transition-colors duration-200">
-                  Privacy Policy
-                </Link>
-              </label>
-            </div> */}
 
             {/* Submit */}
             {apiError && <p className="text-[11px] text-red-500 text-center">{apiError}</p>}

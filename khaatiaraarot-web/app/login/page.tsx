@@ -181,21 +181,6 @@ export default function LoginPage() {
                             </div>
                         </div>
 
-                        {/* Remember me */}
-                        {/* <div className="flex items-center gap-2 mt-1">
-                            <input
-                                id="remember"
-                                type="checkbox"
-                                className="w-4 h-4 rounded border-[#e8d5c4] accent-[#8B0000] cursor-pointer"
-                            />
-                            <label
-                                htmlFor="remember"
-                                className="text-sm text-[#a07850] cursor-pointer select-none"
-                            >
-                                Remember me for 30 days
-                            </label>
-                        </div> */}
-
                         {/* Submit */}
                         {/* {error && <p className="text-[11px] text-red-500 text-center">{error}</p>} */}
                         <button

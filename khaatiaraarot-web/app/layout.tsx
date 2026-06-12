@@ -1,10 +1,21 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { CartProvider } from "@/context/cartcontext";
 import CartDrawerWrapper from "@/components/cartdrawerwrapper";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import localFont from "next/font/local";
+import Providers from "./providers";
+
+export const retroFloral = localFont({
+  src: "../public/fonts/Retro Floral.ttf",
+  variable: "--font-retro-floral",
+});
+
+export const moglanDemo = localFont({
+  src: "../public/fonts/Moglan_DEMO.ttf",
+  variable: "--font-moglan-demo",
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,13 +40,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${retroFloral.variable} ${moglanDemo.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <CartProvider>
-        {children}
-        <CartDrawerWrapper />
-        </CartProvider>
+        <Providers>
+          {children}
+          <CartDrawerWrapper />
+        </Providers>
         <ToastContainer/>
       </body>
     </html>

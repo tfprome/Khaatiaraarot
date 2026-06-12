@@ -17,3 +17,8 @@ export interface CartContextValue {
     updateQuantity: (id: string, quantity: number) => void;
     clearCart: () => void;
   }
+
+  export interface CartState {
+  items: CartItem[];
+  isOpen: boolean;
+}
