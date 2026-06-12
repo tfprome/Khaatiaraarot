@@ -229,7 +229,7 @@ export default function CartDrawer({
         </div>
 
         {/* Delivery banner */}
-        {/* {totalQty > 0 && remaining > 0 && (
+        {totalQty > 0 && remaining > 0 && (
           <div className="px-5 py-3 bg-[#fffbf0] border-b border-[#f0e8c0] shrink-0">
             <p className="text-[11px] text-[#7a6010] mb-1.5">
               Add{" "}
@@ -250,7 +250,7 @@ export default function CartDrawer({
               You unlocked free delivery!
             </p>
           </div>
-        )} */}
+        )}
 
         {/* Items */}
         <div className="flex-1 overflow-y-auto px-5 py-1">

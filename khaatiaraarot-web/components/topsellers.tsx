@@ -7,6 +7,7 @@ import Mustardoil from "../public/Images/MustardOilProducts.png";
 import { Product } from "../Types/Homepagetypes";
 import { useAppDispatch } from "@/store/hooks";
 import { addItem } from "@/store/cartSlice";
+import { toast } from "react-toastify";
 
 const products: Product[] = [
     {
@@ -67,6 +68,24 @@ function ProductCard({ product }: { product: Product }) {
                     ? product.image
                     : product.image.src,
         }));
+        toast("Added to your cart.", {
+                        position: "bottom-right",
+                        autoClose: 1000, // 0.5 second
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: false,
+                        draggable: false,
+                        style: {
+                            background: "#5B1A18", // dark green
+                            color: "#ffffff",
+                            fontSize: "16px",
+                            fontWeight: "600",
+                            padding: "16px",
+                            minWidth: "320px",
+                            minHeight: "70px",
+                            borderRadius: "12px",
+                        },
+                    });
     };
     const saving = product.originalPrice
         ? product.originalPrice - product.price
