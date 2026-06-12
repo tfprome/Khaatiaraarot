@@ -7,12 +7,12 @@ import "react-toastify/dist/ReactToastify.css";
 import localFont from "next/font/local";
 import Providers from "./providers";
 
-export const retroFloral = localFont({
+const retroFloral = localFont({
   src: "../public/fonts/Retro Floral.ttf",
   variable: "--font-retro-floral",
 });
 
-export const moglanDemo = localFont({
+const moglanDemo = localFont({
   src: "../public/fonts/Moglan_DEMO.ttf",
   variable: "--font-moglan-demo",
 });
@@ -47,7 +47,7 @@ export default function RootLayout({
           {children}
           <CartDrawerWrapper />
         </Providers>
-        <ToastContainer/>
+        <ToastContainer />
       </body>
     </html>
   );
