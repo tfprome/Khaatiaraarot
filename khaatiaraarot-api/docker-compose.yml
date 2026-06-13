@@ -1,12 +1,14 @@
 services:
   postgres:
-    image: postgres:16-alpine
+    image: postgres:16
     container_name: kha-postgres
     restart: unless-stopped
+    shm_size: '128mb'
     environment:
       POSTGRES_USER: kha
       POSTGRES_PASSWORD: kha
       POSTGRES_DB: khaatiaraarot
+      POSTGRES_INITDB_ARGS: "-c dynamic_shared_memory_type=mmap"
     ports:
       - "5434:5432"
     volumes:
@@ -19,7 +21,7 @@ services:
       retries: 5
 
   redis:
-    image: redis:alpine
+    image: redis:7
     container_name: kha-redis
     restart: unless-stopped
     ports:

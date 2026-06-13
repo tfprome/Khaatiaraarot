@@ -10,7 +10,8 @@ import {
   ShoppingCartIcon,
   StackIcon,
   ChartBarIcon,
-  UserCircleIcon
+  UserCircleIcon,
+  TruckIcon,
 } from '@phosphor-icons/react';
 
 const NAV = [
@@ -20,6 +21,7 @@ const NAV = [
   { label: 'Banners', href: '/admin/banners', icon: ImageIcon },
   { label: 'Orders', href: '/admin/orders', icon: ShoppingCartIcon },
   { label: 'Inventory', href: '/admin/inventory', icon: StackIcon },
+  { label: 'Delivery', href: '/admin/delivery', icon: TruckIcon },
   { label: 'Reports', href: '/admin/reports', icon: ChartBarIcon },
 ];
 

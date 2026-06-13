@@ -28,13 +28,11 @@ const registerSchema = z
       .max(50, "Full name must be under 50 characters")
       .regex(/^[a-zA-Z\s]+$/, "Full name can only contain letters and spaces"),
 
-    // phone: z
-    //   .string()
-    //   .min(1, "Phone number is required")
-    //   .regex(
-    //     /^[0-9+\-\s]{7,15}$/,
-    //     "Enter a valid phone number"
-    //   ),
+    phone: z
+      .string()
+      .regex(/^[0-9+\-\s]{7,15}$/, "Enter a valid phone number")
+      .optional()
+      .or(z.literal("")),
 
     email: z
       .string()
@@ -73,7 +71,7 @@ export default function RegisterPage() {
   const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
   const [formData, setFormData] = useState<FormData>({
     fullName: "",
-    // phone: "",
+    phone: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -123,7 +121,7 @@ export default function RegisterPage() {
       const res = await fetch(`${BASE}/api/v1/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: result.data.email, password: result.data.password, fullName: result.data.fullName }),
+        body: JSON.stringify({ email: result.data.email, password: result.data.password, fullName: result.data.fullName, phone: result.data.phone || undefined }),
       });
       const json = await res.json() as { success?: boolean; data?: { accessToken: string; user: { role: string; fullName: string } }; error?: { message?: string } };
       if (!res.ok) {
@@ -242,12 +240,12 @@ export default function RegisterPage() {
             </div>
 
             {/* Phone */}
-            {/* <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5">
               <label
                 htmlFor="phone"
                 className="text-[12px] font-semibold text-[#2c1a0e] uppercase tracking-wide"
               >
-                Phone Number
+                Phone Number <span className="text-[#a07850] normal-case font-normal">(optional)</span>
               </label>
               <div className={inputWrapClass("phone")}>
                 <PhoneIcon size={17} weight="fill" className="text-[#a07850] shrink-0" />
@@ -264,7 +262,7 @@ export default function RegisterPage() {
               {errors.phone && (
                 <p className="text-[11px] text-red-500">{errors.phone}</p>
               )}
-            </div> */}
+            </div>
 
             {/* Email */}
             <div className="flex flex-col gap-1.5">

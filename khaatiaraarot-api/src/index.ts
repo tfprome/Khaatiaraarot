@@ -4,12 +4,15 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import "dotenv/config";
 
+import { BANGLADESH_DISTRICTS } from "./constants/districts";
 import authRoutes from "./routes/auth.routes";
 import productRoutes from "./routes/product.routes";
 import categoryRoutes from "./routes/category.routes";
 import bannerRoutes from "./routes/banner.routes";
 import orderRoutes from "./routes/order.routes";
 import cartRoutes from "./routes/cart.routes";
+import rewardRoutes from "./routes/reward.routes";
+import couponRoutes from "./routes/coupon.routes";
 import adminRoutes from "./routes/admin";
 import { errorHandler } from "./middleware/error.middleware";
 import { requestLogger } from "./middleware/requestLogger.middleware";
@@ -39,7 +42,10 @@ app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/banners", bannerRoutes);
 app.use("/api/v1/cart", cartRoutes);
 app.use("/api/v1/orders", orderRoutes);
+app.use("/api/v1/rewards", rewardRoutes);
+app.use("/api/v1/coupons", couponRoutes);
 app.use("/api/v1/admin", adminRoutes);
+app.get("/api/v1/districts", (_req, res) => res.json({ success: true, data: BANGLADESH_DISTRICTS }));
 
 app.use(errorHandler);
 

@@ -9,6 +9,7 @@ import {
 } from '../../db/schema';
 import { invoiceQueue, emailQueue } from '../../queues';
 import { invoices, users } from '../../db/schema';
+import { awardOrderPoints } from '../reward.service';
 import { AppError } from '../../utils/errors';
 import type {
   createManualOrderSchema,
@@ -91,6 +92,14 @@ export async function updateOrderStatus(
       changedBy: adminId,
     });
   });
+
+  if (input.status === 'confirmed') {
+    await invoiceQueue.add('generate-invoice', { orderId: id });
+  }
+
+  if (input.status === 'delivered' && order.userId) {
+    await awardOrderPoints(order.userId, id, parseFloat(order.total));
+  }
 
   return getOrderById(id);
 }
@@ -179,7 +188,6 @@ export async function createManualOrder(adminId: string, input: CreateManualInpu
     return newOrder;
   });
 
-  await invoiceQueue.add('generate-invoice', { orderId: order.id });
   return getOrderById(order.id);
 }
 

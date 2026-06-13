@@ -5,12 +5,17 @@ import { products, productImages } from './products';
 import { carts, cartItems, wishlists } from './carts';
 import { orders, orderItems, orderStatusHistory } from './orders';
 import { invoices } from './invoices';
+import { userPoints, pointTransactions } from './rewards';
+import { coupons, couponUsages } from './coupons';
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   addresses: many(addresses),
   orders: many(orders),
   carts: many(carts),
   wishlists: many(wishlists),
+  points: one(userPoints, { fields: [users.id], references: [userPoints.userId] }),
+  pointTransactions: many(pointTransactions),
+  couponUsages: many(couponUsages),
 }));
 
 export const addressesRelations = relations(addresses, ({ one }) => ({
@@ -53,6 +58,7 @@ export const ordersRelations = relations(orders, ({ one, many }) => ({
   items: many(orderItems),
   statusHistory: many(orderStatusHistory),
   invoice: one(invoices, { fields: [orders.id], references: [invoices.orderId] }),
+  couponUsage: one(couponUsages, { fields: [orders.id], references: [couponUsages.orderId] }),
 }));
 
 export const orderItemsRelations = relations(orderItems, ({ one }) => ({
@@ -67,4 +73,23 @@ export const orderStatusHistoryRelations = relations(orderStatusHistory, ({ one 
 
 export const invoicesRelations = relations(invoices, ({ one }) => ({
   order: one(orders, { fields: [invoices.orderId], references: [orders.id] }),
+}));
+
+export const userPointsRelations = relations(userPoints, ({ one }) => ({
+  user: one(users, { fields: [userPoints.userId], references: [users.id] }),
+}));
+
+export const pointTransactionsRelations = relations(pointTransactions, ({ one }) => ({
+  user: one(users, { fields: [pointTransactions.userId], references: [users.id] }),
+  order: one(orders, { fields: [pointTransactions.orderId], references: [orders.id] }),
+}));
+
+export const couponsRelations = relations(coupons, ({ many }) => ({
+  usages: many(couponUsages),
+}));
+
+export const couponUsagesRelations = relations(couponUsages, ({ one }) => ({
+  coupon: one(coupons, { fields: [couponUsages.couponId], references: [coupons.id] }),
+  user: one(users, { fields: [couponUsages.userId], references: [users.id] }),
+  order: one(orders, { fields: [couponUsages.orderId], references: [orders.id] }),
 }));

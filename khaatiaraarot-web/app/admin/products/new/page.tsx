@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ArrowLeft } from '@phosphor-icons/react';
 
 interface Category { id: string; name: string; }
+interface RatePlan { id: string; name: string; isActive: boolean; }
 
 function toSlug(s: string) {
   return s.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
@@ -27,6 +28,7 @@ const inputCls = "w-full border border-[#e8d5c4] rounded-xl px-3 py-2.5 text-sm 
 export default function NewProductPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [ratePlans, setRatePlans] = useState<RatePlan[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -37,6 +39,7 @@ export default function NewProductPage() {
     unit: '',
     sourceRegion: '',
     categoryId: '',
+    ratePlanId: '',
     price: '',
     originalPrice: '',
     stockQty: '0',
@@ -46,7 +49,13 @@ export default function NewProductPage() {
   });
 
   useEffect(() => {
-    adminApi.get<{ data: Category[] }>('/categories').then(r => setCategories(r.data));
+    Promise.all([
+      adminApi.get<{ data: Category[] }>('/categories'),
+      adminApi.get<{ data: RatePlan[] }>('/rate-plans'),
+    ]).then(([cats, plans]) => {
+      setCategories(cats.data);
+      setRatePlans(plans.data.filter(p => p.isActive));
+    });
   }, []);
 
   function set(k: keyof typeof form, v: string | boolean) {
@@ -69,6 +78,7 @@ export default function NewProductPage() {
         unit: form.unit,
         sourceRegion: form.sourceRegion || undefined,
         categoryId: form.categoryId || undefined,
+        ratePlanId: form.ratePlanId || undefined,
         price: parseFloat(form.price),
         originalPrice: form.originalPrice ? parseFloat(form.originalPrice) : undefined,
         stockQty: parseInt(form.stockQty),
@@ -118,6 +128,12 @@ export default function NewProductPage() {
           <select value={form.categoryId} onChange={e => set('categoryId', e.target.value)} className={inputCls}>
             <option value="">— Select category —</option>
             {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        </Field>
+        <Field label="Delivery Rate Plan">
+          <select value={form.ratePlanId} onChange={e => set('ratePlanId', e.target.value)} className={inputCls}>
+            <option value="">— No delivery / free —</option>
+            {ratePlans.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
         </Field>
         <div className="grid grid-cols-2 gap-4">

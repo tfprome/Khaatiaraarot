@@ -1,9 +1,11 @@
 import { pgTable, uuid, text, boolean, timestamp, integer, numeric, index } from 'drizzle-orm/pg-core';
 import { categories } from './categories';
+import { ratePlans } from './delivery';
 
 export const products = pgTable('products', {
   id: uuid('id').primaryKey().defaultRandom(),
   categoryId: uuid('category_id').references(() => categories.id, { onDelete: 'set null' }),
+  ratePlanId: uuid('rate_plan_id').references(() => ratePlans.id, { onDelete: 'set null' }),
   name: text('name').notNull(),
   slug: text('slug').notNull().unique(),
   description: text('description'),
