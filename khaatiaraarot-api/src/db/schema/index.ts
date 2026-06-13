@@ -6,4 +6,6 @@ export * from './banners';
 export * from './carts';
 export * from './orders';
 export * from './invoices';
+export * from './rewards';
+export * from './coupons';
 export * from './relations';

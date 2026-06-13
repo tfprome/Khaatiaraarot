@@ -151,3 +151,19 @@ export const topProductsQuerySchema = z.object({
   to: z.string().datetime().optional(),
   limit: z.coerce.number().int().min(1).max(50).default(10),
 });
+
+// ── Coupons ──────────────────────────────────────────────────────────────────
+
+export const createCouponSchema = z.object({
+  code: z.string().min(3).max(50).regex(/^[A-Z0-9_-]+$/i, 'Alphanumeric, hyphens, underscores only'),
+  type: z.enum(['percentage', 'fixed']),
+  value: z.number().positive(),
+  minOrderAmount: z.number().positive().optional(),
+  maxDiscount: z.number().positive().optional(),
+  usageLimit: z.number().int().positive().optional(),
+  perUserLimit: z.number().int().positive().default(1),
+  isActive: z.boolean().default(true),
+  expiresAt: z.string().datetime().optional(),
+});
+
+export const updateCouponSchema = createCouponSchema.partial();

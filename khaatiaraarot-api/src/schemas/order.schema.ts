@@ -16,10 +16,16 @@ export const placeOrderSchema = z
     address: addressSchema.optional(),
     paymentMethod: z.enum(['cash', 'card', 'gcash', 'bkash', 'nagad']),
     notes: z.string().max(500).optional(),
+    couponCode: z.string().min(1).optional(),
   })
   .refine((data) => data.addressId || data.address, {
     message: 'Either addressId or an inline address is required',
   });
+
+export const validateCouponSchema = z.object({
+  code: z.string().min(1),
+  subtotal: z.number().positive(),
+});
 
 export const listOrdersQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),

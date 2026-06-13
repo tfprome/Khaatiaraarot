@@ -5,6 +5,8 @@ import {
   addresses,
   cartItems,
   carts,
+  couponUsages,
+  coupons,
   orderItems,
   orderNumberCounter,
   orders,
@@ -15,6 +17,7 @@ import {
 import { AppError } from '../utils/errors';
 import { stockAlertQueue } from '../queues';
 import { getDeliveryFee } from './admin/ratePlan.service';
+import { validateCoupon } from './coupon.service';
 import type { PlaceOrderInput } from '../schemas/order.schema';
 
 const IDEMPOTENCY_TTL = 86400; // 24 hours
@@ -133,6 +136,13 @@ export async function placeOrder(
   );
   const deliveryFee = deliveryFees.reduce((sum, fee) => sum + fee, 0);
 
+  let appliedCoupon: { id: string; discountAmount: number } | null = null;
+  if (input.couponCode) {
+    const { coupon, discountAmount } = await validateCoupon(input.couponCode, userId, subtotal);
+    appliedCoupon = { id: coupon.id, discountAmount };
+  }
+  const discount = appliedCoupon?.discountAmount ?? 0;
+
   const order = await db.transaction(async (tx) => {
     // Atomic order number
     const year = new Date().getFullYear();
@@ -155,8 +165,8 @@ export async function placeOrder(
         paymentMethod: input.paymentMethod,
         subtotal: subtotal.toFixed(2),
         deliveryFee: deliveryFee.toFixed(2),
-        discount: '0',
-        total: (subtotal + deliveryFee).toFixed(2),
+        discount: discount.toFixed(2),
+        total: (subtotal + deliveryFee - discount).toFixed(2),
         source: 'web',
         shippingAddressSnapshot: addressSnapshot,
         notes: input.notes,
@@ -195,6 +205,20 @@ export async function placeOrder(
           `"${item.name}" ran out of stock during checkout`,
         );
       }
+    }
+
+    // Record coupon usage atomically
+    if (appliedCoupon) {
+      await tx.insert(couponUsages).values({
+        couponId: appliedCoupon.id,
+        userId,
+        orderId: newOrder.id,
+        discountApplied: appliedCoupon.discountAmount.toFixed(2),
+      });
+      await tx
+        .update(coupons)
+        .set({ usedCount: sql`${coupons.usedCount} + 1`, updatedAt: new Date() })
+        .where(eq(coupons.id, appliedCoupon.id));
     }
 
     // Initial status history (append-only — never UPDATE orders.status alone)
