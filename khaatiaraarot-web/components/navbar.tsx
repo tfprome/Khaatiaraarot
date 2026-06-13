@@ -22,6 +22,8 @@ import Image from "next/image";
 import Khaatiarotlogo from '../public/Images/khatiarotlogo-removebg.png';
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { openCart } from "@/store/cartSlice";
+import { useAppDispatch } from "@/store/hooks";
 
 const navLinks = [
     { label: "Home", href: "/", icon: HouseIcon },
@@ -34,6 +36,8 @@ const navLinks = [
 
 export default function Navbar() {
     const [token, setToken] = useState<string | null>(null);
+    const dispatch = useAppDispatch();
+
 
     useEffect(() => {
         setToken(localStorage.getItem("userToken"));
@@ -58,7 +62,7 @@ export default function Navbar() {
 
             const json = await res.json();
 
-            console.log("Logout response:", json);
+            //console.log("Logout response:", json);
 
             if (!res.ok) {
                 toast.error(json.error?.message ?? "Logout failed.Please try again", {
@@ -79,7 +83,7 @@ export default function Navbar() {
 
                 throw new Error(json.error?.message ?? "Login failed");
             }
-            
+
             else if (res.ok) {
 
                 localStorage.removeItem("userToken");
@@ -206,9 +210,11 @@ export default function Navbar() {
                                     Wishlist
                                 </span>
                             </div>
-                            <div className="relative flex flex-col items-center gap-0.5 px-2.5 py-2 rounded-xl group transition-colors duration-200 cursor-pointer">
+                            <div onClick={() => dispatch(openCart())}
+                                className="relative flex flex-col items-center gap-0.5 px-2.5 py-2 rounded-xl group transition-colors duration-200 cursor-pointer">
                                 <ShoppingCartIcon size={22} className="text-white transition-colors duration-200" />
-                                <span className="hidden lg:block text-[10px] text-white font-medium transition-colors">
+                                <span
+                                    className="hidden lg:block text-[10px] text-white font-medium transition-colors">
                                     Cart
                                 </span>
                             </div>

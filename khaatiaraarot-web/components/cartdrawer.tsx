@@ -157,10 +157,10 @@ export default function CartDrawer({
     return () => document.removeEventListener("keydown", handler);
   }, []);
 
-  useEffect(() => {
-    document.body.style.overflow = isOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [isOpen]);
+  // useEffect(() => {
+  //   document.body.style.overflow = isOpen ? "hidden" : "";
+  //   return () => { document.body.style.overflow = ""; };
+  // }, [isOpen]);
 
   function handleIncrease(id: string, qty: number) {
     dispatch(updateQuantity({ id, quantity: qty + 1 }));

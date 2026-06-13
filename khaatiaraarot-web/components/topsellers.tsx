@@ -76,7 +76,8 @@ function ProductCard({ product }: { product: Product }) {
                         pauseOnHover: false,
                         draggable: false,
                         style: {
-                            background: "#5B1A18", // dark green
+                            background: "#5B1A18",
+                            opacity: '0.2', // dark green
                             color: "#ffffff",
                             fontSize: "16px",
                             fontWeight: "600",

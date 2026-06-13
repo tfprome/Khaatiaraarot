@@ -15,6 +15,7 @@ import {
 } from "@phosphor-icons/react";
 import logo from "../../public/Images/khatiarotlogo-removebg.png";
 import { toast } from "react-toastify";
+import ClipLoader from "react-spinners/ClipLoader";
 
 // ── Zod Schema ──────────────────────────────────────────────────────────────
 
@@ -370,9 +371,16 @@ export default function RegisterPage() {
               type="button"
               onClick={handleSubmit}
               disabled={loading}
-              className="w-full bg-[#8B0000] hover:bg-[#6e0000] disabled:bg-[#c8a882] disabled:cursor-not-allowed text-white font-semibold text-sm py-3 rounded-xl transition-colors duration-200 mt-2 cursor-pointer"
+              className="w-full bg-[#8B0000] hover:bg-[#6e0000] disabled:cursor-not-allowed text-white font-semibold text-sm py-3 rounded-xl transition-colors duration-200 mt-2 cursor-pointer"
             >
-              {loading ? 'Creating account…' : 'Create Account'}
+              {loading ? (
+                <div className="flex items-center justify-center">
+                  <ClipLoader size={14} color="white" />
+                  <span className="ml-2">Creating account…</span>
+                </div>
+              ) : (
+                "Create Account"
+              )}
             </button>
 
             {/* Divider */}

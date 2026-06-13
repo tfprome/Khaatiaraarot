@@ -7,6 +7,7 @@ import Image from "next/image";
 import { EyeIcon, EyeSlashIcon, LockKeyIcon, EnvelopeSimpleIcon } from "@phosphor-icons/react";
 import logo from "../../public/Images/khatiarotlogo-removebg.png";
 import { toast } from "react-toastify";
+import ClipLoader from "react-spinners/ClipLoader";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -49,7 +50,7 @@ export default function LoginPage() {
 
             localStorage.setItem('userToken', json.data!.accessToken);
             localStorage.setItem('userName', json.data!.user.fullName);
-            
+
             toast("You're in! Let's fill the cart.", {
                 position: "bottom-right",
                 autoClose: 1000, // 0.5 second
@@ -187,9 +188,16 @@ export default function LoginPage() {
                             type="button"
                             onClick={handleSubmit}
                             disabled={loading}
-                            className="w-full bg-[#8B0000] hover:bg-[#6e0000] text-white font-semibold text-sm py-3 rounded-xl transition-colors duration-200 mt-2 cursor-pointer"
+                            className="w-full bg-[#8B0000] hover:bg-[#6e0000] text-white font-semibold text-sm py-3 rounded-xl transition-colors duration-200 mt-2 cursor-pointer disabled:cursor-not-allowed"
                         >
-                            {loading ? 'Signing in…' : 'Sign in'}
+                            {loading ? (
+                                <div className="flex items-center justify-center">
+                                    <ClipLoader size={14} color="white" />
+                                    <span className="ml-2">Signing in…</span>
+                                </div>
+                            ) : (
+                                "Sign in"
+                            )}
                         </button>
 
                         {/* Divider */}

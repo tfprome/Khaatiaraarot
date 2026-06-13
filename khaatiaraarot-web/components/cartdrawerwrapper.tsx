@@ -19,9 +19,9 @@ export default function CartDrawerWrapper() {
     (state) => state.cart.items
   );
 
-  useEffect(() => {
-  console.log("CartDrawerWrapper mounted");
-}, []);
+//   useEffect(() => {
+//   console.log("CartDrawerWrapper mounted");
+// }, []);
 
   return (
     <CartDrawer
