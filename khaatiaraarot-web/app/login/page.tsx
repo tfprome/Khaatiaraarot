@@ -6,6 +6,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { EyeIcon, EyeSlashIcon, LockKeyIcon, EnvelopeSimpleIcon } from "@phosphor-icons/react";
 import logo from "../../public/Images/khatiarotlogo-removebg.png";
+import { toast } from "react-toastify";
+import ClipLoader from "react-spinners/ClipLoader";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -25,10 +27,49 @@ export default function LoginPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
             });
-            const json = await res.json() as { success?: boolean; data?: { accessToken: string; user: { role: string; fullName: string } }; message?: string };
-            if (!res.ok) throw new Error(json.message ?? 'Login failed');
+            const json = await res.json() as { success?: boolean; data?: { accessToken: string; user: { role: string; fullName: string } }; error?: { message?: string } };
+            if (!res.ok) {
+                toast.error(json.error?.message ?? "Login failed.Please try again", {
+                    position: "bottom-right",
+                    autoClose: 1500,
+                    hideProgressBar: true,
+                    style: {
+                        background: "#f00808",
+                        color: "#ffffff",
+                        fontSize: "15px",
+                        fontWeight: "600",
+                        padding: "16px",
+                        minWidth: "320px",
+                        minHeight: "70px",
+                        borderRadius: "12px",
+                    },
+                });
+
+                throw new Error(json.error?.message ?? "Login failed");
+            }
+
             localStorage.setItem('userToken', json.data!.accessToken);
             localStorage.setItem('userName', json.data!.user.fullName);
+
+            toast("You're in! Let's fill the cart.", {
+                position: "bottom-right",
+                autoClose: 1000, // 0.5 second
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: false,
+                style: {
+                    background: "#5B1A18", // dark green
+                    color: "#ffffff",
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    padding: "16px",
+                    minWidth: "320px",
+                    minHeight: "70px",
+                    borderRadius: "12px",
+                },
+            });
+
             router.replace('/');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Login failed');
@@ -141,30 +182,22 @@ export default function LoginPage() {
                             </div>
                         </div>
 
-                        {/* Remember me */}
-                        <div className="flex items-center gap-2 mt-1">
-                            <input
-                                id="remember"
-                                type="checkbox"
-                                className="w-4 h-4 rounded border-[#e8d5c4] accent-[#8B0000] cursor-pointer"
-                            />
-                            <label
-                                htmlFor="remember"
-                                className="text-sm text-[#a07850] cursor-pointer select-none"
-                            >
-                                Remember me for 30 days
-                            </label>
-                        </div>
-
                         {/* Submit */}
-                        {error && <p className="text-[11px] text-red-500 text-center">{error}</p>}
+                        {/* {error && <p className="text-[11px] text-red-500 text-center">{error}</p>} */}
                         <button
                             type="button"
                             onClick={handleSubmit}
                             disabled={loading}
-                            className="w-full bg-[#8B0000] hover:bg-[#6e0000] text-white font-semibold text-sm py-3 rounded-xl transition-colors duration-200 mt-2 cursor-pointer"
+                            className="w-full bg-[#8B0000] hover:bg-[#6e0000] text-white font-semibold text-sm py-3 rounded-xl transition-colors duration-200 mt-2 cursor-pointer disabled:cursor-not-allowed"
                         >
-                            {loading ? 'Signing in…' : 'Sign in'}
+                            {loading ? (
+                                <div className="flex items-center justify-center">
+                                    <ClipLoader size={14} color="white" />
+                                    <span className="ml-2">Signing in…</span>
+                                </div>
+                            ) : (
+                                "Sign in"
+                            )}
                         </button>
 
                         {/* Divider */}

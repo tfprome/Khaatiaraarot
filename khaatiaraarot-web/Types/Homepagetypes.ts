@@ -1,5 +1,4 @@
 import { StaticImageData } from "next/image";
-import type { ImageProps } from "next/image";
 
 export type Category = {
   label: string;
@@ -16,7 +15,7 @@ export type Product = {
   unit: string;
   price: number;
   originalPrice?: number;
-  image: ImageProps["src"];
+  image: string | StaticImageData;
   source: string;
   isBestSelling?: boolean;
 };

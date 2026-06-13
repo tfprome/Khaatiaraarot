@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Navbar from "@/components/navbar";
 import HeroBanner from "@/components/herobanner";
 import FeaturedCategories from "@/components/categories";

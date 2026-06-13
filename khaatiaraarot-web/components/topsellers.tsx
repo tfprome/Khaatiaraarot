@@ -5,6 +5,9 @@ import { ShoppingCartIcon, LightningIcon } from "@phosphor-icons/react";
 import CHINIGURA_CHAL from "../public/Images/ChiniguraChalproducts.png";
 import Mustardoil from "../public/Images/MustardOilProducts.png";
 import { Product } from "../Types/Homepagetypes";
+import { useAppDispatch } from "@/store/hooks";
+import { addItem } from "@/store/cartSlice";
+import { toast } from "react-toastify";
 
 const products: Product[] = [
     {
@@ -50,6 +53,41 @@ const products: Product[] = [
 ];
 
 function ProductCard({ product }: { product: Product }) {
+
+    const dispatch = useAppDispatch();
+
+    const handleAddToCart = () => {
+        dispatch(addItem({
+            id: product.id.toString(),
+            name: product.name,
+            price: product.price,
+            originalPrice: product.originalPrice,
+            unit: product.unit,
+            image:
+                typeof product.image === "string"
+                    ? product.image
+                    : product.image.src,
+        }));
+        toast("Added to your cart.", {
+                        position: "bottom-right",
+                        autoClose: 1000, // 0.5 second
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: false,
+                        draggable: false,
+                        style: {
+                            background: "#5B1A18",
+                            opacity: '0.2', // dark green
+                            color: "#ffffff",
+                            fontSize: "16px",
+                            fontWeight: "600",
+                            padding: "16px",
+                            minWidth: "320px",
+                            minHeight: "70px",
+                            borderRadius: "12px",
+                        },
+                    });
+    };
     const saving = product.originalPrice
         ? product.originalPrice - product.price
         : 0;
@@ -112,7 +150,8 @@ function ProductCard({ product }: { product: Product }) {
 
                 {/* Buttons */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5">
-                    <button className="flex items-center justify-center gap-1 text-[10px] sm:text-[11px] lg:text-[13px] font-semibold text-[#8B0000] border border-[#8B0000] px-2 sm:px-2.5 lg:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-[#8B0000] hover:text-white transition-all duration-200 whitespace-nowrap">
+                    <button onClick={handleAddToCart}
+                        className="flex items-center justify-center gap-1 text-[10px] sm:text-[11px] lg:text-[13px] font-semibold text-[#8B0000] border border-[#8B0000] px-2 sm:px-2.5 lg:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-[#8B0000] hover:text-white transition-all duration-200 whitespace-nowrap">
                         <ShoppingCartIcon size={11} weight="bold" />
                         Add to Cart
                     </button>
