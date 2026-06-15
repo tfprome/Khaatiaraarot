@@ -310,13 +310,13 @@ export default function CartDrawer({
               <LockKeyIcon size={15} weight="bold" />
               Checkout
             </button>
-            <button
+            {/* <button
               onClick={() => { onViewCart?.(); dispatch(closeCart()); }}
               className="w-full py-2.5 rounded-xl border border-[#FCEBEB] text-[#5B1A18] font-semibold text-[12px] flex items-center justify-center gap-2 hover:bg-[#eef6e4] transition-colors"
             >
               <ShoppingBagIcon size={14} weight="regular" />
               View cart
-            </button>
+            </button> */}
           </div>
         )}
       </div>
