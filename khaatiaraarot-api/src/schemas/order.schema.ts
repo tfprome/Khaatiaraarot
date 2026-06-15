@@ -27,9 +27,12 @@ export const validateCouponSchema = z.object({
   subtotal: z.number().positive(),
 });
 
+const ORDER_STATUSES = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'] as const;
+
 export const listOrdersQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(10),
+  status: z.enum(ORDER_STATUSES).optional(),
 });
 
 export type PlaceOrderInput = z.infer<typeof placeOrderSchema>;

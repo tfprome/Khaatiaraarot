@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { login, register, logout, refreshToken } from '../controllers/auth.controller';
+import { login, register, logout, refreshToken, getMe } from '../controllers/auth.controller';
 import { authenticate } from '../middleware/auth.middleware';
 import { validateBody } from '../middleware/validate.middleware';
 import { loginSchema, registerSchema } from '../schemas/auth.schema';
@@ -93,5 +93,19 @@ router.post('/refresh', refreshToken);
  *         description: Logged out
  */
 router.post('/logout', authenticate, logout);
+
+/**
+ * @swagger
+ * /auth/me:
+ *   get:
+ *     tags: [Auth]
+ *     summary: Get authenticated user profile
+ *     responses:
+ *       200:
+ *         description: User profile
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/me', authenticate, getMe);
 
 export default router;

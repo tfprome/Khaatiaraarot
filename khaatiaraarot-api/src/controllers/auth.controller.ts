@@ -3,6 +3,9 @@ import { AuthRequest } from '../types';
 import * as authService from '../services/auth.service';
 import { mergeGuestCart } from '../services/cart.service';
 import { SESSION_COOKIE } from '../middleware/session.middleware';
+import { db } from '../config/db';
+import { users } from '../db/schema';
+import { eq } from 'drizzle-orm';
 
 const REFRESH_COOKIE = 'kha_refresh';
 
@@ -81,6 +84,23 @@ export async function refreshToken(req: Request, res: Response, next: NextFuncti
         user: { id: user.id, email: user.email, role: user.role, fullName: user.fullName },
       },
     });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getMe(req: AuthRequest, res: Response, next: NextFunction) {
+  try {
+    const userId = req.user!.id;
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+      columns: { id: true, email: true, fullName: true, phone: true, role: true, createdAt: true },
+    });
+    if (!user) {
+      res.status(404).json({ success: false, error: { code: 'USER_NOT_FOUND', message: 'User not found' } });
+      return;
+    }
+    res.json({ success: true, data: user });
   } catch (err) {
     next(err);
   }
