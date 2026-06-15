@@ -19,9 +19,19 @@ export async function createOrder(req: AuthRequest, res: Response, next: NextFun
 export async function getOrders(req: AuthRequest, res: Response, next: NextFunction) {
   try {
     const userId = req.user!.id;
-    const { page, limit } = listOrdersQuerySchema.parse(req.query);
-    const result = await orderService.listOrders(userId, page, limit);
+    const { page, limit, status } = listOrdersQuerySchema.parse(req.query);
+    const result = await orderService.listOrders(userId, page, limit, status);
     res.json({ success: true, ...result });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function cancelOrder(req: AuthRequest, res: Response, next: NextFunction) {
+  try {
+    const userId = req.user!.id;
+    const data = await orderService.cancelOrder(req.params.id, userId);
+    res.json({ success: true, data });
   } catch (err) {
     next(err);
   }

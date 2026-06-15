@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth.middleware';
-import { createOrder, getOrders, getOrderById } from '../controllers/order.controller';
+import { createOrder, getOrders, getOrderById, cancelOrder } from '../controllers/order.controller';
 
 const router = Router();
 
@@ -89,5 +89,26 @@ router.get('/', getOrders);
  *         description: Order not found
  */
 router.get('/:id', getOrderById);
+
+/**
+ * @swagger
+ * /orders/{id}/cancel:
+ *   patch:
+ *     tags: [Orders]
+ *     summary: Cancel an order (only when status is pending or confirmed)
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Order cancelled
+ *       400:
+ *         description: Order cannot be cancelled at current status
+ *       404:
+ *         description: Order not found
+ */
+router.patch('/:id/cancel', cancelOrder);
 
 export default router;

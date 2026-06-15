@@ -13,6 +13,7 @@ import orderRoutes from "./routes/order.routes";
 import cartRoutes from "./routes/cart.routes";
 import rewardRoutes from "./routes/reward.routes";
 import couponRoutes from "./routes/coupon.routes";
+import wishlistRoutes from "./routes/wishlist.routes";
 import adminRoutes from "./routes/admin";
 import { errorHandler } from "./middleware/error.middleware";
 import { requestLogger } from "./middleware/requestLogger.middleware";
@@ -44,6 +45,7 @@ app.use("/api/v1/cart", cartRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/rewards", rewardRoutes);
 app.use("/api/v1/coupons", couponRoutes);
+app.use("/api/v1/wishlist", wishlistRoutes);
 app.use("/api/v1/admin", adminRoutes);
 app.get("/api/v1/districts", (_req, res) => res.json({ success: true, data: BANGLADESH_DISTRICTS }));
 

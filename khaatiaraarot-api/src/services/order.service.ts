@@ -1,4 +1,4 @@
-import { and, count, desc, eq, gte, inArray, sql } from 'drizzle-orm';
+import { and, count, desc, eq, gte, inArray, sql, SQL } from 'drizzle-orm';
 import { db } from '../config/db';
 import { redis } from '../config/redis';
 import {
@@ -271,23 +271,47 @@ export async function getOrderById(orderId: string, userId: string) {
   return order;
 }
 
-export async function listOrders(userId: string, page: number, limit: number) {
+export async function listOrders(userId: string, page: number, limit: number, status?: string) {
   const offset = (page - 1) * limit;
+  type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  const where: SQL[] = [eq(orders.userId, userId)];
+  if (status) where.push(eq(orders.status, status as OrderStatus));
+  const condition = and(...where);
 
   const [countResult, rows] = await Promise.all([
-    db.select({ total: count() }).from(orders).where(eq(orders.userId, userId)),
+    db.select({ total: count() }).from(orders).where(condition),
     db
       .select()
       .from(orders)
-      .where(eq(orders.userId, userId))
+      .where(condition)
       .orderBy(desc(orders.createdAt))
       .limit(limit)
       .offset(offset),
   ]);
 
   const total = Number(countResult[0]?.total ?? 0);
-  return {
-    data: rows,
-    meta: { page, limit, total, pages: Math.ceil(total / limit) },
-  };
+  const totalPages = Math.ceil(total / limit) || 1;
+  return { data: rows, total, page, limit, totalPages };
+}
+
+export async function cancelOrder(orderId: string, userId: string) {
+  const order = await db.query.orders.findFirst({
+    where: and(eq(orders.id, orderId), eq(orders.userId, userId)),
+  });
+  if (!order) throw new AppError(404, 'ORDER_NOT_FOUND', 'Order not found');
+  if (!['pending', 'confirmed'].includes(order.status)) {
+    throw new AppError(400, 'CANNOT_CANCEL', 'Order cannot be cancelled at this stage');
+  }
+
+  await db.transaction(async (tx) => {
+    await tx.update(orders).set({ status: 'cancelled', updatedAt: new Date() }).where(eq(orders.id, orderId));
+    await tx.insert(orderStatusHistory).values({
+      orderId,
+      status: 'cancelled',
+      note: 'Cancelled by customer',
+      changedBy: userId,
+    });
+  });
+
+  return getOrderById(orderId, userId);
 }
