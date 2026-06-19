@@ -105,3 +105,10 @@ Full interactive docs at `/api/v1/docs`. Admin routes require `Authorization: Be
 - Generate fresh JWT secrets — never use the dev defaults from `.env.example`
 - Set `NODE_ENV=production` for JSON logging and reduced log verbosity
 - Configure `ALLOWED_ORIGIN` to your frontend domain
+
+---
+
+## Admin Account
+
+- Email = admin@khaatiaraarot.com
+- PASSWORD = Admin@123456

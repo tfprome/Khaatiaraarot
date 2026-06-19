@@ -24,6 +24,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { openCart } from "@/store/cartSlice";
 import { useAppDispatch } from "@/store/hooks";
+import { api } from "@/lib/api";
 
 const navLinks = [
     { label: "Home", href: "/", icon: HouseIcon },
@@ -45,72 +46,46 @@ export default function Navbar() {
 
     const handleLogout = async () => {
         try {
-            const token = localStorage.getItem("userToken");
+            await api.post('/api/v1/auth/logout', {});
 
-            if (!token) return;
+            localStorage.removeItem("userToken");
+            localStorage.removeItem("userName");
+            setToken(null);
 
-            const BASE =
-                process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
-
-            const res = await fetch(`${BASE}/api/v1/auth/logout`, {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${token}`,
+            toast("You're logged out! See you soon.", {
+                position: "bottom-right",
+                autoClose: 1000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: false,
+                style: {
+                    background: "#5B1A18",
+                    color: "#ffffff",
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    padding: "16px",
+                    minWidth: "320px",
+                    minHeight: "70px",
+                    borderRadius: "12px",
                 },
-                credentials: "include",
             });
-
-            const json = await res.json();
-
-            //console.log("Logout response:", json);
-
-            if (!res.ok) {
-                toast.error(json.error?.message ?? "Logout failed.Please try again", {
-                    position: "bottom-right",
-                    autoClose: 1500,
-                    hideProgressBar: true,
-                    style: {
-                        background: "#f00808",
-                        color: "#ffffff",
-                        fontSize: "15px",
-                        fontWeight: "600",
-                        padding: "16px",
-                        minWidth: "320px",
-                        minHeight: "70px",
-                        borderRadius: "12px",
-                    },
-                });
-
-                throw new Error(json.error?.message ?? "Login failed");
-            }
-
-            else if (res.ok) {
-
-                localStorage.removeItem("userToken");
-                localStorage.removeItem("userName");
-
-                setToken(null);
-                toast("You're logged out! See you soon.", {
-                    position: "bottom-right",
-                    autoClose: 1000, // 0.5 second
-                    hideProgressBar: true,
-                    closeOnClick: true,
-                    pauseOnHover: false,
-                    draggable: false,
-                    style: {
-                        background: "#5B1A18", // dark green
-                        color: "#ffffff",
-                        fontSize: "16px",
-                        fontWeight: "600",
-                        padding: "16px",
-                        minWidth: "320px",
-                        minHeight: "70px",
-                        borderRadius: "12px",
-                    },
-                });
-            }
-
         } catch (error) {
+            toast.error("Logout failed. Please try again.", {
+                position: "bottom-right",
+                autoClose: 1500,
+                hideProgressBar: true,
+                style: {
+                    background: "#f00808",
+                    color: "#ffffff",
+                    fontSize: "15px",
+                    fontWeight: "600",
+                    padding: "16px",
+                    minWidth: "320px",
+                    minHeight: "70px",
+                    borderRadius: "12px",
+                },
+            });
             console.error("Logout failed:", error);
         }
     };
