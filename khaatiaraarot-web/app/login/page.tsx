@@ -26,7 +26,6 @@ export default function LoginPage() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
-                credentials: 'include',
             });
             const json = await res.json() as { success?: boolean; data?: { accessToken: string; user: { role: string; fullName: string } }; error?: { message?: string } };
             if (!res.ok) {

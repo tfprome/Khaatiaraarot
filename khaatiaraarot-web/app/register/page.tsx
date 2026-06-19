@@ -122,7 +122,6 @@ export default function RegisterPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: result.data.email, password: result.data.password, fullName: result.data.fullName, phone: result.data.phone || undefined }),
-        credentials: 'include',
       });
       const json = await res.json() as { success?: boolean; data?: { accessToken: string; user: { role: string; fullName: string } }; error?: { message?: string } };
       if (!res.ok) {
