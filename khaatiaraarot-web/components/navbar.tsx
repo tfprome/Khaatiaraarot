@@ -24,7 +24,6 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { openCart } from "@/store/cartSlice";
 import { useAppDispatch } from "@/store/hooks";
-import { api } from "@/lib/api";
 
 const navLinks = [
     { label: "Home", href: "/", icon: HouseIcon },
@@ -46,7 +45,42 @@ export default function Navbar() {
 
     const handleLogout = async () => {
         try {
-            await api.post('/api/v1/auth/logout', {});
+            const token = localStorage.getItem("userToken");
+
+            if (!token) return;
+
+            const BASE =
+                process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+
+            const res = await fetch(`${BASE}/api/v1/auth/logout`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                credentials: "include",
+            });
+
+            const json = await res.json();
+
+            if (!res.ok) {
+                toast.error(json.error?.message ?? "Logout failed. Please try again", {
+                    position: "bottom-right",
+                    autoClose: 1500,
+                    hideProgressBar: true,
+                    style: {
+                        background: "#f00808",
+                        color: "#ffffff",
+                        fontSize: "15px",
+                        fontWeight: "600",
+                        padding: "16px",
+                        minWidth: "320px",
+                        minHeight: "70px",
+                        borderRadius: "12px",
+                    },
+                });
+
+                throw new Error(json.error?.message ?? "Logout failed");
+            }
 
             localStorage.removeItem("userToken");
             localStorage.removeItem("userName");
@@ -71,21 +105,6 @@ export default function Navbar() {
                 },
             });
         } catch (error) {
-            toast.error("Logout failed. Please try again.", {
-                position: "bottom-right",
-                autoClose: 1500,
-                hideProgressBar: true,
-                style: {
-                    background: "#f00808",
-                    color: "#ffffff",
-                    fontSize: "15px",
-                    fontWeight: "600",
-                    padding: "16px",
-                    minWidth: "320px",
-                    minHeight: "70px",
-                    borderRadius: "12px",
-                },
-            });
             console.error("Logout failed:", error);
         }
     };
