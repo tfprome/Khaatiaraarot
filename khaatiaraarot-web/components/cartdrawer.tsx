@@ -42,7 +42,7 @@ function ItemRow({
     <div className="flex gap-3 py-3 border-b border-[#e4eede] last:border-0 group relative">
       <div className="w-14 h-14 shrink-0 rounded-xl bg-[#eef6e4] border border-[#d0e8c0] overflow-hidden">
         <img
-          src={item.image}
+          src={typeof item.image === "string" ? item.image : item.image.src}
           alt={item.name}
           className="w-full h-full object-contain p-1.5"
           onError={(e) => {
@@ -305,7 +305,7 @@ export default function CartDrawer({
             </p>
             <button
               onClick={() => { onCheckout?.(); dispatch(closeCart()); }}
-              className="w-full py-3 rounded-xl bg-[#5B1A18] hover:bg-[#5B1A18] text-white font-semibold text-[13px] flex items-center justify-center gap-2 transition-colors active:scale-[0.98]"
+              className="w-full py-3 rounded-xl bg-[#5B1A18] hover:bg-[#5B1A18] cursor-pointer text-white font-semibold text-[13px] flex items-center justify-center gap-2 transition-colors active:scale-[0.98]"
             >
               <LockKeyIcon size={15} weight="bold" />
               Checkout

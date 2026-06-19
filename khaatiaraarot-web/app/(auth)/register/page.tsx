@@ -13,7 +13,7 @@ import {
   UserIcon,
   PhoneIcon,
 } from "@phosphor-icons/react";
-import logo from "../../public/Images/khatiarotlogo-removebg.png";
+import logo from "../../../public/Images/khatiarotlogo-removebg.png";
 import { toast } from "react-toastify";
 import ClipLoader from "react-spinners/ClipLoader";
 

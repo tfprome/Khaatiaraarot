@@ -57,7 +57,7 @@ export default function CheckoutPage() {
         }
     }, [items]);
 
-    const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const subtotal = items.reduce((sum: number, item) => sum + item.price * item.quantity, 0);
 
     const handleField = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -72,11 +72,11 @@ export default function CheckoutPage() {
                 <p className="text-sm text-gray-400 mt-1">
                     <span onClick={() => router.push('/')}
                         className="cursor-pointer">Home</span>
-                    {" › "} <span className="text-orange-500">Checkout</span>
+                    {" › "} <span className="text-[#5B1A18]">Checkout</span>
                 </p>
             </div>
 
-            <div className="max-w-8xl mx-auto px-4 pb-16 mt-4 grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <div className="max-w-7xl mx-auto px-4 pb-16 mt-4 grid grid-cols-1 lg:grid-cols-3 gap-5">
 
                 {/* ── LEFT COLUMN ── */}
                 <div className="lg:col-span-2 space-y-4">
@@ -88,7 +88,7 @@ export default function CheckoutPage() {
                             <button onClick={() => router.push('/login')} className="px-5 py-2 text-sm border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
                                 Login
                             </button>
-                            <button onClick={() => router.push('/register')} className="px-5 py-2 text-sm bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium">
+                            <button onClick={() => router.push('/register')} className="px-5 py-2 text-sm bg-[#5B1A18] text-white rounded-lg hover:bg-[#5B1A18] transition-colors font-medium">
                                 Register
                             </button>
                         </div>
@@ -96,7 +96,7 @@ export default function CheckoutPage() {
 
                     {/* Order review */}
                     <div className="bg-white border border-gray-200 rounded-xl p-4">
-                        <h2 className="text-sm font-semibold text-orange-500 border-l-4 border-orange-500 pl-3 mb-4">
+                        <h2 className="text-sm font-semibold text-[#5B1A18] border-l-4 border-[#5B1A18] pl-3 mb-4">
                             Order review
                         </h2>
                         <div className="divide-y divide-gray-100">
@@ -152,7 +152,7 @@ export default function CheckoutPage() {
 
                     {/* Shipping Address */}
                     <div className="bg-white border border-gray-200 rounded-xl p-4">
-                        <h2 className="text-sm font-semibold text-orange-500 border-l-4 border-orange-500 pl-3 mb-4">
+                        <h2 className="text-sm font-semibold text-[#5B1A18] border-l-4 border-[#5B1A18] pl-3 mb-4">
                             Shipping Address
                         </h2>
                         <div className="space-y-3">
@@ -162,9 +162,9 @@ export default function CheckoutPage() {
                                 value={form.name}
                                 onChange={handleField}
                                 placeholder="Your Full Name *"
-                                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition-all"
+                                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5B1A18] focus:border-[#5B1A18] transition-all"
                             />
-                            <div className="flex rounded-lg border border-gray-200 overflow-hidden focus-within:ring-2 focus-within:ring-orange-300 focus-within:border-orange-400 transition-all">
+                            <div className="flex rounded-lg border border-gray-200 overflow-hidden focus-within:ring-2 focus-within:ring-[#5B1A18] focus-within:border-[#5B1A18] transition-all">
                                 <span className="px-3 py-2.5 bg-gray-50 text-sm text-gray-500 border-r border-gray-200 flex-shrink-0">
                                     88
                                 </span>
@@ -183,14 +183,14 @@ export default function CheckoutPage() {
                                 value={form.address}
                                 onChange={handleField}
                                 placeholder="ex: House no. / building / street / area"
-                                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition-all"
+                                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5B1A18] focus:border-[#5B1A18] transition-all"
                             />
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <select
                                     name="district"
                                     value={form.district}
                                     onChange={handleField}
-                                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition-all bg-white"
+                                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#5B1A18] focus:border-[#5B1A18] transition-all bg-white"
                                 >
                                     <option value="">Select District</option>
                                     {districts.map((d) => <option key={d}>{d}</option>)}
@@ -199,7 +199,7 @@ export default function CheckoutPage() {
                                     name="thana"
                                     value={form.thana}
                                     onChange={handleField}
-                                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition-all bg-white"
+                                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#5B1A18] focus:border-[#5B1A18] transition-all bg-white"
                                 >
                                     <option value="">Select Thana (Optional)</option>
                                     {thanas.map((t) => <option key={t}>{t}</option>)}
@@ -210,7 +210,7 @@ export default function CheckoutPage() {
 
                     {/* Billing Address */}
                     <div className="bg-white border border-gray-200 rounded-xl p-4">
-                        <h2 className="text-sm font-semibold text-orange-500 border-l-4 border-orange-500 pl-3 mb-4">
+                        <h2 className="text-sm font-semibold text-[#5B1A18] border-l-4 border-[#5B1A18] pl-3 mb-4">
                             Billing Address
                         </h2>
                         <input
@@ -219,13 +219,13 @@ export default function CheckoutPage() {
                             value={form.billing}
                             onChange={handleField}
                             placeholder="Same as shipping address"
-                            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition-all"
+                            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5B1A18] focus:border-[#5B1A18] transition-all"
                         />
                     </div>
 
                     {/* Payment Method */}
                     <div className="bg-white border border-gray-200 rounded-xl p-4">
-                        <h2 className="text-sm font-semibold text-orange-500 border-l-4 border-orange-500 pl-3 mb-4">
+                        <h2 className="text-sm font-semibold text-[#5B1A18] border-l-4 border-[#5B1A18] pl-3 mb-4">
                             Payment method
                         </h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -234,11 +234,11 @@ export default function CheckoutPage() {
                                     key={id}
                                     onClick={() => setPayment(id)}
                                     className={`flex items-center gap-2.5 px-4 py-3 rounded-lg border text-sm font-medium transition-all ${payment === id
-                                        ? "border-orange-400 bg-orange-50 text-gray-800"
+                                        ? "border-[#5B1A18] bg-[#FBF3EC] text-gray-800"
                                         : "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50"
                                         }`}
                                 >
-                                    <Icon className={`w-5 h-5 ${color}`} />
+                                    <Icon />
                                     {label}
                                 </button>
                             ))}
@@ -247,7 +247,7 @@ export default function CheckoutPage() {
 
                     {/* Special Notes */}
                     <div className="bg-white border border-gray-200 rounded-xl p-4">
-                        <h2 className="text-sm font-semibold text-orange-500 border-l-4 border-orange-500 pl-3 mb-4">
+                        <h2 className="text-sm font-semibold text-[#5B1A18] border-l-4 border-[#5B1A18] pl-3 mb-4">
                             Special notes{" "}
                             <span className="text-gray-400 font-normal">(Optional)</span>
                         </h2>
@@ -271,7 +271,7 @@ export default function CheckoutPage() {
                             className="w-full flex items-center justify-between px-4 py-3.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
                         >
                             <span className="flex items-center gap-2">
-                                <TagIcon className="w-4 h-4 text-orange-500" />
+                                <TagIcon className="w-4 h-4 text-[#5B1A18]" />
                                 Have any coupon or gift voucher?
                             </span>
                             {couponOpen ? <CaretCircleUpIcon className="w-4 h-4" /> : <CaretCircleDownIcon className="w-4 h-4" />}
@@ -284,9 +284,9 @@ export default function CheckoutPage() {
                                         value={coupon}
                                         onChange={(e) => setCoupon(e.target.value)}
                                         placeholder="Enter coupon code"
-                                        className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-300"
+                                        className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5B1A18]"
                                     />
-                                    <button className="px-4 py-2 bg-orange-500 text-white text-sm rounded-lg hover:bg-orange-600 transition-colors font-medium">
+                                    <button className="px-4 py-2 bg-[#5B1A18] text-white text-sm rounded-lg hover:bg-[#5B1A18] transition-colors font-medium">
                                         Apply
                                     </button>
                                 </div>
@@ -296,7 +296,7 @@ export default function CheckoutPage() {
 
                     {/* Order Summary */}
                     <div className="bg-white border border-gray-200 rounded-xl p-4">
-                        <h2 className="text-sm font-semibold text-orange-500 border-l-4 border-orange-500 pl-3 mb-4">
+                        <h2 className="text-sm font-semibold text-[#5B1A18] border-l-4 border-[#5B1A18] pl-3 mb-4">
                             Order Summary
                         </h2>
                         <div className="space-y-2 text-sm">
@@ -317,12 +317,12 @@ export default function CheckoutPage() {
 
                     {/* Terms + Place Order */}
                     <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-4">
-                        <label className="flex items-start gap-2.5 cursor-pointer">
+                        {/* <label className="flex items-start gap-2.5 cursor-pointer">
                             <input
                                 type="checkbox"
                                 checked={agreed}
                                 onChange={(e) => setAgreed(e.target.checked)}
-                                className="mt-0.5 accent-orange-500 w-4 h-4 flex-shrink-0"
+                                className="mt-0.5 accent-[#5B1A18] w-4 h-4 flex-shrink-0"
                             />
                             <span className="text-xs text-gray-500 leading-relaxed">
                                 I have read and agreed to the{" "}
@@ -330,10 +330,10 @@ export default function CheckoutPage() {
                                 <a href="#" className="text-orange-500 hover:underline">Privacy Policy</a> &{" "}
                                 <a href="#" className="text-orange-500 hover:underline">Refund and Return Policy.</a>
                             </span>
-                        </label>
+                        </label> */}
                         <button
                             disabled={!agreed || items.length === 0}
-                            className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 disabled:cursor-not-allowed text-white font-semibold py-3.5 rounded-xl transition-colors text-sm tracking-wide"
+                            className="w-full bg-[#5B1A18] hover:bg-[#5B1A18] disabled:bg-[#5B1A18] disabled:cursor-not-allowed text-white font-semibold py-3.5 rounded-xl transition-colors text-sm tracking-wide"
                         >
                             PLACE ORDER
                         </button>
@@ -355,47 +355,6 @@ export default function CheckoutPage() {
                     </div>
                 </div>
             </div>
-
-            {/* ── Footer ── */}
-            <footer className="border-t border-gray-200 bg-white mt-8">
-                <div className="max-w-4xl mx-auto px-4 py-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <div>
-                        <div className="flex items-center gap-2 mb-3">
-                            <div className="bg-orange-500 rounded-lg p-1">
-                                <ShoppingBagIcon className="text-white w-4 h-4" />
-                            </div>
-                            <span className="font-bold text-sm">GHOER<span className="text-orange-500">BAZAR</span></span>
-                        </div>
-                        <p className="text-xs text-gray-500 leading-relaxed mb-3">
-                            An e-commerce platform dedicated to providing safe and reliable food to every home.
-                        </p>
-                        <p className="text-xs text-gray-500">📍 Rampura, Dhaka, Bangladesh</p>
-                        <p className="text-xs text-gray-500 mt-1">📞 09642922922</p>
-                        <p className="text-xs text-gray-500 mt-1">✉️ contact@ghorerbazar.com</p>
-                    </div>
-                    {[
-                        { title: "Information", links: ["About us", "Contact us", "Company Information", "Ghoer Bazar Stories", "Terms & Conditions", "Privacy Policy", "Careers"] },
-                        { title: "Shop By", links: ["Oil & Ghee", "Honey", "Dates", "Spices", "Nuts & Seeds", "Beverage", "Functional Foods"] },
-                        { title: "Support", links: ["Support Center", "How to Order", "Order Tracking", "Payment", "Shipping", "FAQ"] },
-                    ].map(({ title, links }) => (
-                        <div key={title}>
-                            <h3 className="text-xs font-semibold text-gray-800 uppercase tracking-wider mb-3">{title}</h3>
-                            <ul className="space-y-1.5">
-                                {links.map((link) => (
-                                    <li key={link}>
-                                        <a href="#" className="text-xs text-gray-500 hover:text-orange-500 transition-colors">
-                                            {link}
-                                        </a>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    ))}
-                </div>
-                <div className="border-t border-gray-100 py-4 text-center">
-                    <p className="text-xs text-gray-400">Copyright © 2026 GhorerBazar</p>
-                </div>
-            </footer>
         </div>
     );
 }

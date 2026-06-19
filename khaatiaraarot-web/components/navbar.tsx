@@ -24,6 +24,8 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { openCart } from "@/store/cartSlice";
 import { useAppDispatch } from "@/store/hooks";
+import api from "@/lib/axiosinterceptor";
+import { useRouter } from "next/navigation";
 
 const navLinks = [
     { label: "Home", href: "/", icon: HouseIcon },
@@ -37,6 +39,7 @@ const navLinks = [
 export default function Navbar() {
     const [token, setToken] = useState<string | null>(null);
     const dispatch = useAppDispatch();
+    const router = useRouter();
 
 
     useEffect(() => {
@@ -45,27 +48,40 @@ export default function Navbar() {
 
     const handleLogout = async () => {
         try {
-            const token = localStorage.getItem("userToken");
+            await api.post("/api/v1/auth/logout");
 
-            if (!token) return;
+            if (typeof window !== "undefined") {
+                localStorage.removeItem("userToken");
+                localStorage.removeItem("userName");
+            }
 
-            const BASE =
-                process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+            setToken(null);
 
-            const res = await fetch(`${BASE}/api/v1/auth/logout`, {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${token}`,
+            toast("You're logged out! See you soon.", {
+                position: "bottom-right",
+                autoClose: 1000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: false,
+                style: {
+                    background: "#5B1A18",
+                    color: "#ffffff",
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    padding: "16px",
+                    minWidth: "320px",
+                    minHeight: "70px",
+                    borderRadius: "12px",
                 },
-                credentials: "include",
             });
 
-            const json = await res.json();
+        } catch (error: any) {
+            console.error("Logout failed:", error);
 
-            //console.log("Logout response:", json);
-
-            if (!res.ok) {
-                toast.error(json.error?.message ?? "Logout failed.Please try again", {
+            toast.error(
+                error?.response?.data?.message ?? "Logout failed. Please try again",
+                {
                     position: "bottom-right",
                     autoClose: 1500,
                     hideProgressBar: true,
@@ -79,39 +95,8 @@ export default function Navbar() {
                         minHeight: "70px",
                         borderRadius: "12px",
                     },
-                });
-
-                throw new Error(json.error?.message ?? "Login failed");
-            }
-
-            else if (res.ok) {
-
-                localStorage.removeItem("userToken");
-                localStorage.removeItem("userName");
-
-                setToken(null);
-                toast("You're logged out! See you soon.", {
-                    position: "bottom-right",
-                    autoClose: 1000, // 0.5 second
-                    hideProgressBar: true,
-                    closeOnClick: true,
-                    pauseOnHover: false,
-                    draggable: false,
-                    style: {
-                        background: "#5B1A18", // dark green
-                        color: "#ffffff",
-                        fontSize: "16px",
-                        fontWeight: "600",
-                        padding: "16px",
-                        minWidth: "320px",
-                        minHeight: "70px",
-                        borderRadius: "12px",
-                    },
-                });
-            }
-
-        } catch (error) {
-            console.error("Logout failed:", error);
+                }
+            );
         }
     };
 
@@ -159,7 +144,7 @@ export default function Navbar() {
 
             {/* ── Main Bar ── */}
             <div className="bg-[#5B1A18] border-b border-gray-100">
-                <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col gap-3">
+                <div className="max-w-7xl mx-auto md:px-0 px-4 py-3 flex flex-col gap-3">
 
                     {/* Row 1: Logo + Search + Icons */}
                     <div className="flex items-center gap-3">
@@ -218,7 +203,8 @@ export default function Navbar() {
                                     Cart
                                 </span>
                             </div>
-                            <div className="flex flex-col items-center gap-0.5 px-2.5 py-2 rounded-xl group transition-colors duration-200 cursor-pointer">
+                            <div onClick={() => router.push('/my-account')}
+                             className="flex flex-col items-center gap-0.5 px-2.5 py-2 rounded-xl group transition-colors duration-200 cursor-pointer">
                                 <UserIcon size={22} className="text-white transition-colors duration-200" />
                                 <span className="hidden lg:block text-[10px] text-white font-medium transition-colors">
                                     Account
@@ -244,7 +230,7 @@ export default function Navbar() {
 
             {/* ── Bottom Nav ── */}
             <div className="bg-white border-t border-gray-100 shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 flex items-center">
+                <div className="max-w-7xl mx-auto md:px-0 px-4 flex items-center">
 
                     {/* All Categories */}
                     {/* <div className="flex items-center gap-2 bg-[#5B1A18] hover:bg-[#5B1A18] text-white px-4 py-3 text-sm font-semibold transition-colors duration-200 cursor-pointer shrink-0">

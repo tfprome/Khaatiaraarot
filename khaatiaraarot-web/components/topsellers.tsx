@@ -1,60 +1,63 @@
 "use client";
 
 import Image from "next/image";
-import { ShoppingCartIcon, LightningIcon } from "@phosphor-icons/react";
+import { ShoppingCartIcon, LightningIcon, HandbagIcon } from "@phosphor-icons/react";
 import CHINIGURA_CHAL from "../public/Images/ChiniguraChalproducts.png";
 import Mustardoil from "../public/Images/MustardOilProducts.png";
 import { Product } from "../Types/Homepagetypes";
 import { useAppDispatch } from "@/store/hooks";
 import { addItem } from "@/store/cartSlice";
 import { toast } from "react-toastify";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-const products: Product[] = [
-    {
-        id: 1,
-        name: "100% Deshi Mustard Oil",
-        unit: "1 Litre",
-        price: 300,
-        originalPrice: 350,
-        image: Mustardoil,
-        source: "Chapainawabganj",
-        isBestSelling: true,
-    },
-    {
-        id: 2,
-        name: "100% Deshi Mustard Oil",
-        unit: "5 Litre",
-        price: 1500,
-        originalPrice: 1750,
-        image: "/images/products/mustard-oil-5l.jpg",
-        source: "Chapainawabganj",
-        isBestSelling: false,
-    },
-    {
-        id: 3,
-        name: "Chinigura Chal",
-        unit: "1 kg",
-        price: 170,
-        originalPrice: 200,
-        image: CHINIGURA_CHAL,
-        source: "Chapainawabganj",
-        isBestSelling: true,
-    },
-    {
-        id: 4,
-        name: "Chinigura Chal",
-        unit: "5 kg",
-        price: 800,
-        originalPrice: 950,
-        image: "/images/products/chinigura-chal-5kg.jpg",
-        source: "Chapainawabganj",
-        isBestSelling: false,
-    },
-];
+// const products: Product[] = [
+//     {
+//         id: 1,
+//         name: "100% Deshi Mustard Oil",
+//         unit: "1 Litre",
+//         price: 300,
+//         originalPrice: 350,
+//         image: Mustardoil,
+//         source: "Chapainawabganj",
+//         isBestSelling: true,
+//     },
+//     {
+//         id: 2,
+//         name: "100% Deshi Mustard Oil",
+//         unit: "5 Litre",
+//         price: 1500,
+//         originalPrice: 1750,
+//         image: "/images/products/mustard-oil-5l.jpg",
+//         source: "Chapainawabganj",
+//         isBestSelling: false,
+//     },
+//     {
+//         id: 3,
+//         name: "Chinigura Chal",
+//         unit: "1 kg",
+//         price: 170,
+//         originalPrice: 200,
+//         image: CHINIGURA_CHAL,
+//         source: "Chapainawabganj",
+//         isBestSelling: true,
+//     },
+//     {
+//         id: 4,
+//         name: "Chinigura Chal",
+//         unit: "5 kg",
+//         price: 800,
+//         originalPrice: 950,
+//         image: "/images/products/chinigura-chal-5kg.jpg",
+//         source: "Chapainawabganj",
+//         isBestSelling: false,
+//     },
+// ];
 
 function ProductCard({ product }: { product: Product }) {
 
     const dispatch = useAppDispatch();
+
 
     const handleAddToCart = () => {
         dispatch(addItem({
@@ -66,28 +69,29 @@ function ProductCard({ product }: { product: Product }) {
             image:
                 typeof product.image === "string"
                     ? product.image
-                    : product.image.src,
+                    : product.image ? product.image : "",
         }));
         toast("Added to your cart.", {
-                        position: "bottom-right",
-                        autoClose: 1000, // 0.5 second
-                        hideProgressBar: true,
-                        closeOnClick: true,
-                        pauseOnHover: false,
-                        draggable: false,
-                        style: {
-                            background: "#5B1A18",
-                            opacity: '0.2', // dark green
-                            color: "#ffffff",
-                            fontSize: "16px",
-                            fontWeight: "600",
-                            padding: "16px",
-                            minWidth: "320px",
-                            minHeight: "70px",
-                            borderRadius: "12px",
-                        },
-                    });
+            position: "bottom-right",
+            autoClose: 1000, // 0.5 second
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: false,
+            style: {
+                background: "#5B1A18",
+                opacity: '0.5', // dark green
+                color: "#ffffff",
+                fontSize: "16px",
+                fontWeight: "600",
+                padding: "16px",
+                minWidth: "320px",
+                minHeight: "70px",
+                borderRadius: "12px",
+            },
+        });
     };
+
     const saving = product.originalPrice
         ? product.originalPrice - product.price
         : 0;
@@ -142,11 +146,14 @@ function ProductCard({ product }: { product: Product }) {
                 </div>
 
                 {/* Save badge */}
-                {saving > 0 && (
-                    <span className="inline-block w-fit text-[10px] font-semibold text-[#BA7517] bg-[#faf5e4] border border-[#eedfa0] px-2 py-0.5 rounded-full mb-2 lg:mb-4">
-                        Save ৳{saving}
+                <div className="inline-block mb-2 lg:mb-4">
+                    <span
+                        className={`w-fit text-[10px] font-semibold text-[#BA7517] bg-[#faf5e4] border border-[#eedfa0] px-2 py-0.5 rounded-full  ${saving > 0 ? "visible" : "invisible"
+                            }`}
+                    >
+                        Save ৳{saving || 0}
                     </span>
-                )}
+                </div>
 
                 {/* Buttons */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5">
@@ -156,7 +163,7 @@ function ProductCard({ product }: { product: Product }) {
                         Add to Cart
                     </button>
                     <button className="flex items-center justify-center gap-1 text-[10px] sm:text-[11px] lg:text-[13px] font-semibold text-white bg-[#8B0000] px-2 sm:px-2.5 lg:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-[#6e0000] transition-all duration-200 whitespace-nowrap">
-                        <LightningIcon size={11} weight="fill" />
+                        <HandbagIcon size={11} weight="bold" />
                         Buy now
                     </button>
                 </div>
@@ -167,6 +174,17 @@ function ProductCard({ product }: { product: Product }) {
 }
 
 export default function TopSellingProducts() {
+    const [products, setProducts] = useState<Product[]>([]);
+    const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+    useEffect(() => {
+        const fetchProducts = async () => {
+            const products = await axios.get<{ data: Product[] }>(`${BASE}/api/v1/products/top-sellers`);
+            // console.log('products', products.data);
+            setProducts(products.data.data.slice(0, 4)); // Take only top 4 products
+        };
+
+        fetchProducts();
+    }, []);
     return (
         <section className="bg-white py-8 sm:py-10 px-4 sm:px-6">
             <div className="max-w-7xl mx-auto">
