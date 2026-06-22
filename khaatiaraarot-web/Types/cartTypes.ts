@@ -1,23 +1,28 @@
 import { StaticImageData } from "next/image";
 
 export interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  originalPrice?: number | null;
-  quantity: number;
-  unit: string;
-  image: string | StaticImageData;
-} 
+  id: string
+  quantity: number
+  product: CartProduct
+}
 
-export interface CartContextValue {
-  items: CartItem[];
-  totalQty: number;
-  subtotal: number;
-  addItem: (item: Omit<CartItem, "quantity">) => void;
-  removeItem: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
-  clearCart: () => void;
+export interface CartProduct {
+  id: string
+  name: string
+  slug: string
+  unit: string
+  price: number
+  originalPrice: any
+  stockQty: number
+  image: any
+}
+
+
+export interface CartDrawerProps {
+  onUpdateQuantity: (id: string, quantity: number) => void;
+  onRemoveItem: (id: string) => void;
+  onCheckout?: () => void;
+  onViewCart?: () => void;
 }
 
 export interface CartState {

@@ -6,90 +6,82 @@ import CHINIGURA_CHAL from "../public/Images/ChiniguraChalproducts.png";
 import Mustardoil from "../public/Images/MustardOilProducts.png";
 import { Product } from "../Types/Homepagetypes";
 import { useAppDispatch } from "@/store/hooks";
-import { addItem } from "@/store/cartSlice";
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+import { addToCart } from "@/lib/cartApi";
 
-// const products: Product[] = [
-//     {
-//         id: 1,
-//         name: "100% Deshi Mustard Oil",
-//         unit: "1 Litre",
-//         price: 300,
-//         originalPrice: 350,
-//         image: Mustardoil,
-//         source: "Chapainawabganj",
-//         isBestSelling: true,
-//     },
-//     {
-//         id: 2,
-//         name: "100% Deshi Mustard Oil",
-//         unit: "5 Litre",
-//         price: 1500,
-//         originalPrice: 1750,
-//         image: "/images/products/mustard-oil-5l.jpg",
-//         source: "Chapainawabganj",
-//         isBestSelling: false,
-//     },
-//     {
-//         id: 3,
-//         name: "Chinigura Chal",
-//         unit: "1 kg",
-//         price: 170,
-//         originalPrice: 200,
-//         image: CHINIGURA_CHAL,
-//         source: "Chapainawabganj",
-//         isBestSelling: true,
-//     },
-//     {
-//         id: 4,
-//         name: "Chinigura Chal",
-//         unit: "5 kg",
-//         price: 800,
-//         originalPrice: 950,
-//         image: "/images/products/chinigura-chal-5kg.jpg",
-//         source: "Chapainawabganj",
-//         isBestSelling: false,
-//     },
-// ];
+function getInitial(name: string) {
+    const initials = name
+        ?.trim()
+        .split(" ")
+        .slice(0, 2)
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase() || "U";
+
+    return (
+        <div className="w-full h-full flex items-center justify-center text-black font-bold text-lg sm:text-xl">
+            {initials}
+        </div>
+    );
+}
 
 function ProductCard({ product }: { product: Product }) {
-
+    const [loading, setLoading] = useState(false)
     const dispatch = useAppDispatch();
+    const router = useRouter()
 
 
-    const handleAddToCart = () => {
-        dispatch(addItem({
-            id: product.id.toString(),
-            name: product.name,
-            price: product.price,
-            originalPrice: product.originalPrice,
-            unit: product.unit,
-            image:
-                typeof product.image === "string"
-                    ? product.image
-                    : product.image ? product.image : "",
-        }));
-        toast("Added to your cart.", {
-            position: "bottom-right",
-            autoClose: 1000, // 0.5 second
-            hideProgressBar: true,
-            closeOnClick: true,
-            pauseOnHover: false,
-            draggable: false,
-            style: {
-                background: "#5B1A18",
-                opacity: '0.5', // dark green
-                color: "#ffffff",
-                fontSize: "16px",
-                fontWeight: "600",
-                padding: "16px",
-                minWidth: "320px",
-                minHeight: "70px",
-                borderRadius: "12px",
-            },
-        });
+    const handleAddToCart = async (
+        id: string,
+        quantity: number
+    ) => {
+        try {
+            setLoading(true);
+
+            await addToCart(id, quantity);
+
+            toast("Added to your cart.", {
+                position: "bottom-right",
+                autoClose: 1000, // 0.5 second
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: false,
+                style: {
+                    background: "#5B1A18",
+                    opacity: '0.5',
+                    color: "#ffffff",
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    padding: "16px",
+                    minWidth: "320px",
+                    minHeight: "70px",
+                    borderRadius: "12px",
+                },
+            });
+        } catch (error) {
+            toast.error("Failed to add item");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleBuyNow = async (id: string, quantity: number) => {
+        try {
+            setLoading(true);
+
+            // same as add to cart (reuse backend logic)
+            await addToCart(id, quantity);
+            router.push("/checkout");
+
+        } catch (error) {
+            toast.error("Failed to process Buy Now");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const saving = product.originalPrice
@@ -110,12 +102,14 @@ function ProductCard({ product }: { product: Product }) {
 
             {/* Image */}
             <div className="relative w-22.5 sm:w-27.5 md:w-32.5 lg:w-42.5 shrink-0 self-stretch bg-[#fdf5ee] overflow-hidden rounded-l-2xl">
-                <Image
-                    src={product.image}
-                    alt={product.name}
-                    fill
-                    className="object-contain p-2 sm:p-3 transition-transform duration-300 hover:scale-105"
-                />
+                {product.image ? (
+                    <Image
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        className="object-contain p-2 sm:p-3 transition-transform duration-300 hover:scale-105"
+                    />) : (getInitial(product.name))
+                }
             </div>
 
             {/* Content */}
@@ -157,12 +151,19 @@ function ProductCard({ product }: { product: Product }) {
 
                 {/* Buttons */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5">
-                    <button onClick={handleAddToCart}
-                        className="flex items-center justify-center gap-1 text-[10px] sm:text-[11px] lg:text-[13px] font-semibold text-[#8B0000] border border-[#8B0000] px-2 sm:px-2.5 lg:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-[#8B0000] hover:text-white transition-all duration-200 whitespace-nowrap">
-                        <ShoppingCartIcon size={11} weight="bold" />
+                    <button onClick={() => { handleAddToCart(product.id, 1) }}
+                        disabled={loading}
+                        className="group flex items-center justify-center gap-1 text-[10px] 
+                        sm:text-[11px] lg:text-[13px] font-semibold text-[#8B0000] border border-[#8B0000] px-2 cursor-pointer disabled:cursor-not-allowed
+                        sm:px-2.5 lg:px-4 py-1.5 sm:py-2 rounded-lg  transition-all duration-200 whitespace-nowrap">
+                        <ShoppingCartIcon size={11} weight="bold" className="transition-transform duration-200 group-hover:scale-120"/>
                         Add to Cart
                     </button>
-                    <button className="flex items-center justify-center gap-1 text-[10px] sm:text-[11px] lg:text-[13px] font-semibold text-white bg-[#8B0000] px-2 sm:px-2.5 lg:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-[#6e0000] transition-all duration-200 whitespace-nowrap">
+                    <button
+                        onClick={() => handleBuyNow(product.id, 1)}
+                        disabled={loading}
+                        className="flex items-center justify-center gap-1 cursor-pointer disabled:cursor-not-allowed text-[10px] sm:text-[11px] lg:text-[13px] font-semibold text-white bg-[#8B0000] px-2 sm:px-2.5 lg:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-[#6e0000] transition-all duration-200 whitespace-nowrap disabled:opacity-50"
+                    >
                         <HandbagIcon size={11} weight="bold" />
                         Buy now
                     </button>

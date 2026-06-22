@@ -14,3 +14,17 @@ export interface NavItem {
     href: string;
     icon: LucideIcon;
 }
+
+export interface accountPageHeaderProps {
+  title: string;
+  description: string;
+}
+
+export interface Address {
+  id: string;
+  label: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  isDefault?: boolean;
+}

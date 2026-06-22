@@ -13,13 +13,9 @@ import { CartItem } from "@/Types/cartTypes";
 import { useAppDispatch } from "@/store/hooks";
 import { useAppSelector } from "@/store/hooks";
 import { closeCart, openCart, removeItem, updateQuantity } from "@/store/cartSlice";
-
-interface CartDrawerProps {
-  onUpdateQuantity: (id: string, quantity: number) => void;
-  onRemoveItem: (id: string) => void;
-  onCheckout?: () => void;
-  onViewCart?: () => void;
-}
+import { CartDrawerProps } from "@/Types/cartTypes";
+import api from "@/lib/axiosinterceptor";
+import { fetchCart, updateCartItem, deleteCartItem } from "@/lib/cartApi";
 
 const FREE_DELIVERY_THRESHOLD = 500;
 
@@ -42,12 +38,12 @@ function ItemRow({
     <div className="flex gap-3 py-3 border-b border-[#e4eede] last:border-0 group relative">
       <div className="w-14 h-14 shrink-0 rounded-xl bg-[#eef6e4] border border-[#d0e8c0] overflow-hidden">
         <img
-          src={typeof item.image === "string" ? item.image : item.image.src}
-          alt={item.name}
+          src={typeof item.product.image === "string" ? item.product.image : item.product.image?.src || "/placeholder.png"}
+          alt={item.product.name}
           className="w-full h-full object-contain p-1.5"
           onError={(e) => {
             (e.currentTarget as HTMLImageElement).src =
-              `https://placehold.co/56x56/eef6e4/3a7a30?text=${item.name.slice(0, 2)}`;
+              `https://placehold.co/56x56/eef6e4/3a7a30?text=${item.product.name?.slice(0, 2)}`;
           }}
         />
       </div>
@@ -56,13 +52,13 @@ function ItemRow({
         <div className="flex items-start justify-between gap-1">
           <div className="min-w-0">
             <p className="text-[13px] font-semibold text-[#5B1A18] leading-tight truncate">
-              {item.name}
+              {item.product.name}
             </p>
-            <p className="text-[11px] text-[#9aaa88] mt-0.5">{item.unit}</p>
+            <p className="text-[11px] text-[#9aaa88] mt-0.5">{item.product.unit}</p>
           </div>
           <button
             onClick={onRemove}
-            aria-label={`Remove ${item.name}`}
+            aria-label={`Remove ${item.product.name}`}
             className="opacity-0 group-hover:opacity-100 transition-opacity text-[#b0b8a0] hover:text-red-500 shrink-0 mt-0.5"
           >
             <X size={13} weight="bold" />
@@ -72,11 +68,11 @@ function ItemRow({
         <div className="flex items-center justify-between mt-2">
           <div className="flex items-baseline gap-1.5">
             <span className="text-[13px] font-semibold text-[#2d6a2d]">
-              {fmt(item.price * item.quantity)}
+              {fmt(item.product.price * item.quantity)}
             </span>
-            {item.originalPrice && (
+            {item.product.originalPrice && (
               <span className="text-[11px] line-through text-[#b0b8a0]">
-                {fmt(item.originalPrice * item.quantity)}
+                {fmt(item.product.originalPrice * item.quantity)}
               </span>
             )}
           </div>
@@ -114,16 +110,17 @@ export default function CartDrawer({
 }: CartDrawerProps) {
   // const [isOpen, setIsOpen] = useState(false);
   const [badgePulse, setBadgePulse] = useState(false);
+  const [cart, setCart] = useState<CartItem[]>([])
   const prevCount = useRef(0);
   const drawerRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
   const isOpen = useAppSelector((state) => state.cart.isOpen);
   const items = useAppSelector((state) => state.cart.items);
 
-  const totalQty = items.reduce((s, i) => s + i.quantity, 0);
-  const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
-  const savings = items.reduce(
-    (s, i) => s + ((i.originalPrice ?? i.price) - i.price) * i.quantity,
+  const totalQty = cart.reduce((s, i) => s + i.quantity, 0);
+  const subtotal = cart.reduce((s, i) => s + i.product?.price * i.quantity, 0);
+  const savings = cart.reduce(
+    (s, i) => s + ((i.product.originalPrice ?? i.product.price) - i.product.price) * i.quantity,
     0
   );
   const remaining = Math.max(0, FREE_DELIVERY_THRESHOLD - subtotal);
@@ -157,22 +154,54 @@ export default function CartDrawer({
     return () => document.removeEventListener("keydown", handler);
   }, []);
 
-  // useEffect(() => {
-  //   document.body.style.overflow = isOpen ? "hidden" : "";
-  //   return () => { document.body.style.overflow = ""; };
-  // }, [isOpen]);
+  const handleUpdateQuantity = async (
+    productId: string,
+    quantity: number
+  ) => {
+    const previousCart = cart;
 
-  function handleIncrease(id: string, qty: number) {
-    dispatch(updateQuantity({ id, quantity: qty + 1 }));
-  }
+    // update UI immediately
+    setCart((prev) =>
+      prev.map((item) =>
+        item.product.id === productId
+          ? { ...item, quantity }
+          : item
+      )
+    );
 
-  function handleDecrease(id: string, qty: number) {
-    if (qty <= 1) {
-      dispatch(removeItem(id));
-    } else {
-      dispatch(updateQuantity({ id, quantity: qty - 1 }));
+    try {
+      await updateCartItem(productId, quantity);
+    } catch (error) {
+      // rollback on failure
+      setCart(previousCart);
+      console.error("Failed to update cart item", error);
     }
-  }
+  };
+
+  const handleDeleteItem = async (productId: string) => {
+    try {
+      await deleteCartItem(productId);
+
+      const res = await fetchCart();
+      setCart(res.data.items);
+    } catch (error) {
+      console.error("Failed to delete cart item", error);
+    }
+  };
+
+  useEffect(() => {
+    const loadCart = async () => {
+      try {
+        const res = await fetchCart();
+        setCart(res.data.items)
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    loadCart();
+  }, [isOpen]);
+  console.log('cart', cart)
 
   return (
     <>
@@ -254,7 +283,7 @@ export default function CartDrawer({
 
         {/* Items */}
         <div className="flex-1 overflow-y-auto px-5 py-1">
-          {items.length === 0 ? (
+          {cart.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full gap-3 text-center py-16">
               <div className="w-16 h-16 rounded-full bg-[#FCEBEB] flex items-center justify-center text-[#5A1A18]">
                 <ShoppingBagIcon size={32} weight="duotone" />
@@ -275,20 +304,34 @@ export default function CartDrawer({
               </button>
             </div>
           ) : (
-            items.map((item) => (
+            cart.map((item) => (
               <ItemRow
                 key={item.id}
                 item={item}
-                onIncrease={() => handleIncrease(item.id, item.quantity)}
-                onDecrease={() => handleDecrease(item.id, item.quantity)}
-                onRemove={() => dispatch(removeItem(item.id))}
+                onIncrease={() =>
+                  handleUpdateQuantity(
+                    item.product.id,
+                    item.quantity + 1
+                  )
+                }
+                onDecrease={() => {
+                  if (item.quantity === 1) {
+                    handleDeleteItem(item.product.id);
+                  } else {
+                    handleUpdateQuantity(
+                      item.product.id,
+                      item.quantity - 1
+                    );
+                  }
+                }}
+                onRemove={() => handleDeleteItem(item.product.id)}
               />
             ))
           )}
         </div>
 
         {/* Footer */}
-        {items.length > 0 && (
+        {cart.length > 0 && (
           <div className="border-t border-[#d0e8c0] px-5 pt-4 pb-6 bg-white shrink-0 space-y-1.5">
             {savings > 0 && (
               <div className="flex justify-between text-[12px]">

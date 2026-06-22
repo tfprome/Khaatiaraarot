@@ -44,7 +44,7 @@ export default function ProfileSection({ user }: { user: UserProfile }) {
           { label: "Full name",     value: user.fullName  ?? "—" },
           { label: "Email address", value: user.email ?? "—" },
           { label: "Account role",  value: user.role  ?? "—" },
-          { label: "User ID",       value: user.id    ?? "—" },
+          { label: "Contact number",  value: user.phone  ?? "—" },
         ].map(({ label, value }) => (
           <div key={label} className="flex items-center justify-between px-5 py-4">
             <span className="text-sm text-[#9b7b7a] font-medium w-32 flex-shrink-0">{label}</span>

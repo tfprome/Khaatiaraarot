@@ -3,7 +3,8 @@
 import { MapPin, Plus } from "lucide-react";
 import AccountPageHeader from "@/components/account/accountpageHeader";
 import EmptyState from "@/components/account/emptystate";
-import AddressCard, { Address } from "@/components/account/addresscard";
+import AddressCard from "@/components/account/addresscard";
+import { Address } from "@/Types/userTypes";
 
 const MOCK_ADDRESSES: Address[] = [];
 

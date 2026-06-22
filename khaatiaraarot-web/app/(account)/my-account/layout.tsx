@@ -7,7 +7,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
     <div className="min-h-screen flex flex-col bg-[#fdf8f7]">
       <Navbar />
 
-      <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8">
         <div className="flex gap-8 items-start">
 
           {/* Sidebar — hidden on mobile, shown md+ */}

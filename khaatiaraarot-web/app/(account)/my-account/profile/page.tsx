@@ -7,6 +7,7 @@ import AccountPageHeader from "@/components/account/accountpageHeader";
 import ProfileSection from "@/components/account/profilesection";
 import LoadingSkeleton from "@/components/account/loadingskeleton";
 import { UserProfile } from "@/Types/userTypes";
+import { toast } from "react-toastify";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -17,18 +18,35 @@ export default function ProfilePage() {
     (async () => {
       try {
         const { data } = await api.get("/api/v1/auth/me");
-        console.log("profile response", data);
-        const profile =  data.data
+        // console.log("profile response", data);
+        const profile = data.data
         setUser(profile);
-        // if (profile?.name) localStorage.setItem("userName", profile.name);
       } catch {
         router.push("/login");
+        toast("Please login to view your profile", {
+          position: "bottom-right",
+          autoClose: 1000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          style: {
+            background: "#5B1A18",
+            color: "#ffffff",
+            fontSize: "16px",
+            fontWeight: "600",
+            padding: "16px",
+            minWidth: "320px",
+            minHeight: "70px",
+            borderRadius: "12px",
+          },
+        });
       } finally {
         setLoading(false);
       }
     })();
   }, [router]);
-  console.log("user profile", user);
+
 
   return (
     <>

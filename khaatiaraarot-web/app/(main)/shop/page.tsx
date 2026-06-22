@@ -7,8 +7,17 @@ import axios from "axios";
 import { ChevronDown, MapPinHouse } from "lucide-react";
 import { CaretDownIcon } from "@phosphor-icons/react";
 import { Category } from "@/Types/ProductTypes";
-import { addItem } from "@/store/cartSlice";
+import { addToCart } from "@/lib/cartApi";
 import { useAppDispatch } from "@/store/hooks";
+import { toast } from "react-toastify";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 function getDiscount(price: number, originalPrice: number | null): number | null {
   if (!originalPrice) return null;
@@ -28,21 +37,43 @@ function ProductCard({ product, categories }: { product: Product; categories: Ca
   const emoji = "📦";
   const discount = getDiscount(product.price, product.originalPrice);
   //const regionClass = regionColor[product.sourceRegion] ?? "bg-gray-100 text-gray-700";
+  const [loading, setLoading] = useState(false)
 
   const dispatch = useAppDispatch();
 
-  const handleAddToCart = () => {
-    dispatch(addItem({
-      id: product.id.toString(),
-      name: product.name,
-      price: product.price,
-      originalPrice: product.originalPrice,
-      unit: product.unit,
-      image:
-        typeof product.image === "string"
-          ? product.image
-          : product.image ? product.image : "",
-    }))
+  const handleAddToCart = async (
+    id: string,
+    quantity: number
+  ) => {
+    try {
+      setLoading(true);
+
+      await addToCart(id, quantity);
+
+      toast("Added to your cart.", {
+        position: "bottom-right",
+        autoClose: 1000, // 0.5 second
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        style: {
+          background: "#5B1A18",
+          opacity: '0.5',
+          color: "#ffffff",
+          fontSize: "16px",
+          fontWeight: "600",
+          padding: "16px",
+          minWidth: "320px",
+          minHeight: "70px",
+          borderRadius: "12px",
+        },
+      });
+    } catch (error) {
+      toast.error("Failed to add item");
+    } finally {
+      setLoading(false);
+    }
   };
 
 
@@ -120,7 +151,7 @@ function ProductCard({ product, categories }: { product: Product; categories: Ca
             Out of Stock
           </button>
         ) : (
-          <button onClick={handleAddToCart}
+          <button onClick={() => handleAddToCart(product.id, 1)}
             className="mt-1 w-full py-2.5 rounded-xl cursor-pointer bg-[#5A1B18] active:scale-95 text-white text-sm font-semibold transition-all duration-150">
             Add to Cart
           </button>
@@ -139,7 +170,8 @@ export default function ProductsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
+  const [limit, setLimit] = useState(5);
+  const [total, setTotal] = useState(0);
 
   const allCategories = [
     { id: "all", name: "All" },
@@ -150,6 +182,7 @@ export default function ProductsPage() {
     const fetchProducts = async () => {
       const res = await axios.get(`${BASE}/api/v1/products?page=${page}&limit=${limit}&sort=${sortBy}`);
       setProducts(res.data.data);
+      setTotal(res.data.meta.total);
     };
     fetchProducts();
   }, [sortBy, page, limit]);
@@ -179,6 +212,8 @@ export default function ProductsPage() {
       if (sortBy === "price_desc") return b.price - a.price;
       return 0;
     });
+
+  const totalPages = Math.ceil(total / limit);
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] font-sans">
@@ -278,6 +313,47 @@ export default function ProductsPage() {
             <p className="text-sm mt-1">Try adjusting your filters or search term</p>
           </div>
         )}
+
+        <div className="mt-10 flex justify-end">
+          <Pagination>
+            <PaginationContent>
+
+              {/* Previous */}
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => setPage((p) => Math.max(p - 1, 1))}
+                  className={page === 1 ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+
+              {/* Page numbers */}
+              {Array.from({ length: totalPages }).map((_, i) => {
+                const pageNumber = i + 1;
+
+                return (
+                  <PaginationItem key={pageNumber}>
+                    <PaginationLink
+                      isActive={page === pageNumber}
+                      onClick={() => setPage(pageNumber)}
+                      className="cursor-pointer"
+                    >
+                      {pageNumber}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+
+              {/* Next */}
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+                  className={page === totalPages ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+
+            </PaginationContent>
+          </Pagination>
+        </div>
       </main>
     </div>
   );

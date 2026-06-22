@@ -1,13 +1,5 @@
 import { MapPin, Pencil, Trash2 } from "lucide-react";
-
-export interface Address {
-  id: string;
-  label: string;
-  line1: string;
-  line2?: string;
-  city: string;
-  isDefault?: boolean;
-}
+import { Address } from "@/Types/userTypes";
 
 export default function AddressCard({ address }: { address: Address }) {
   return (

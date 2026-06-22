@@ -11,7 +11,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "My Profile",    href: "/my-account/profile",       icon: User },
   { label: "My Orders",     href: "/my-account/orders",        icon: ShoppingBag },
   { label: "My Wishlist",   href: "/my-account/wishlist",      icon: Heart },
-  { label: "My Addresses",  href: "/my-account/addresses",     icon: MapPin },
+  { label: "My Addresses",  href: "/my-account/address",     icon: MapPin },
 //   { label: "Notifications", href: "/my-account/notifications", icon: Bell },
   { label: "Security",      href: "/my-account/security",      icon: Shield },
 ];
@@ -60,7 +60,7 @@ export default function AccountSidebar() {
       <div className="px-2 py-3 border-t border-[#f0e8e7]">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#5B1A18] hover:bg-[#fdf3f3] transition-all duration-150"
+          className="w-full flex items-center gap-3 px-3 py-2.5 cursor-pointer rounded-xl text-[#5B1A18] hover:bg-[#fdf3f3] transition-all duration-150"
         >
           <LogOut size={17} className="flex-shrink-0" />
           <span className="text-sm font-semibold">Log out</span>
@@ -98,7 +98,7 @@ export default function AccountSidebar() {
             className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             onClick={() => setDrawerOpen(false)}
           />
-          <div className="relative w-72 max-w-[85vw] h-full bg-white shadow-2xl z-50 pt-[130px] flex flex-col animate-slide-in">
+          <div className="relative w-72 max-w-[85vw] h-full bg-white shadow-2xl z-50 pt-[200px] flex flex-col animate-slide-in">
             <button
               onClick={() => setDrawerOpen(false)}
               className="absolute top-[138px] right-3 p-1.5 rounded-lg text-[#9b7b7a] hover:text-[#5B1A18] hover:bg-[#f9f1f0] transition"

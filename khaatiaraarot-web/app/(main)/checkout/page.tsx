@@ -17,8 +17,9 @@ import Image from "next/image";
 import { useAppDispatch } from "@/store/hooks";
 import { useAppSelector } from "@/store/hooks";
 import { addItem, removeItem, updateQuantity } from "@/store/cartSlice";
+import { fetchCart, updateCartItem, deleteCartItem } from "@/lib/cartApi";
 
-type PaymentMethod = "cod" | "online" | "bkash";
+type PaymentMethod = "cash" | "online" | "bkash";
 
 const districts = ["Dhaka", "Chittagong", "Sylhet", "Rajshahi", "Khulna", "Barisal", "Mymensingh"];
 const thanas = ["Rampura", "Mirpur", "Gulshan", "Banani", "Dhanmondi", "Motijheel", "Uttara"];
@@ -32,7 +33,7 @@ const paymentMethods = [
 const paymentLogos = ["VISA", "Mastercard", "Amex", "Bkash", "Nagad", "Rocket", "Dutch-Bangla", "SSL Commerz"];
 
 export default function CheckoutPage() {
-    const [payment, setPayment] = useState<PaymentMethod>("cod");
+    const [payment, setPayment] = useState<PaymentMethod>("cash");
     const [couponOpen, setCouponOpen] = useState(false);
     const [coupon, setCoupon] = useState("");
     const [notes, setNotes] = useState("");
@@ -45,19 +46,69 @@ export default function CheckoutPage() {
         thana: "",
         billing: "",
     });
+    const [cart, setCart] = useState<CartItem[]>([])
     const router = useRouter();
     const dispatch = useAppDispatch();
-    const items = useAppSelector((state) => state.cart.items);
+    //const items = useAppSelector((state) => state.cart.items);
+    //console.log('form',form)
+
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!items) return;
+        const loadCart = async () => {
+            try {
+                const res = await fetchCart();
+                setCart(res.data.items);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-        if (items.length === 0) {
+        loadCart();
+    }, []);
+
+    useEffect(() => {
+        if (loading) return;
+
+        if (cart.length === 0) {
             router.replace("/");
         }
-    }, [items]);
+    }, [loading, cart, router]);
 
-    const subtotal = items.reduce((sum: number, item) => sum + item.price * item.quantity, 0);
+    const handleUpdateQuantity = async (productId: string, quantity: number) => {
+        const previousCart = cart;
+
+        // update UI immediately
+        setCart((prev) =>
+            prev.map((item) =>
+                item.product.id === productId
+                    ? { ...item, quantity }
+                    : item
+            )
+        );
+
+        try {
+            await updateCartItem(productId, quantity);
+        } catch (error) {
+            // rollback on failure
+            setCart(previousCart);
+            console.error("Failed to update cart item", error);
+        }
+    };
+
+    const handleDeleteItem = async (productId: string) => {
+        try {
+            await deleteCartItem(productId);
+
+            const res = await fetchCart();
+            setCart(res.data.items);
+        } catch (error) {
+            console.error("Failed to delete cart item", error);
+        }
+    };
+
+
+    const subtotal = cart.reduce((sum: number, item) => sum + item.product.price * item.quantity, 0);
 
     const handleField = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -100,18 +151,18 @@ export default function CheckoutPage() {
                             Order review
                         </h2>
                         <div className="divide-y divide-gray-100">
-                            {items.map((item) => (
+                            {cart.map((item) => (
                                 <div key={item.id} className="flex items-center gap-3 py-3">
                                     <div className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">
                                         <Image
-                                            src={item.image}
-                                            alt={item.name}
+                                            src={item.product.image}
+                                            alt={item.product.name}
                                             height={40}
                                             width={40} />
 
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium text-gray-800 truncate">{item.name}</p>
+                                        <p className="text-sm font-medium text-gray-800 truncate">{item.product.name}</p>
                                         {/* {item.isGift && (
                       <span className="inline-block text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full mt-0.5">
                         Gift
@@ -119,7 +170,7 @@ export default function CheckoutPage() {
                     )} */}
                                         <div className="flex items-center gap-2 mt-1.5">
                                             <button
-                                                onClick={() => dispatch(updateQuantity({ id: item.id, quantity: item.quantity - 1 }))}
+                                                onClick={() => handleUpdateQuantity(item.product.id, item.quantity - 1)}
                                                 className="w-6 h-6 border border-gray-300 rounded text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm leading-none"
                                                 aria-label="Decrease quantity"
                                             >
@@ -127,7 +178,7 @@ export default function CheckoutPage() {
                                             </button>
                                             <span className="text-sm w-5 text-center font-medium">{item.quantity}</span>
                                             <button
-                                                onClick={() => dispatch(updateQuantity({ id: item.id, quantity: item.quantity + 1 }))}
+                                                onClick={() => handleUpdateQuantity(item.product.id, item.quantity + 1)}
                                                 className="w-6 h-6 border border-gray-300 rounded text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm leading-none"
                                                 aria-label="Increase quantity"
                                             >
@@ -136,12 +187,12 @@ export default function CheckoutPage() {
                                         </div>
                                     </div>
                                     <p className="text-sm font-semibold text-gray-800 flex-shrink-0">
-                                        ৳{(item.price * item.quantity).toLocaleString()}.00
+                                        ৳{(item.product.price * item.quantity).toLocaleString()}.00
                                     </p>
                                     <button
-                                        onClick={() => dispatch(removeItem(item.id))}
+                                        onClick={() => handleDeleteItem(item.product.id)}
                                         className="w-8 h-8 bg-red-50 text-red-500 rounded-lg flex items-center justify-center hover:bg-red-100 transition-colors flex-shrink-0"
-                                        aria-label={`Remove ${item.name}`}
+                                        aria-label={`Remove ${item.product.name}`}
                                     >
                                         <TrashSimpleIcon className="w-4 h-4" />
                                     </button>
@@ -332,7 +383,7 @@ export default function CheckoutPage() {
                             </span>
                         </label> */}
                         <button
-                            disabled={!agreed || items.length === 0}
+                            disabled={!agreed || cart.length === 0}
                             className="w-full bg-[#5B1A18] hover:bg-[#5B1A18] disabled:bg-[#5B1A18] disabled:cursor-not-allowed text-white font-semibold py-3.5 rounded-xl transition-colors text-sm tracking-wide"
                         >
                             PLACE ORDER
