@@ -8,11 +8,21 @@ import ProfileSection from "@/components/account/profilesection";
 import LoadingSkeleton from "@/components/account/loadingskeleton";
 import { UserProfile } from "@/Types/userTypes";
 import { toast } from "react-toastify";
+import { useAppSelector } from "@/store/hooks";
 
 export default function ProfilePage() {
   const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const { isAuthenticated } = useAppSelector(
+    (state) => state.auth
+  );
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace("/login");
+    }
+  }, [isAuthenticated, router]);
 
   useEffect(() => {
     (async () => {
@@ -21,26 +31,46 @@ export default function ProfilePage() {
         // console.log("profile response", data);
         const profile = data.data
         setUser(profile);
-      } catch {
-        router.push("/login");
-        toast("Please login to view your profile", {
-          position: "bottom-right",
-          autoClose: 1000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: false,
-          style: {
-            background: "#5B1A18",
-            color: "#ffffff",
-            fontSize: "16px",
-            fontWeight: "600",
-            padding: "16px",
-            minWidth: "320px",
-            minHeight: "70px",
-            borderRadius: "12px",
-          },
-        });
+      } catch (error: any) {
+        //console.log(error)
+        if (error?.status === 401) {
+          router.push("/login");
+          toast("Please login to view your profile", {
+            position: "bottom-right",
+            autoClose: 1000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: false,
+            style: {
+              background: "#5B1A18",
+              color: "#ffffff",
+              fontSize: "16px",
+              fontWeight: "600",
+              padding: "16px",
+              minWidth: "320px",
+              minHeight: "70px",
+              borderRadius: "12px",
+            },
+          });
+        }
+        else {
+          toast.error(error.error?.message ?? "Something went wrong", {
+            position: "bottom-right",
+            autoClose: 1500,
+            hideProgressBar: true,
+            style: {
+              background: "#f00808",
+              color: "#ffffff",
+              fontSize: "15px",
+              fontWeight: "600",
+              padding: "16px",
+              minWidth: "320px",
+              minHeight: "70px",
+              borderRadius: "12px",
+            },
+          })
+        }
       } finally {
         setLoading(false);
       }

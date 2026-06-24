@@ -1,6 +1,6 @@
 import { StaticImageData } from "next/image";
 
-export type Category = {
+export type HomePageCategory = {
   label: string;
   bangla: string;
   slug: string;

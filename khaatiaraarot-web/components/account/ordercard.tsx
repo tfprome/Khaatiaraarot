@@ -1,12 +1,5 @@
 import { Package } from "lucide-react";
-
-export interface Order {
-  id: string;
-  date: string;
-  status: "pending" | "processing" | "delivered" | "cancelled";
-  total: number;
-  items: number;
-}
+import { Order } from "@/Types/orderTypes";
 
 const STATUS_STYLES: Record<Order["status"], string> = {
   pending:    "bg-yellow-50 text-yellow-700 border-yellow-200",

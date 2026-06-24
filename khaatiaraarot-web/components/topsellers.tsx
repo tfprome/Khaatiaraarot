@@ -101,7 +101,8 @@ function ProductCard({ product }: { product: Product }) {
             )}
 
             {/* Image */}
-            <div className="relative w-22.5 sm:w-27.5 md:w-32.5 lg:w-42.5 shrink-0 self-stretch bg-[#fdf5ee] overflow-hidden rounded-l-2xl">
+            <div onClick={()=>{router.push(`/shop/${product.id}`)}} 
+            className="relative w-22.5 sm:w-27.5 md:w-32.5 lg:w-42.5 shrink-0 self-stretch cursor-pointer bg-[#fdf5ee] overflow-hidden rounded-l-2xl">
                 {product.image ? (
                     <Image
                         src={product.image}
@@ -124,7 +125,7 @@ function ProductCard({ product }: { product: Product }) {
                 </h3>
 
                 <p className="text-[11px] lg:text-[12px] text-[#a07850] mb-1.5 md:mb-2 lg:mb-3">
-                    {product.unit}
+                    {/\d/.test(product.unit) ? product.unit : `1 ${product.unit}`}
                 </p>
 
                 {/* Price */}
@@ -154,15 +155,15 @@ function ProductCard({ product }: { product: Product }) {
                     <button onClick={() => { handleAddToCart(product.id, 1) }}
                         disabled={loading}
                         className="group flex items-center justify-center gap-1 text-[10px] 
-                        sm:text-[11px] lg:text-[13px] font-semibold text-[#8B0000] border border-[#8B0000] px-2 cursor-pointer disabled:cursor-not-allowed
+                        sm:text-[11px] lg:text-[13px] font-semibold text-[#8B0000] border border-[#8B0000] px-2 cursor-pointer disabled:cursor-progress
                         sm:px-2.5 lg:px-4 py-1.5 sm:py-2 rounded-lg  transition-all duration-200 whitespace-nowrap">
-                        <ShoppingCartIcon size={11} weight="bold" className="transition-transform duration-200 group-hover:scale-120"/>
+                        <ShoppingCartIcon size={11} weight="bold" className="transition-transform duration-200 group-hover:scale-120" />
                         Add to Cart
                     </button>
                     <button
                         onClick={() => handleBuyNow(product.id, 1)}
                         disabled={loading}
-                        className="flex items-center justify-center gap-1 cursor-pointer disabled:cursor-not-allowed text-[10px] sm:text-[11px] lg:text-[13px] font-semibold text-white bg-[#8B0000] px-2 sm:px-2.5 lg:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-[#6e0000] transition-all duration-200 whitespace-nowrap disabled:opacity-50"
+                        className="flex items-center justify-center gap-1 cursor-pointer disabled:cursor-progress text-[10px] sm:text-[11px] lg:text-[13px] font-semibold text-white bg-[#8B0000] px-2 sm:px-2.5 lg:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-[#6e0000] transition-all duration-200 whitespace-nowrap disabled:opacity-50"
                     >
                         <HandbagIcon size={11} weight="bold" />
                         Buy now

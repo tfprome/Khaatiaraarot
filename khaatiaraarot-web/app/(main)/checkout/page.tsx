@@ -9,25 +9,26 @@ import {
     CreditCardIcon,
     WalletIcon,
     TagIcon,
-    ShoppingBagIcon,
+    DeviceMobileIcon,
 } from "@phosphor-icons/react";
 import { CartItem } from "@/Types/cartTypes";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useAppDispatch } from "@/store/hooks";
-import { useAppSelector } from "@/store/hooks";
-import { addItem, removeItem, updateQuantity } from "@/store/cartSlice";
 import { fetchCart, updateCartItem, deleteCartItem } from "@/lib/cartApi";
+import { createOrder } from "@/lib/orderApi";
+import { toast } from 'react-toastify'
+import { useRef } from "react";
 
 type PaymentMethod = "cash" | "online" | "bkash";
 
-const districts = ["Dhaka", "Chittagong", "Sylhet", "Rajshahi", "Khulna", "Barisal", "Mymensingh"];
-const thanas = ["Rampura", "Mirpur", "Gulshan", "Banani", "Dhanmondi", "Motijheel", "Uttara"];
+// const districts = ["Dhaka", "Chittagong", "Sylhet", "Rajshahi", "Khulna", "Barisal", "Mymensingh"];
+// const thanas = ["Rampura", "Mirpur", "Gulshan", "Banani", "Dhanmondi", "Motijheel", "Uttara"];
 
 const paymentMethods = [
-    { id: "cod" as PaymentMethod, label: "Cash On Delivery", Icon: TruckIcon, color: "text-green-600" },
-    { id: "online" as PaymentMethod, label: "Online Payment", Icon: CreditCardIcon, color: "text-blue-600" },
-    { id: "bkash" as PaymentMethod, label: "Bkash", Icon: WalletIcon, color: "text-pink-600" },
+    { id: "cash" as PaymentMethod, label: "Cash On Delivery", Icon: TruckIcon },
+    { id: "card" as PaymentMethod, label: "Online Payment", Icon: CreditCardIcon },
+    { id: "bkash" as PaymentMethod, label: "Bkash", Icon: WalletIcon },
+    { id: "nagad" as PaymentMethod, label: "Nagad", Icon: DeviceMobileIcon },
 ];
 
 const paymentLogos = ["VISA", "Mastercard", "Amex", "Bkash", "Nagad", "Rocket", "Dutch-Bangla", "SSL Commerz"];
@@ -43,16 +44,52 @@ export default function CheckoutPage() {
         phone: "",
         address: "",
         district: "",
-        thana: "",
+        city: "",
         billing: "",
+        postalCode:""
     });
     const [cart, setCart] = useState<CartItem[]>([])
     const router = useRouter();
-    const dispatch = useAppDispatch();
-    //const items = useAppSelector((state) => state.cart.items);
     //console.log('form',form)
 
     const [loading, setLoading] = useState(true);
+    const [placingOrder, setPlacingOrder] = useState(false);
+    const idempotencyKey = useRef<string>(crypto.randomUUID());
+
+    const handlePlaceOrder = async () => {
+        try {
+            setPlacingOrder(true);
+
+            const payload = {
+                paymentMethod: payment,
+                notes,
+                address: {
+                    fullName: form.name,
+                    phone: form.phone,
+                    line1: form.address,
+                    line2: form.billing,
+                    city: form.city,
+                    district: form.district,
+                    postalCode: form.postalCode,
+                },
+            };
+
+            const res = await createOrder(payload, idempotencyKey.current);
+
+            toast.success("Order placed successfully!");
+            idempotencyKey.current = crypto.randomUUID();
+
+            console.log(res.data);
+
+            //router.push("/order-success");
+        } catch (error: any) {
+            toast.error(
+                error?.response?.data?.message || "Failed to place order"
+            );
+        } finally {
+            setPlacingOrder(false);
+        }
+    };
 
     useEffect(() => {
         const loadCart = async () => {
@@ -163,11 +200,6 @@ export default function CheckoutPage() {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium text-gray-800 truncate">{item.product.name}</p>
-                                        {/* {item.isGift && (
-                      <span className="inline-block text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full mt-0.5">
-                        Gift
-                      </span>
-                    )} */}
                                         <div className="flex items-center gap-2 mt-1.5">
                                             <button
                                                 onClick={() => handleUpdateQuantity(item.product.id, item.quantity - 1)}
@@ -215,7 +247,8 @@ export default function CheckoutPage() {
                                 placeholder="Your Full Name *"
                                 className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5B1A18] focus:border-[#5B1A18] transition-all"
                             />
-                            <div className="flex rounded-lg border border-gray-200 overflow-hidden focus-within:ring-2 focus-within:ring-[#5B1A18] focus-within:border-[#5B1A18] transition-all">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div className="flex rounded-lg border border-gray-200 overflow-hidden focus-within:ring-2 focus-within:ring-[#5B1A18] focus-within:border-[#5B1A18] transition-all">
                                 <span className="px-3 py-2.5 bg-gray-50 text-sm text-gray-500 border-r border-gray-200 flex-shrink-0">
                                     88
                                 </span>
@@ -228,6 +261,15 @@ export default function CheckoutPage() {
                                     className="flex-1 px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none"
                                 />
                             </div>
+                                <input
+                                type="text"
+                                name="postalCode"
+                                value={form.postalCode}
+                                onChange={handleField}
+                                placeholder="Enter your postal code"
+                                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5B1A18] focus:border-[#5B1A18] transition-all"
+                            />
+                            </div>
                             <input
                                 type="text"
                                 name="address"
@@ -237,24 +279,26 @@ export default function CheckoutPage() {
                                 className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5B1A18] focus:border-[#5B1A18] transition-all"
                             />
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <select
+                                <input
                                     name="district"
                                     value={form.district}
                                     onChange={handleField}
+                                    placeholder="Enter district"
                                     className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#5B1A18] focus:border-[#5B1A18] transition-all bg-white"
                                 >
-                                    <option value="">Select District</option>
-                                    {districts.map((d) => <option key={d}>{d}</option>)}
-                                </select>
-                                <select
-                                    name="thana"
-                                    value={form.thana}
+                                    {/* <option value="">Select District</option>
+                                    {districts.map((d) => <option key={d}>{d}</option>)} */}
+                                </input>
+                                <input
+                                    name="city"
+                                    value={form.city}
                                     onChange={handleField}
+                                    placeholder="Enter city"
                                     className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#5B1A18] focus:border-[#5B1A18] transition-all bg-white"
                                 >
-                                    <option value="">Select Thana (Optional)</option>
-                                    {thanas.map((t) => <option key={t}>{t}</option>)}
-                                </select>
+                                    {/* <option value="">Select Thana (Optional)</option>
+                                    {thanas.map((t) => <option key={t}>{t}</option>)} */}
+                                </input>
                             </div>
                         </div>
                     </div>
@@ -280,7 +324,7 @@ export default function CheckoutPage() {
                             Payment method
                         </h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                            {paymentMethods.map(({ id, label, Icon, color }) => (
+                            {paymentMethods.map(({ id, label, Icon }) => (
                                 <button
                                     key={id}
                                     onClick={() => setPayment(id)}
@@ -383,8 +427,9 @@ export default function CheckoutPage() {
                             </span>
                         </label> */}
                         <button
-                            disabled={!agreed || cart.length === 0}
-                            className="w-full bg-[#5B1A18] hover:bg-[#5B1A18] disabled:bg-[#5B1A18] disabled:cursor-not-allowed text-white font-semibold py-3.5 rounded-xl transition-colors text-sm tracking-wide"
+                        onClick={handlePlaceOrder}
+                            disabled={!agreed || cart.length === 0 || placingOrder}
+                            className="w-full bg-[#5B1A18] hover:bg-[#5B1A18] disabled:bg-[#5B1A18] cursor-pointer disabled:cursor-progress text-white font-semibold py-3.5 rounded-xl transition-colors text-sm tracking-wide"
                         >
                             PLACE ORDER
                         </button>

@@ -369,7 +369,7 @@ export default function RegisterPage() {
               type="button"
               onClick={handleSubmit}
               disabled={loading}
-              className="w-full bg-[#8B0000] hover:bg-[#6e0000] disabled:cursor-not-allowed text-white font-semibold text-sm py-3 rounded-xl transition-colors duration-200 mt-2 cursor-pointer"
+              className="w-full bg-[#8B0000] hover:bg-[#6e0000] disabled:cursor-progress text-white font-semibold text-sm py-3 rounded-xl transition-colors duration-200 mt-2 cursor-pointer"
             >
               {loading ? (
                 <div className="flex items-center justify-center">

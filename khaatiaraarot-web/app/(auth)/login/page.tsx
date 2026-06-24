@@ -8,6 +8,8 @@ import { EyeIcon, EyeSlashIcon, LockKeyIcon, EnvelopeSimpleIcon } from "@phospho
 import logo from "../../../public/Images/khatiarotlogo-removebg.png";
 import { toast } from "react-toastify";
 import ClipLoader from "react-spinners/ClipLoader";
+import { useAppDispatch } from "@/store/hooks";
+import { login } from "@/store/authSlice";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -17,6 +19,7 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+    const dispatch=useAppDispatch()
 
     async function handleSubmit() {
         setError('');
@@ -51,6 +54,7 @@ export default function LoginPage() {
 
             localStorage.setItem('userToken', json.data!.accessToken);
             localStorage.setItem('userName', json.data!.user.fullName);
+            dispatch(login())
 
             toast("You're in! Let's fill the cart.", {
                 position: "bottom-right",
@@ -189,7 +193,7 @@ export default function LoginPage() {
                             type="button"
                             onClick={handleSubmit}
                             disabled={loading}
-                            className="w-full bg-[#8B0000] hover:bg-[#6e0000] text-white font-semibold text-sm py-3 rounded-xl transition-colors duration-200 mt-2 cursor-pointer disabled:cursor-not-allowed"
+                            className="w-full bg-[#8B0000] hover:bg-[#6e0000] text-white font-semibold text-sm py-3 rounded-xl transition-colors duration-200 mt-2 cursor-pointer disabled:cursor-progress"
                         >
                             {loading ? (
                                 <div className="flex items-center justify-center">

@@ -18,6 +18,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { useRouter } from "next/navigation";
 
 function getDiscount(price: number, originalPrice: number | null): number | null {
   if (!originalPrice) return null;
@@ -38,8 +39,9 @@ function ProductCard({ product, categories }: { product: Product; categories: Ca
   const discount = getDiscount(product.price, product.originalPrice);
   //const regionClass = regionColor[product.sourceRegion] ?? "bg-gray-100 text-gray-700";
   const [loading, setLoading] = useState(false)
+  //console.log(product)
 
-  const dispatch = useAppDispatch();
+  const router = useRouter()
 
   const handleAddToCart = async (
     id: string,
@@ -79,9 +81,10 @@ function ProductCard({ product, categories }: { product: Product; categories: Ca
 
 
   return (
-    <div className="group relative flex flex-col bg-white rounded-2xl border border-stone-200 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+    <div className="group relative flex flex-col bg-white rounded-2xl border border-stone-200 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 hover:scale-103 transition-all duration-200">
       {/* Image / Placeholder */}
-      <div className="relative bg-stone-50 flex items-center justify-center h-44 sm:h-48 text-5xl select-none">
+      <div onClick={() => { router.push(`/shop/${product.id}`) }}
+        className="relative bg-stone-50 flex items-center justify-center cursor-pointer h-44 sm:h-48 text-5xl select-none">
         {product.image ? (
           <img
             src={product.image}
@@ -152,7 +155,8 @@ function ProductCard({ product, categories }: { product: Product; categories: Ca
           </button>
         ) : (
           <button onClick={() => handleAddToCart(product.id, 1)}
-            className="mt-1 w-full py-2.5 rounded-xl cursor-pointer bg-[#5A1B18] active:scale-95 text-white text-sm font-semibold transition-all duration-150">
+            disabled={loading}
+            className="mt-1 w-full py-2.5 rounded-xl cursor-pointer disabled:cursor-progress bg-[#5A1B18] active:scale-95 text-white text-sm font-semibold transition-all duration-150">
             Add to Cart
           </button>
         )}

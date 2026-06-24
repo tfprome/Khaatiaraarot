@@ -28,3 +28,13 @@ export interface Address {
   city: string;
   isDefault?: boolean;
 }
+
+export interface ErrorType {
+  success: boolean
+  error: Error
+}
+
+export interface Error {
+  code: string
+  message: string
+}

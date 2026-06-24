@@ -15,12 +15,31 @@ export type Product = {
   image: string | null;
 };
 
+export type ProductDetailstype = {
+  id: string;
+  categoryId: string;
+  name: string;
+  slug: string;
+  description: string;
+  unit: string;
+  sourceRegion: string;
+  price: number;
+  originalPrice: number;
+  stockQty: number;
+  lowStockThreshold: number;
+  isBestSelling: boolean;
+  isActive: boolean;
+  createdAt: string;
+  images: string[];
+  category: Category;
+}
+
 export type Category = {
   id: string;
   name: string;
   nameBn: string;
   slug: string;
-  imageUrl: string | StaticImageData;
-  sortOrder: number;
-  productCount: number;
+  imageUrl?: string | StaticImageData;
+  sortOrder?: number;
+  productCount?: number;
 }

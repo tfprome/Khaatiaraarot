@@ -16,35 +16,79 @@ import {
     ShoppingCartIcon,
     UserIcon,
     ListIcon,
+    XIcon
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import Image from "next/image";
 import Khaatiarotlogo from '../public/Images/khatiarotlogo-removebg.png';
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { toast } from "react-toastify";
 import { openCart } from "@/store/cartSlice";
 import { useAppDispatch } from "@/store/hooks";
 import api from "@/lib/axiosinterceptor";
 import { useRouter } from "next/navigation";
+import { logout } from "@/store/authSlice";
+import { motion, AnimatePresence } from "framer-motion";
 
 const navLinks = [
     { label: "Home", href: "/", icon: HouseIcon },
     { label: "Shop", href: "/shop", icon: StorefrontIcon },
-    { label: "Offers", href: "/offers", icon: TagIcon },
-    { label: "Orders", href: "/orders", icon: HandbagSimpleIcon },
+    { label: "Orders", href: "/my-account/orders", icon: HandbagSimpleIcon },
     { label: "About", href: "/about", icon: InfoIcon },
     { label: "Contact", href: "/contact", icon: EnvelopeSimpleIcon },
 ];
 
 export default function Navbar() {
     const [token, setToken] = useState<string | null>(null);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const dispatch = useAppDispatch();
     const router = useRouter();
+
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!mobileMenuOpen) return;
+        const handleClickOutside = (e: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+                setMobileMenuOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [mobileMenuOpen]);
 
 
     useEffect(() => {
         setToken(localStorage.getItem("userToken"));
     }, []);
+
+    const handleMyAccountRedirection = () => {
+        const token = localStorage.getItem("userToken");
+
+        if (token) {
+            router.push("/my-account");
+        } else {
+            toast("Please login to view your profile", {
+                position: "bottom-right",
+                autoClose: 1000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: false,
+                style: {
+                    background: "#5B1A18",
+                    color: "#ffffff",
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    padding: "16px",
+                    minWidth: "320px",
+                    minHeight: "70px",
+                    borderRadius: "12px",
+                },
+            });
+            router.push("/login");
+        }
+    };
 
     const handleLogout = async () => {
         try {
@@ -56,6 +100,7 @@ export default function Navbar() {
             }
 
             setToken(null);
+            dispatch(logout())
 
             toast("You're logged out! See you soon.", {
                 position: "bottom-right",
@@ -77,7 +122,7 @@ export default function Navbar() {
             });
 
         } catch (error: any) {
-            console.error("Logout failed:", error);
+            console.log("Logout failed:", error);
 
             toast.error(
                 error?.response?.data?.message ?? "Logout failed. Please try again",
@@ -203,8 +248,8 @@ export default function Navbar() {
                                     Cart
                                 </span>
                             </div>
-                            <div onClick={() => router.push('/my-account')}
-                             className="flex flex-col items-center gap-0.5 px-2.5 py-2 rounded-xl group transition-colors duration-200 cursor-pointer">
+                            <div onClick={handleMyAccountRedirection}
+                                className="flex flex-col items-center gap-0.5 px-2.5 py-2 rounded-xl group transition-colors duration-200 cursor-pointer">
                                 <UserIcon size={22} className="text-white transition-colors duration-200" />
                                 <span className="hidden lg:block text-[10px] text-white font-medium transition-colors">
                                     Account
@@ -240,7 +285,7 @@ export default function Navbar() {
                     </div> */}
 
                     {/* Nav Links — icon only on md, icon+label on lg+ */}
-                    <nav className="hidden md:flex items-center min-w-0">
+                    <nav className="hidden md:flex items-center min-w-0 font-serif">
                         {navLinks.map(({ label, href, icon: Icon }) => (
                             <Link
                                 key={label}
@@ -265,11 +310,69 @@ export default function Navbar() {
                         <span className="lg:hidden text-xs">Deals</span>
                     </div>
 
-                    {/* Mobile Hamburger */}
-                    <div className="md:hidden flex items-center gap-2 px-4 py-3 text-sm font-medium text-gray-600 cursor-pointer hover:text-green-700">
-                        <ListIcon size={20} />
-                        <span>Menu</span>
-                    </div>
+                    {/* Mobile sidebar */}
+                        <button
+                            onClick={() => setMobileMenuOpen(true)}
+                            className="md:hidden flex items-center gap-2 px-4 py-3 text-sm font-medium text-gray-600 cursor-pointer hover:text-[#5B1A18] transition-colors"
+                        >
+                            <ListIcon size={20} />
+                            <span>Menu</span>
+                        </button>
+
+                    <AnimatePresence>
+                        {mobileMenuOpen && (
+                            <>
+                                {/* Backdrop */}
+                                <div className="md:hidden fixed inset-0 bg-black/30 z-40" />
+
+                                {/* Sidebar drawer */}
+                                <motion.div
+                                    ref={menuRef}
+                                    initial={{ x: "-100%" }}
+                                    animate={{ x: 0 }}
+                                    exit={{ x: "-100%" }}
+                                    transition={{ duration: 0.25, ease: "easeInOut" }}
+                                    className="md:hidden fixed top-0 left-0 h-full w-72 max-w-[85vw] bg-white shadow-2xl z-50 flex flex-col"
+                                >
+                                    {/* Header */}
+                                    <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                                        <span className="text-[#5B1A18] font-bold text-base">Menu</span>
+                                        <button
+                                            onClick={() => setMobileMenuOpen(false)}
+                                            className="p-1.5 rounded-lg text-gray-400 hover:text-[#5B1A18] hover:bg-[#f9f1f0] transition"
+                                        >
+                                            <XIcon size={18} />
+                                        </button>
+                                    </div>
+
+                                    {/* Nav links */}
+                                    <nav className="flex-1 flex flex-col px-2 py-2 overflow-y-auto">
+                                        {navLinks.map(({ label, href, icon: Icon }) => (
+                                            <Link
+                                                key={label}
+                                                href={href}
+                                                onClick={() => setMobileMenuOpen(false)}
+                                                className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-[#fcebeb] hover:text-[#5B1A18] transition-colors"
+                                            >
+                                                <Icon size={18} />
+                                                <span className="text-sm font-medium">{label}</span>
+                                            </Link>
+                                        ))}
+                                        <button
+                                            onClick={() => {
+                                                handleMyAccountRedirection();
+                                                setMobileMenuOpen(false);
+                                            }}
+                                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-[#fcebeb] hover:text-[#5B1A18] transition-colors w-full text-left"
+                                        >
+                                            <UserIcon size={18} />
+                                            <span className="text-sm font-medium">My Account</span>
+                                        </button>
+                                    </nav>
+                                </motion.div>
+                            </>
+                        )}
+                    </AnimatePresence>
 
                 </div>
             </div>

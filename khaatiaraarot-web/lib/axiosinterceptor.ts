@@ -69,6 +69,7 @@ api.interceptors.response.use(
 
         localStorage.removeItem("userToken");
         localStorage.removeItem("userName");
+        //window.location.href='/login'
 
         return Promise.reject({
           status: 401,

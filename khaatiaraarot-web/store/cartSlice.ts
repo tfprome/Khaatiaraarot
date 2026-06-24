@@ -14,23 +14,23 @@ const cartSlice = createSlice({
       state.items = action.payload;
     },
 
-    addItem: (
-      state,
-      action: PayloadAction<Omit<CartItem, "quantity">>
-    ) => {
-      const existing = state.items.find(
-        (item) => item.id === action.payload.id
-      );
+    // addItem: (
+    //   state,
+    //   action: PayloadAction<Omit<CartItem, "quantity">>
+    // ) => {
+    //   const existing = state.items.find(
+    //     (item) => item.id === action.payload.id
+    //   );
 
-      if (existing) {
-        existing.quantity += 1;
-      } else {
-        state.items.push({
-          ...action.payload,
-          quantity: 1,
-        });
-      }
-    },
+    //   if (existing) {
+    //     existing.quantity += 1;
+    //   } else {
+    //     state.items.push({
+    //       ...action.payload,
+    //       quantity: 1,
+    //     });
+    //   }
+    // },
 
     removeItem: (state, action: PayloadAction<string>) => {
       state.items = state.items.filter(
@@ -80,7 +80,7 @@ const cartSlice = createSlice({
 
 export const {
   hydrateCart,
-  addItem,
+  //addItem,
   removeItem,
   updateQuantity,
   clearCart,
