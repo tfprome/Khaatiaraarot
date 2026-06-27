@@ -47,13 +47,17 @@ api.interceptors.response.use(
         // console.log("refreshResponse", refreshResponse);
 
         const {
-          accessToken,
+          accessToken,user
         } = refreshResponse.data.data;
 
         // store new AT
         localStorage.setItem(
           "userToken",
           accessToken
+        );
+        localStorage.setItem(
+          "userName",
+          user.fullName
         );
         //console.log("new access token", accessToken);
 

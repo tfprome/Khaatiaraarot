@@ -9,30 +9,33 @@ import { useState, useEffect } from "react";
 import { getOrders } from "@/lib/orderApi";
 import { useAppSelector } from "@/store/hooks";
 import { useRouter } from "next/navigation";
-import {toast} from 'react-toastify'
-
-// Replace with real API fetch when ready
-
+import { toast } from 'react-toastify'
+import PaginationControls from "@/components/pagination/paginationcontrol";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<any[]>([])
   const { isAuthenticated } = useAppSelector(
-      (state) => state.auth
-    );
-  const router=useRouter();
-  
-    useEffect(() => {
-      if (!isAuthenticated) {
-        router.replace("/login");
-      }
-    }, [isAuthenticated, router]);
+    (state) => state.auth
+  );
+  const router = useRouter();
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(5);
+  const [total, setTotal] = useState(0);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace("/");
+    }
+  }, [isAuthenticated, router]);
+  console.log(isAuthenticated)
 
   useEffect(() => {
     const handleOrders = async () => {
       try {
-        const res = await getOrders();
+        const res = await getOrders(page, limit);
         setOrders(res.data.data);
-      } catch (error:any) {
+        setTotal(res.data.total)
+      } catch (error: any) {
         if (error?.status === 401) {
           router.push("/login");
           toast("Please login to view your profile", {
@@ -42,23 +45,16 @@ export default function OrdersPage() {
             closeOnClick: true,
             pauseOnHover: false,
             draggable: false,
-            style: {
-              background: "#5B1A18",
-              color: "#ffffff",
-              fontSize: "16px",
-              fontWeight: "600",
-              padding: "16px",
-              minWidth: "320px",
-              minHeight: "70px",
-              borderRadius: "12px",
-            },
+            className: 'cart-success-toast'
           });
         }
         //console.log("Failed to fetch orders:", error);
       }
     };
     handleOrders();
-  }, []);
+  }, [page,limit]);
+
+  const totalPages = Math.ceil(total / limit);
   return (
     <>
       <AccountPageHeader title="My Orders" description="Track and view your past orders" />
@@ -77,6 +73,7 @@ export default function OrdersPage() {
             ))}
           </div>
         )}
+        <PaginationControls page={page} totalPages={totalPages} onPageChange={setPage} />
       </div>
     </>
   );

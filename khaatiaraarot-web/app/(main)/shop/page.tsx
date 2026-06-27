@@ -10,14 +10,7 @@ import { Category } from "@/Types/ProductTypes";
 import { addToCart } from "@/lib/cartApi";
 import { useAppDispatch } from "@/store/hooks";
 import { toast } from "react-toastify";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import PaginationControls from "@/components/pagination/paginationcontrol";
 import { useRouter } from "next/navigation";
 
 function getDiscount(price: number, originalPrice: number | null): number | null {
@@ -53,26 +46,21 @@ function ProductCard({ product, categories }: { product: Product; categories: Ca
       await addToCart(id, quantity);
 
       toast("Added to your cart.", {
-        position: "bottom-right",
+        position: "top-center",
         autoClose: 1000, // 0.5 second
         hideProgressBar: true,
         closeOnClick: true,
         pauseOnHover: false,
         draggable: false,
-        style: {
-          background: "#5B1A18",
-          opacity: '0.5',
-          color: "#ffffff",
-          fontSize: "16px",
-          fontWeight: "600",
-          padding: "16px",
-          minWidth: "320px",
-          minHeight: "70px",
-          borderRadius: "12px",
-        },
+        className: 'cart-success-toast'
       });
     } catch (error) {
-      toast.error("Failed to add item");
+      toast.error("Failed to add item", {
+        position: "bottom-right",
+        autoClose: 1500,
+        hideProgressBar: true,
+        className: "error-toast"
+      });
     } finally {
       setLoading(false);
     }
@@ -318,46 +306,7 @@ export default function ProductsPage() {
           </div>
         )}
 
-        <div className="mt-10 flex justify-end">
-          <Pagination>
-            <PaginationContent>
-
-              {/* Previous */}
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => setPage((p) => Math.max(p - 1, 1))}
-                  className={page === 1 ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
-                />
-              </PaginationItem>
-
-              {/* Page numbers */}
-              {Array.from({ length: totalPages }).map((_, i) => {
-                const pageNumber = i + 1;
-
-                return (
-                  <PaginationItem key={pageNumber}>
-                    <PaginationLink
-                      isActive={page === pageNumber}
-                      onClick={() => setPage(pageNumber)}
-                      className="cursor-pointer"
-                    >
-                      {pageNumber}
-                    </PaginationLink>
-                  </PaginationItem>
-                );
-              })}
-
-              {/* Next */}
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
-                  className={page === totalPages ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
-                />
-              </PaginationItem>
-
-            </PaginationContent>
-          </Pagination>
-        </div>
+        <PaginationControls page={page} totalPages={totalPages} onPageChange={setPage}/>
       </main>
     </div>
   );

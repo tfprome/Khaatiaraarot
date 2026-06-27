@@ -19,8 +19,6 @@ export interface CartProduct {
 
 
 export interface CartDrawerProps {
-  onUpdateQuantity: (id: string, quantity: number) => void;
-  onRemoveItem: (id: string) => void;
   onCheckout?: () => void;
   onViewCart?: () => void;
 }

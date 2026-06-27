@@ -4,8 +4,15 @@ interface AuthState {
     isAuthenticated: boolean;
 }
 
+const getStoredAuth = (): boolean => {
+    if (typeof window !== "undefined") {
+        return localStorage.getItem("isAuthenticated") === "true";
+    }
+    return false;
+};
+
 const initialState: AuthState = {
-    isAuthenticated: false,
+    isAuthenticated: getStoredAuth(),
     //token: null,
 };
 

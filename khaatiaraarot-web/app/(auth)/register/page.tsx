@@ -129,16 +129,7 @@ export default function RegisterPage() {
           position: "bottom-right",
           autoClose: 1500,
           hideProgressBar: true,
-          style: {
-            background: "#f00808",
-            color: "#ffffff",
-            fontSize: "15px",
-            fontWeight: "600",
-            padding: "16px",
-            minWidth: "320px",
-            minHeight: "70px",
-            borderRadius: "12px",
-          },
+          className:"error-toast"
         });
         throw new Error(json.error?.message ?? 'Registration failed');
       }

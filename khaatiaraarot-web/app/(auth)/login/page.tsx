@@ -35,18 +35,9 @@ export default function LoginPage() {
             if (!res.ok) {
                 toast.error(json.error?.message ?? "Login failed.Please try again", {
                     position: "bottom-right",
-                    autoClose: 1500,
+                    autoClose: 1000,
                     hideProgressBar: true,
-                    style: {
-                        background: "#f00808",
-                        color: "#ffffff",
-                        fontSize: "15px",
-                        fontWeight: "600",
-                        padding: "16px",
-                        minWidth: "320px",
-                        minHeight: "70px",
-                        borderRadius: "12px",
-                    },
+                    className: 'error-toast'
                 });
 
                 throw new Error(json.error?.message ?? "Login failed");

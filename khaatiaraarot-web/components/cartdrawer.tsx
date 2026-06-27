@@ -12,7 +12,7 @@ import {
 import { CartItem } from "@/Types/cartTypes";
 import { useAppDispatch } from "@/store/hooks";
 import { useAppSelector } from "@/store/hooks";
-import { closeCart, openCart, removeItem, updateQuantity } from "@/store/cartSlice";
+import { closeCart, openCart } from "@/store/cartSlice";
 import { CartDrawerProps } from "@/Types/cartTypes";
 import api from "@/lib/axiosinterceptor";
 import { fetchCart, updateCartItem, deleteCartItem } from "@/lib/cartApi";
@@ -105,8 +105,6 @@ function ItemRow({
 export default function CartDrawer({
   onCheckout,
   onViewCart,
-  onUpdateQuantity,
-  onRemoveItem,
 }: CartDrawerProps) {
   // const [isOpen, setIsOpen] = useState(false);
   const [badgePulse, setBadgePulse] = useState(false);

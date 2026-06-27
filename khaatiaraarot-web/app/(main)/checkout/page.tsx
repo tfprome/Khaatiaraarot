@@ -33,6 +33,22 @@ const paymentMethods = [
 
 const paymentLogos = ["VISA", "Mastercard", "Amex", "Bkash", "Nagad", "Rocket", "Dutch-Bangla", "SSL Commerz"];
 
+function getInitial(name: string) {
+    const initials = name
+        ?.trim()
+        .split(" ")
+        .slice(0, 2)
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase() || "U";
+
+    return (
+        <div className="w-full h-full flex items-center justify-center text-black font-bold text-lg sm:text-xl">
+            {initials}
+        </div>
+    );
+}
+
 export default function CheckoutPage() {
     const [payment, setPayment] = useState<PaymentMethod>("cash");
     const [couponOpen, setCouponOpen] = useState(false);
@@ -46,7 +62,7 @@ export default function CheckoutPage() {
         district: "",
         city: "",
         billing: "",
-        postalCode:""
+        postalCode: ""
     });
     const [cart, setCart] = useState<CartItem[]>([])
     const router = useRouter();
@@ -81,10 +97,15 @@ export default function CheckoutPage() {
 
             console.log(res.data);
 
-            //router.push("/order-success");
+            router.push(`/orderdetails/${res.data.data.id}`);
         } catch (error: any) {
             toast.error(
-                error?.response?.data?.message || "Failed to place order"
+                error?.response?.data?.message || "Failed to place order", {
+                position: "bottom-right",
+                autoClose: 1500,
+                hideProgressBar: true,
+                className: "error-toast"
+            }
             );
         } finally {
             setPlacingOrder(false);
@@ -191,11 +212,12 @@ export default function CheckoutPage() {
                             {cart.map((item) => (
                                 <div key={item.id} className="flex items-center gap-3 py-3">
                                     <div className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">
-                                        <Image
-                                            src={item.product.image}
-                                            alt={item.product.name}
-                                            height={40}
-                                            width={40} />
+                                        {item.product.image ?
+                                            <Image
+                                                src={item.product.image}
+                                                alt={item.product.name}
+                                                height={40}
+                                                width={40} /> : (getInitial(item.product.name))}
 
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -249,26 +271,26 @@ export default function CheckoutPage() {
                             />
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div className="flex rounded-lg border border-gray-200 overflow-hidden focus-within:ring-2 focus-within:ring-[#5B1A18] focus-within:border-[#5B1A18] transition-all">
-                                <span className="px-3 py-2.5 bg-gray-50 text-sm text-gray-500 border-r border-gray-200 flex-shrink-0">
-                                    88
-                                </span>
+                                    <span className="px-3 py-2.5 bg-gray-50 text-sm text-gray-500 border-r border-gray-200 flex-shrink-0">
+                                        88
+                                    </span>
+                                    <input
+                                        type="tel"
+                                        name="phone"
+                                        value={form.phone}
+                                        onChange={handleField}
+                                        placeholder="017••••••••"
+                                        className="flex-1 px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none"
+                                    />
+                                </div>
                                 <input
-                                    type="tel"
-                                    name="phone"
-                                    value={form.phone}
+                                    type="text"
+                                    name="postalCode"
+                                    value={form.postalCode}
                                     onChange={handleField}
-                                    placeholder="017••••••••"
-                                    className="flex-1 px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none"
+                                    placeholder="Enter your postal code"
+                                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5B1A18] focus:border-[#5B1A18] transition-all"
                                 />
-                            </div>
-                                <input
-                                type="text"
-                                name="postalCode"
-                                value={form.postalCode}
-                                onChange={handleField}
-                                placeholder="Enter your postal code"
-                                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5B1A18] focus:border-[#5B1A18] transition-all"
-                            />
                             </div>
                             <input
                                 type="text"
@@ -427,7 +449,7 @@ export default function CheckoutPage() {
                             </span>
                         </label> */}
                         <button
-                        onClick={handlePlaceOrder}
+                            onClick={handlePlaceOrder}
                             disabled={!agreed || cart.length === 0 || placingOrder}
                             className="w-full bg-[#5B1A18] hover:bg-[#5B1A18] disabled:bg-[#5B1A18] cursor-pointer disabled:cursor-progress text-white font-semibold py-3.5 rounded-xl transition-colors text-sm tracking-wide"
                         >

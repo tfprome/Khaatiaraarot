@@ -17,6 +17,6 @@ export const createOrder = async (payload: paymentpayloadtype,idempotecyKey:stri
   );
 };
 
-export const getOrders = async () => {
-  return api.get("/api/v1/orders");
+export const getOrders = async (page:number,limit:number) => {
+  return api.get(`/api/v1/orders?page=${page}&limit=${limit}`);
 };

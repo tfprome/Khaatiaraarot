@@ -24,9 +24,9 @@ import {
   Phone,
   Flame,
 } from "lucide-react";
-import { PageSkeleton } from "@/components/skeleton/detailsSkeleton";
+import { ProductdetailsPageSkeleton } from "@/components/skeleton/productDetailsPageSkeleton";
 import { addToCart } from "@/lib/cartApi";
-import {toast} from 'react-toastify'
+import { toast } from 'react-toastify'
 import { ProductDetailstype } from "@/Types/ProductTypes";
 
 
@@ -55,9 +55,8 @@ function ImageGallery({ images, name }: { images: string[]; name: string }) {
             <button
               key={i}
               onClick={() => setActive(i)}
-              className={`flex-shrink-0 w-18 h-18 rounded-xl overflow-hidden border-2 transition-all ${
-                active === i ? "border-[#5B1A18]" : "border-[#f0e8e7] hover:border-[#d4b8b7]"
-              }`}
+              className={`flex-shrink-0 w-18 h-18 rounded-xl overflow-hidden border-2 transition-all ${active === i ? "border-[#5B1A18]" : "border-[#f0e8e7] hover:border-[#d4b8b7]"
+                }`}
             >
               <img src={src} alt={`${name} ${i + 1}`} className="w-full h-full object-cover" />
             </button>
@@ -71,9 +70,9 @@ function ImageGallery({ images, name }: { images: string[]; name: string }) {
 // ─── Trust badges ─────────────────────────────────────────────────────────────
 function TrustBadges() {
   const badges = [
-    { icon: Truck,       label: "Rapid Delivery",    sub: "On all orders" },
-    { icon: ShieldCheck, label: "100% Pure",         sub: "Verified quality" },
-    { icon: RefreshCw,   label: "Easy Returns",      sub: "Hassle-free" },
+    { icon: Truck, label: "Rapid Delivery", sub: "On all orders" },
+    { icon: ShieldCheck, label: "100% Pure", sub: "Verified quality" },
+    { icon: RefreshCw, label: "Easy Returns", sub: "Hassle-free" },
   ];
   return (
     <div className="grid grid-cols-3 gap-2 border border-[#f0e8e7] rounded-2xl p-3">
@@ -100,11 +99,10 @@ function Tabs({ description }: { description: string }) {
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-5 py-3.5 text-sm font-semibold capitalize transition-colors ${
-              tab === t
-                ? "text-[#5B1A18] border-b-2 border-[#5B1A18] -mb-px bg-white"
-                : "text-[#9b7b7a] hover:text-[#5B1A18]"
-            }`}
+            className={`px-5 py-3.5 text-sm font-semibold capitalize transition-colors ${tab === t
+              ? "text-[#5B1A18] border-b-2 border-[#5B1A18] -mb-px bg-white"
+              : "text-[#9b7b7a] hover:text-[#5B1A18]"
+              }`}
           >
             {t === "reviews" ? "Reviews (0)" : t.charAt(0).toUpperCase() + t.slice(1)}
           </button>
@@ -140,29 +138,20 @@ export default function ProductPage() {
   const [qty, setQty] = useState(1);
   const [wishlisted, setWishlisted] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
-  const [addingtoCart,setAddingtoCart]=useState(false)
+  const [addingtoCart, setAddingtoCart] = useState(false)
 
   useEffect(() => {
     (async () => {
       try {
         const { data } = await api.get(`/api/v1/products/${id}`);
         setProduct(data.data ?? data);
-      } catch(error:any) {
+      } catch (error: any) {
         toast.error(error.error?.message ?? "Something went wrong", {
-                    position: "bottom-right",
-                    autoClose: 1500,
-                    hideProgressBar: true,
-                    style: {
-                      background: "#f00808",
-                      color: "#ffffff",
-                      fontSize: "15px",
-                      fontWeight: "600",
-                      padding: "16px",
-                      minWidth: "320px",
-                      minHeight: "70px",
-                      borderRadius: "12px",
-                    },
-                  })
+          position: "bottom-right",
+          autoClose: 1500,
+          hideProgressBar: true,
+          className: "error-toast"
+        })
         router.push("/shop");
       } finally {
         setLoading(false);
@@ -170,7 +159,7 @@ export default function ProductPage() {
     })();
   }, [id, router]);
 
-  if (loading) return <PageSkeleton />;
+  if (loading) return <ProductdetailsPageSkeleton />;
   if (!product) return null;
 
   const discount = product.originalPrice > product.price
@@ -181,40 +170,35 @@ export default function ProductPage() {
   const outOfStock = product.stockQty === 0;
 
   const handleAddToCart = async (
-          id: string,
-          quantity: number
-      ) => {
-          try {
-              setAddingtoCart(true);
-  
-              await addToCart(id, quantity);
-  
-              toast("Added to your cart.", {
-                  position: "bottom-right",
-                  autoClose: 1000, // 0.5 second
-                  hideProgressBar: true,
-                  closeOnClick: true,
-                  pauseOnHover: false,
-                  draggable: false,
-                  style: {
-                      background: "#5B1A18",
-                      opacity: '0.5',
-                      color: "#ffffff",
-                      fontSize: "16px",
-                      fontWeight: "600",
-                      padding: "16px",
-                      minWidth: "320px",
-                      minHeight: "70px",
-                      borderRadius: "12px",
-                  },
-              });
-            setAddedToCart(true);
-          } catch (error) {
-              toast.error("Failed to add item");
-          } finally {
-              setAddingtoCart(false);
-          }
-      };
+    id: string,
+    quantity: number
+  ) => {
+    try {
+      setAddingtoCart(true);
+
+      await addToCart(id, quantity);
+
+      toast("Added to your cart.", {
+        position: "top-center",
+        autoClose: 1000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        className: 'cart-success-toast'
+      });
+      setAddedToCart(true);
+    } catch (error) {
+      toast.error("Failed to add item", {
+        position: "bottom-right",
+        autoClose: 1500,
+        hideProgressBar: true,
+        className: "error-toast"
+      });
+    } finally {
+      setAddingtoCart(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#fdf8f7]">
@@ -336,30 +320,28 @@ export default function ProductPage() {
                 {/* CTA buttons */}
                 <div className="flex gap-3 group">
                   <button
-                    onClick={()=>{handleAddToCart(product.id,1)}}
+                    onClick={() => { handleAddToCart(product.id, 1) }}
                     disabled={addingtoCart}
-                    className={`flex-1 flex items-center cursor-pointer disabled:cursor-progress justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                      addedToCart
-                        ? "bg-green-600 text-white"
-                        : "bg-[#5B1A18] text-white hover:bg-[#7a2320]"
-                    }`}
+                    className={`flex-1 flex items-center cursor-pointer disabled:cursor-progress justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${addedToCart
+                      ? "bg-green-600 text-white"
+                      : "bg-[#5B1A18] text-white hover:bg-[#7a2320]"
+                      }`}
                   >
-                    <ShoppingCart size={16} className="transition-transform duration-200 group-hover:scale-120"/>
+                    <ShoppingCart size={16} className="transition-transform duration-200 group-hover:scale-120" />
                     {addedToCart ? "Added!" : "Add to Cart"}
                   </button>
                   <button
                     onClick={() => setWishlisted((w) => !w)}
-                    className={`px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
-                      wishlisted
-                        ? "border-[#5B1A18] bg-[#5B1A18] text-white"
-                        : "border-[#f0e8e7] text-[#9b7b7a] hover:border-[#5B1A18] hover:text-[#5B1A18]"
-                    }`}
+                    className={`px-4 py-3 rounded-xl border-2 transition-all duration-200 ${wishlisted
+                      ? "border-[#5B1A18] bg-[#5B1A18] text-white"
+                      : "border-[#f0e8e7] text-[#9b7b7a] hover:border-[#5B1A18] hover:text-[#5B1A18]"
+                      }`}
                   >
                     <Heart size={16} fill={wishlisted ? "currentColor" : "none"} />
                   </button>
-                  {/* <button className="px-4 py-3 rounded-xl border-2 border-[#f0e8e7] text-[#9b7b7a] hover:border-[#5B1A18] hover:text-[#5B1A18] transition-all duration-200">
+                  <button className="px-4 py-3 rounded-xl border-2 border-[#f0e8e7] text-[#9b7b7a] hover:border-[#5B1A18] hover:text-[#5B1A18] transition-all duration-200">
                     <Share2 size={16} />
-                  </button> */}
+                  </button>
                 </div>
 
                 {/* Buy now */}

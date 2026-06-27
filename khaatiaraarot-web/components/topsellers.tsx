@@ -2,8 +2,6 @@
 
 import Image from "next/image";
 import { ShoppingCartIcon, LightningIcon, HandbagIcon } from "@phosphor-icons/react";
-import CHINIGURA_CHAL from "../public/Images/ChiniguraChalproducts.png";
-import Mustardoil from "../public/Images/MustardOilProducts.png";
 import { Product } from "../Types/Homepagetypes";
 import { useAppDispatch } from "@/store/hooks";
 import { toast } from "react-toastify";
@@ -43,27 +41,22 @@ function ProductCard({ product }: { product: Product }) {
 
             await addToCart(id, quantity);
 
-            toast("Added to your cart.", {
-                position: "bottom-right",
+            toast.success("Added to your cart.", {
+                position: "top-center",
                 autoClose: 1000, // 0.5 second
                 hideProgressBar: true,
                 closeOnClick: true,
                 pauseOnHover: false,
                 draggable: false,
-                style: {
-                    background: "#5B1A18",
-                    opacity: '0.5',
-                    color: "#ffffff",
-                    fontSize: "16px",
-                    fontWeight: "600",
-                    padding: "16px",
-                    minWidth: "320px",
-                    minHeight: "70px",
-                    borderRadius: "12px",
-                },
+                className: 'cart-success-toast'
             });
         } catch (error) {
-            toast.error("Failed to add item");
+            toast.error("Failed to add item", {
+                position: "bottom-right",
+                autoClose: 1500,
+                hideProgressBar: true,
+                className: "error-toast"
+            });
         } finally {
             setLoading(false);
         }
@@ -78,7 +71,12 @@ function ProductCard({ product }: { product: Product }) {
             router.push("/checkout");
 
         } catch (error) {
-            toast.error("Failed to process Buy Now");
+            toast.error("Failed to process Buy Now", {
+                position: "bottom-right",
+                autoClose: 1500,
+                hideProgressBar: true,
+                className: "error-toast"
+            });
         } finally {
             setLoading(false);
         }
@@ -101,8 +99,8 @@ function ProductCard({ product }: { product: Product }) {
             )}
 
             {/* Image */}
-            <div onClick={()=>{router.push(`/shop/${product.id}`)}} 
-            className="relative w-22.5 sm:w-27.5 md:w-32.5 lg:w-42.5 shrink-0 self-stretch cursor-pointer bg-[#fdf5ee] overflow-hidden rounded-l-2xl">
+            <div onClick={() => { router.push(`/shop/${product.id}`) }}
+                className="relative w-22.5 sm:w-27.5 md:w-32.5 lg:w-42.5 shrink-0 self-stretch cursor-pointer bg-[#fdf5ee] overflow-hidden rounded-l-2xl">
                 {product.image ? (
                     <Image
                         src={product.image}

@@ -5,8 +5,6 @@ import { useEffect } from "react";
 import { useAppDispatch } from "@/store/hooks";
 import { useAppSelector } from "@/store/hooks";
 
-import { hydrateCart } from "../store/cartSlice";
-
 export default function CartPersistence() {
   const dispatch = useAppDispatch();
 
@@ -18,12 +16,6 @@ export default function CartPersistence() {
   useEffect(() => {
     const storedCart =
       localStorage.getItem("cart");
-
-    if (storedCart) {
-      dispatch(
-        hydrateCart(JSON.parse(storedCart))
-      );
-    }
   }, [dispatch]);
 
   // Save whenever cart changes

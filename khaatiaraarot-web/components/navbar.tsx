@@ -43,6 +43,7 @@ export default function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const dispatch = useAppDispatch();
     const router = useRouter();
+    const [username, setUsername] = useState<string | null>("")
 
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -60,6 +61,7 @@ export default function Navbar() {
 
     useEffect(() => {
         setToken(localStorage.getItem("userToken"));
+        setUsername(localStorage.getItem("userName"))
     }, []);
 
     const handleMyAccountRedirection = () => {
@@ -75,16 +77,7 @@ export default function Navbar() {
                 closeOnClick: true,
                 pauseOnHover: false,
                 draggable: false,
-                style: {
-                    background: "#5B1A18",
-                    color: "#ffffff",
-                    fontSize: "16px",
-                    fontWeight: "600",
-                    padding: "16px",
-                    minWidth: "320px",
-                    minHeight: "70px",
-                    borderRadius: "12px",
-                },
+                className: 'cart-success-toast'
             });
             router.push("/login");
         }
@@ -100,6 +93,7 @@ export default function Navbar() {
             }
 
             setToken(null);
+            setUsername(null);
             dispatch(logout())
 
             toast("You're logged out! See you soon.", {
@@ -130,16 +124,7 @@ export default function Navbar() {
                     position: "bottom-right",
                     autoClose: 1500,
                     hideProgressBar: true,
-                    style: {
-                        background: "#f00808",
-                        color: "#ffffff",
-                        fontSize: "15px",
-                        fontWeight: "600",
-                        padding: "16px",
-                        minWidth: "320px",
-                        minHeight: "70px",
-                        borderRadius: "12px",
-                    },
+                    className: "error-toast"
                 }
             );
         }
@@ -199,10 +184,11 @@ export default function Navbar() {
                             {/* <div className="w-9 h-9 rounded-xl bg-green-600 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
                                 <HouseIcon size={20} weight="fill" className="text-white" />
                             </div> */}
-                            <div className="mb-2">
+                            <div onClick={() => { router.push('/') }}
+                                className="mb-2">
                                 <Image
                                     src={Khaatiarotlogo}
-                                    alt="Grocery Store Logo"
+                                    alt="Khaati Aarot Logo"
                                     width={100}
                                     height={50}
                                     //className="w-full h-full object-contain"
@@ -233,7 +219,8 @@ export default function Navbar() {
                         <div className="flex-1 md:hidden" />
 
                         {/* Action Icons */}
-                        <div className="flex items-center shrink-0">
+                        <div onClick={() => router.push('my-account/wishlist')}
+                            className="flex items-center shrink-0">
                             <div className="relative flex flex-col items-center gap-0.5 px-2.5 py-2 rounded-xl group transition-colors duration-200 cursor-pointer">
                                 <HeartIcon size={22} className="text-white transition-colors duration-200" />
                                 <span className="hidden lg:block text-[10px] text-white font-medium transition-colors">
@@ -252,7 +239,7 @@ export default function Navbar() {
                                 className="flex flex-col items-center gap-0.5 px-2.5 py-2 rounded-xl group transition-colors duration-200 cursor-pointer">
                                 <UserIcon size={22} className="text-white transition-colors duration-200" />
                                 <span className="hidden lg:block text-[10px] text-white font-medium transition-colors">
-                                    Account
+                                    {username ? username : "account"}
                                 </span>
                             </div>
                         </div>
@@ -311,13 +298,13 @@ export default function Navbar() {
                     </div>
 
                     {/* Mobile sidebar */}
-                        <button
-                            onClick={() => setMobileMenuOpen(true)}
-                            className="md:hidden flex items-center gap-2 px-4 py-3 text-sm font-medium text-gray-600 cursor-pointer hover:text-[#5B1A18] transition-colors"
-                        >
-                            <ListIcon size={20} />
-                            <span>Menu</span>
-                        </button>
+                    <button
+                        onClick={() => setMobileMenuOpen(true)}
+                        className="md:hidden flex items-center gap-2 px-4 py-3 text-sm font-medium text-gray-600 cursor-pointer hover:text-[#5B1A18] transition-colors"
+                    >
+                        <ListIcon size={20} />
+                        <span>Menu</span>
+                    </button>
 
                     <AnimatePresence>
                         {mobileMenuOpen && (
