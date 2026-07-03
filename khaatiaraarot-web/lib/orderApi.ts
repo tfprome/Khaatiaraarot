@@ -1,5 +1,4 @@
 import api from "./axiosinterceptor";
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 import { paymentpayloadtype } from "@/Types/orderTypes";
 
 export const createOrder = async (payload: paymentpayloadtype,idempotecyKey:string) => {

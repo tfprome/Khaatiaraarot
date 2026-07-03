@@ -34,7 +34,7 @@ export default function LoginPage() {
             const json = await res.json() as { success?: boolean; data?: { accessToken: string; user: { role: string; fullName: string } }; error?: { message?: string } };
             if (!res.ok) {
                 toast.error(json.error?.message ?? "Login failed.Please try again", {
-                    position: "bottom-right",
+                    position: "top-center",
                     autoClose: 1000,
                     hideProgressBar: true,
                     className: 'error-toast'
@@ -48,22 +48,13 @@ export default function LoginPage() {
             dispatch(login())
 
             toast("You're in! Let's fill the cart.", {
-                position: "bottom-right",
+                position: "top-center",
                 autoClose: 1000, // 0.5 second
                 hideProgressBar: true,
                 closeOnClick: true,
                 pauseOnHover: false,
                 draggable: false,
-                style: {
-                    background: "#5B1A18", // dark green
-                    color: "#ffffff",
-                    fontSize: "16px",
-                    fontWeight: "600",
-                    padding: "16px",
-                    minWidth: "320px",
-                    minHeight: "70px",
-                    borderRadius: "12px",
-                },
+                className:'success-toast'
             });
 
             router.replace('/');

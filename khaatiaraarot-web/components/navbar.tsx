@@ -71,13 +71,13 @@ export default function Navbar() {
             router.push("/my-account");
         } else {
             toast("Please login to view your profile", {
-                position: "bottom-right",
+                position: "top-center",
                 autoClose: 1000,
                 hideProgressBar: true,
                 closeOnClick: true,
                 pauseOnHover: false,
                 draggable: false,
-                className: 'cart-success-toast'
+                className: 'success-toast'
             });
             router.push("/login");
         }
@@ -103,16 +103,7 @@ export default function Navbar() {
                 closeOnClick: true,
                 pauseOnHover: false,
                 draggable: false,
-                style: {
-                    background: "#5B1A18",
-                    color: "#ffffff",
-                    fontSize: "16px",
-                    fontWeight: "600",
-                    padding: "16px",
-                    minWidth: "320px",
-                    minHeight: "70px",
-                    borderRadius: "12px",
-                },
+                className:'success-toast'
             });
 
         } catch (error: any) {
@@ -219,9 +210,9 @@ export default function Navbar() {
                         <div className="flex-1 md:hidden" />
 
                         {/* Action Icons */}
-                        <div onClick={() => router.push('my-account/wishlist')}
-                            className="flex items-center shrink-0">
-                            <div className="relative flex flex-col items-center gap-0.5 px-2.5 py-2 rounded-xl group transition-colors duration-200 cursor-pointer">
+                        <div className="flex items-center shrink-0">
+                            <div onClick={() => router.push('/my-account/wishlist')} 
+                            className="relative flex flex-col items-center gap-0.5 px-2.5 py-2 rounded-xl group transition-colors duration-200 cursor-pointer">
                                 <HeartIcon size={22} className="text-white transition-colors duration-200" />
                                 <span className="hidden lg:block text-[10px] text-white font-medium transition-colors">
                                     Wishlist

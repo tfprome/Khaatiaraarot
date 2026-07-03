@@ -12,7 +12,7 @@ import {
 import { CartItem } from "@/Types/cartTypes";
 import { useAppDispatch } from "@/store/hooks";
 import { useAppSelector } from "@/store/hooks";
-import { closeCart, openCart } from "@/store/cartSlice";
+import { closeCart, openCart, setItemCount } from "@/store/cartSlice";
 import { CartDrawerProps } from "@/Types/cartTypes";
 import api from "@/lib/axiosinterceptor";
 import { fetchCart, updateCartItem, deleteCartItem } from "@/lib/cartApi";
@@ -59,7 +59,7 @@ function ItemRow({
           <button
             onClick={onRemove}
             aria-label={`Remove ${item.product.name}`}
-            className="opacity-0 group-hover:opacity-100 transition-opacity text-[#b0b8a0] hover:text-red-500 shrink-0 mt-0.5"
+            className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-[#b0b8a0] hover:text-red-500 shrink-0 mt-0.5"
           >
             <X size={13} weight="bold" />
           </button>
@@ -115,7 +115,10 @@ export default function CartDrawer({
   const isOpen = useAppSelector((state) => state.cart.isOpen);
   const items = useAppSelector((state) => state.cart.items);
 
-  const totalQty = cart.reduce((s, i) => s + i.quantity, 0);
+  const totalQty = useAppSelector(
+    (state) => state.cart.itemCount
+  );
+  //console.log('totalQty', totalQty)
   const subtotal = cart.reduce((s, i) => s + i.product?.price * i.quantity, 0);
   const savings = cart.reduce(
     (s, i) => s + ((i.product.originalPrice ?? i.product.price) - i.product.price) * i.quantity,
@@ -124,13 +127,27 @@ export default function CartDrawer({
   const remaining = Math.max(0, FREE_DELIVERY_THRESHOLD - subtotal);
   const deliveryPct = Math.min(100, Math.round((subtotal / FREE_DELIVERY_THRESHOLD) * 100));
 
+  const isFirstRender = useRef(true);
+
   useEffect(() => {
-    if (totalQty > prevCount.current) {
-      setBadgePulse(true);
-      const t = setTimeout(() => setBadgePulse(false), 300);
+    if (isFirstRender.current) {
       prevCount.current = totalQty;
+      isFirstRender.current = false;
+      return;
+    }
+
+    if (totalQty!= prevCount.current) {
+      setBadgePulse(true);
+
+      const t = setTimeout(() => {
+        setBadgePulse(false);
+      }, 300);
+
+      prevCount.current = totalQty;
+
       return () => clearTimeout(t);
     }
+
     prevCount.current = totalQty;
   }, [totalQty]);
 
@@ -168,7 +185,9 @@ export default function CartDrawer({
     );
 
     try {
-      await updateCartItem(productId, quantity);
+      const res = await updateCartItem(productId, quantity);
+      console.log('updateCartItem res', res.data.itemCount)
+      dispatch(setItemCount(res.data.itemCount));
     } catch (error) {
       // rollback on failure
       setCart(previousCart);
@@ -192,6 +211,7 @@ export default function CartDrawer({
       try {
         const res = await fetchCart();
         setCart(res.data.items)
+        dispatch(setItemCount(res.data.itemCount));
       } catch (err) {
         console.error(err);
       }

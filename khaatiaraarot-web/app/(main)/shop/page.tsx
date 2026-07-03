@@ -1,17 +1,18 @@
-// app/products/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
 import { Product } from "@/Types/ProductTypes";
 import axios from "axios";
 import { ChevronDown, MapPinHouse } from "lucide-react";
-import { CaretDownIcon } from "@phosphor-icons/react";
+import { BagIcon, HeartIcon, ShoppingCartIcon } from "@phosphor-icons/react";
 import { Category } from "@/Types/ProductTypes";
 import { addToCart } from "@/lib/cartApi";
-import { useAppDispatch } from "@/store/hooks";
 import { toast } from "react-toastify";
 import PaginationControls from "@/components/pagination/paginationcontrol";
 import { useRouter } from "next/navigation";
+import { addToWish } from "@/lib/wishlistApi";
+import { useAppDispatch } from "@/store/hooks";
+import { setItemCount } from "@/store/cartSlice";
 
 function getDiscount(price: number, originalPrice: number | null): number | null {
   if (!originalPrice) return null;
@@ -35,6 +36,7 @@ function ProductCard({ product, categories }: { product: Product; categories: Ca
   //console.log(product)
 
   const router = useRouter()
+  const dispatch = useAppDispatch()
 
   const handleAddToCart = async (
     id: string,
@@ -43,7 +45,8 @@ function ProductCard({ product, categories }: { product: Product; categories: Ca
     try {
       setLoading(true);
 
-      await addToCart(id, quantity);
+      const res = await addToCart(id, quantity);
+      dispatch(setItemCount(res.data.itemCount));
 
       toast("Added to your cart.", {
         position: "top-center",
@@ -54,8 +57,38 @@ function ProductCard({ product, categories }: { product: Product; categories: Ca
         draggable: false,
         className: 'cart-success-toast'
       });
-    } catch (error) {
-      toast.error("Failed to add item", {
+    } catch (error: any) {
+      //console.error("Failed to add item", error.message);
+      toast.error(error.response?.data?.message || "Failed to add item", {
+        position: "bottom-right",
+        autoClose: 1500,
+        hideProgressBar: true,
+        className: "error-toast"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddToWish = async (
+    id: string,
+  ) => {
+    try {
+      setLoading(true);
+
+      await addToWish(id);
+
+      toast("Added to your wishlist.", {
+        position: "top-center",
+        autoClose: 1000, // 0.5 second
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        className: 'cart-success-toast'
+      });
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to add item", {
         position: "bottom-right",
         autoClose: 1500,
         hideProgressBar: true,
@@ -69,7 +102,7 @@ function ProductCard({ product, categories }: { product: Product; categories: Ca
 
 
   return (
-    <div className="group relative flex flex-col bg-white rounded-2xl border border-stone-200 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 hover:scale-103 transition-all duration-200">
+    <div className="relative flex flex-col bg-white rounded-2xl border border-stone-200 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
       {/* Image / Placeholder */}
       <div onClick={() => { router.push(`/shop/${product.id}`) }}
         className="relative bg-stone-50 flex items-center justify-center cursor-pointer h-44 sm:h-48 text-5xl select-none">
@@ -137,16 +170,54 @@ function ProductCard({ product, categories }: { product: Product; categories: Ca
         <StockIndicator qty={product.stockQty} />
 
         {/* CTA */}
-        {product.stockQty == 0 ? (
-          <button className="mt-1 w-full py-2.5 rounded-xl cursor-not-allowed bg-stone-300 text-stone-500 text-sm font-semibold transition-all duration-150" disabled>
+        {product.stockQty === 0 ? (
+          <button
+            disabled
+            className="mt-1 w-full py-2.5 rounded-xl cursor-not-allowed bg-stone-300 text-stone-500 text-sm font-semibold"
+          >
             Out of Stock
           </button>
         ) : (
-          <button onClick={() => handleAddToCart(product.id, 1)}
-            disabled={loading}
-            className="mt-1 w-full py-2.5 rounded-xl cursor-pointer disabled:cursor-progress bg-[#5A1B18] active:scale-95 text-white text-sm font-semibold transition-all duration-150">
-            Add to Cart
-          </button>
+          <div className="mt-1 flex gap-1.5 sm:gap-2">
+            {/* Add to Cart */}
+            <button
+              onClick={() => handleAddToCart(product.id, 1)}
+              disabled={loading}
+              title="Add to Cart"
+              className="flex-1 group flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-2.5 rounded-xl bg-[#5A1B18] text-white cursor-pointer text-xs sm:text-sm font-semibold active:scale-95 disabled:cursor-progress"
+            >
+              <ShoppingCartIcon
+                size={16}
+                className="group-hover:scale-110 transition-transform duration-200 sm:hidden lg:inline sm:w-[18px] sm:h-[18px]"
+              />
+              <span className="hidden xs:inline sm:inline">Add to Cart</span>
+              {/* <span className="xs:hidden sm:hidden">Cart</span> */}
+            </button>
+
+            {/* Buy Now */}
+            <button
+              title="Buy Now"
+              //onClick={() => handleBuyNow(product.id)}
+              className="w-10 sm:w-12 lg:w-[15%] flex group items-center justify-center cursor-pointer rounded-xl border border-[#5A1B18] text-[#5A1B18] transition-colors py-2 sm:py-2.5"
+            >
+              <BagIcon
+                size={16}
+                className="group-hover:scale-125 transition-transform duration-200 sm:w-[18px] sm:h-[18px]"
+              />
+            </button>
+
+            {/* Wishlist */}
+            <button
+              title="Add to Wishlist"
+              onClick={() => handleAddToWish(product.id)}
+              className="w-10 sm:w-12 lg:w-[15%] flex items-center justify-center group rounded-xl cursor-pointer border border-[#5A1B18] text-[#5A1B18] transition-colors py-2 sm:py-2.5"
+            >
+              <HeartIcon
+                size={16}
+                className="group-hover:scale-125 transition-transform duration-200 sm:w-[18px] sm:h-[18px]"
+              />
+            </button>
+          </div>
         )}
       </div>
     </div>
@@ -178,7 +249,7 @@ export default function ProductsPage() {
     };
     fetchProducts();
   }, [sortBy, page, limit]);
-  console.log('products', products);
+  //console.log('products', products);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -187,7 +258,7 @@ export default function ProductsPage() {
     };
     fetchCategories();
   }, []);
-  console.log('categories', categories);
+  //console.log('categories', categories);
 
   const filtered = products
     .filter((p) => {
@@ -208,7 +279,7 @@ export default function ProductsPage() {
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] font-sans">
+    <div className="min-h-screen bg-[#FDFBF7] font-serif">
       {/* Header */}
       {/* <header className="sticky top-0 z-30 bg-[#1B4332] text-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -306,7 +377,7 @@ export default function ProductsPage() {
           </div>
         )}
 
-        <PaginationControls page={page} totalPages={totalPages} onPageChange={setPage}/>
+        <PaginationControls page={page} totalPages={totalPages} onPageChange={setPage} />
       </main>
     </div>
   );

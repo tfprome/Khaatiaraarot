@@ -1,4 +1,6 @@
+import { CartProduct } from "@/Types/cartTypes";
 import api from "./axiosinterceptor";
+import { ProductDetailstype } from "@/Types/ProductTypes";
 
 export const addToCart = async (
   productId: string,
@@ -11,7 +13,6 @@ export const addToCart = async (
       quantity,
     }
   );
-
   return data;
 };
 
@@ -28,11 +29,34 @@ export const updateCartItem = async (
   productId: string,
   quantity: number
 ) => {
-  return api.patch(`/api/v1/cart/items/${productId}`, {
+  const {data}=await api.patch(`/api/v1/cart/items/${productId}`, {
     quantity,
   });
+  return data;
 };
 
 export const deleteCartItem = async (productId: string) => {
   return api.delete(`/api/v1/cart/items/${productId}`);
+};
+
+export const saveBuyNowItem = (product: ProductDetailstype) => {
+  localStorage.setItem(
+    "buyNowItem",
+    JSON.stringify({
+      product,
+      quantity: 1,
+    })
+  );
+};
+
+export const getBuyNowItem = () => {
+  const item = localStorage.getItem("buyNowItem");
+
+  if (!item) return null;
+
+  return JSON.parse(item);
+};
+
+export const clearBuyNowItem = () => {
+  localStorage.removeItem("buyNowItem");
 };

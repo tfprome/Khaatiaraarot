@@ -126,7 +126,7 @@ export default function RegisterPage() {
       const json = await res.json() as { success?: boolean; data?: { accessToken: string; user: { role: string; fullName: string } }; error?: { message?: string } };
       if (!res.ok) {
         toast.error(json.error?.message ?? "Registration failed.Please try again", {
-          position: "bottom-right",
+          position: "top-center",
           autoClose: 1500,
           hideProgressBar: true,
           className:"error-toast"
@@ -143,16 +143,7 @@ export default function RegisterPage() {
         closeOnClick: true,
         pauseOnHover: false,
         draggable: false,
-        style: {
-          background: "#5B1A18", // dark green
-          color: "#ffffff",
-          fontSize: "16px",
-          fontWeight: "600",
-          padding: "16px",
-          minWidth: "320px",
-          minHeight: "70px",
-          borderRadius: "12px",
-        },
+        className: 'success-toast'
       });
       router.replace('/');
     } catch (err) {

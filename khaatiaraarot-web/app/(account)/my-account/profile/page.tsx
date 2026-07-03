@@ -36,27 +36,18 @@ export default function ProfilePage() {
         if (error?.status === 401) {
           router.push("/login");
           toast("Please login to view your profile", {
-            position: "bottom-right",
+            position: "top-center",
             autoClose: 1000,
             hideProgressBar: true,
             closeOnClick: true,
             pauseOnHover: false,
             draggable: false,
-            style: {
-              background: "#5B1A18",
-              color: "#ffffff",
-              fontSize: "16px",
-              fontWeight: "600",
-              padding: "16px",
-              minWidth: "320px",
-              minHeight: "70px",
-              borderRadius: "12px",
-            },
+            className: 'success-toast'
           });
         }
         else {
           toast.error(error.error?.message ?? "Something went wrong", {
-            position: "bottom-right",
+            position: "top-center",
             autoClose: 1500,
             hideProgressBar: true,
             className:"error-toast"

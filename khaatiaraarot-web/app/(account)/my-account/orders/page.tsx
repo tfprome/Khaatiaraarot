@@ -27,7 +27,7 @@ export default function OrdersPage() {
       router.replace("/");
     }
   }, [isAuthenticated, router]);
-  console.log(isAuthenticated)
+  //console.log(isAuthenticated)
 
   useEffect(() => {
     const handleOrders = async () => {
@@ -39,20 +39,18 @@ export default function OrdersPage() {
         if (error?.status === 401) {
           router.push("/login");
           toast("Please login to view your profile", {
-            position: "bottom-right",
-            autoClose: 1000,
             hideProgressBar: true,
             closeOnClick: true,
             pauseOnHover: false,
             draggable: false,
-            className: 'cart-success-toast'
+            className: 'success-toast'
           });
         }
         //console.log("Failed to fetch orders:", error);
       }
     };
     handleOrders();
-  }, [page,limit]);
+  }, [page, limit]);
 
   const totalPages = Math.ceil(total / limit);
   return (
@@ -73,8 +71,9 @@ export default function OrdersPage() {
             ))}
           </div>
         )}
-        <PaginationControls page={page} totalPages={totalPages} onPageChange={setPage} />
       </div>
+
+      <PaginationControls page={page} totalPages={totalPages} onPageChange={setPage} />
     </>
   );
 }

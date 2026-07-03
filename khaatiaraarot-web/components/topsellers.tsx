@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { addToCart } from "@/lib/cartApi";
+import {setItemCount} from "@/store/cartSlice";
 
 function getInitial(name: string) {
     const initials = name
@@ -39,7 +40,9 @@ function ProductCard({ product }: { product: Product }) {
         try {
             setLoading(true);
 
-            await addToCart(id, quantity);
+            const res = await addToCart(id, quantity);
+
+            dispatch(setItemCount(res.data.itemCount));
 
             toast.success("Added to your cart.", {
                 position: "top-center",

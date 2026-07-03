@@ -10,13 +10,9 @@ import {
   ShoppingCart,
   Heart,
   Share2,
-  Star,
   MapPin,
   Package,
   Tag,
-  Truck,
-  ShieldCheck,
-  RefreshCw,
   ChevronRight,
   Minus,
   Plus,
@@ -25,109 +21,19 @@ import {
   Flame,
 } from "lucide-react";
 import { ProductdetailsPageSkeleton } from "@/components/skeleton/productDetailsPageSkeleton";
-import { addToCart } from "@/lib/cartApi";
+import { addToCart, saveBuyNowItem } from "@/lib/cartApi";
+import { addToWish } from "@/lib/wishlistApi";
 import { toast } from 'react-toastify'
 import { ProductDetailstype } from "@/Types/ProductTypes";
+import { Tabs } from "@/components/productdetailspage/tabs";
+import { TrustBadges } from "@/components/productdetailspage/trustbadges";
+import { ImageGallery } from "@/components/productdetailspage/images";
+import {useAppDispatch} from "@/store/hooks";
+import {setItemCount} from "@/store/cartSlice";
+import { CartProduct } from "@/Types/cartTypes";
 
 
-// ─── Image gallery ────────────────────────────────────────────────────────────
-const PLACEHOLDER = "/Images/placeholder-product.png"; // your placeholder
 
-function ImageGallery({ images, name }: { images: string[]; name: string }) {
-  const imgs = images.length > 0 ? images : [PLACEHOLDER];
-  const [active, setActive] = useState(0);
-
-  return (
-    <div className="space-y-3">
-      {/* Main image */}
-      <div className="relative aspect-square rounded-2xl overflow-hidden bg-[#f9f1f0] border border-[#f0e8e7]">
-        <img
-          src={imgs[active]}
-          alt={name}
-          className="w-full h-full object-contain p-4"
-        />
-      </div>
-
-      {/* Thumbnails */}
-      {imgs.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {imgs.map((src, i) => (
-            <button
-              key={i}
-              onClick={() => setActive(i)}
-              className={`flex-shrink-0 w-18 h-18 rounded-xl overflow-hidden border-2 transition-all ${active === i ? "border-[#5B1A18]" : "border-[#f0e8e7] hover:border-[#d4b8b7]"
-                }`}
-            >
-              <img src={src} alt={`${name} ${i + 1}`} className="w-full h-full object-cover" />
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Trust badges ─────────────────────────────────────────────────────────────
-function TrustBadges() {
-  const badges = [
-    { icon: Truck, label: "Rapid Delivery", sub: "On all orders" },
-    { icon: ShieldCheck, label: "100% Pure", sub: "Verified quality" },
-    { icon: RefreshCw, label: "Easy Returns", sub: "Hassle-free" },
-  ];
-  return (
-    <div className="grid grid-cols-3 gap-2 border border-[#f0e8e7] rounded-2xl p-3">
-      {badges.map(({ icon: Icon, label, sub }) => (
-        <div key={label} className="flex flex-col items-center text-center gap-1 py-1">
-          <Icon size={18} className="text-[#5B1A18]" />
-          <span className="text-xs font-semibold text-[#2d1010]">{label}</span>
-          <span className="text-[10px] text-[#9b7b7a]">{sub}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ─── Tab panel ────────────────────────────────────────────────────────────────
-function Tabs({ description }: { description: string }) {
-  const [tab, setTab] = useState<"description" | "details" | "reviews">("description");
-
-  return (
-    <div className="mt-10 border border-[#f0e8e7] rounded-2xl overflow-hidden bg-white">
-      {/* Tab bar */}
-      <div className="flex border-b border-[#f0e8e7]">
-        {(["description", "details", "reviews"] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`px-5 py-3.5 text-sm font-semibold capitalize transition-colors ${tab === t
-              ? "text-[#5B1A18] border-b-2 border-[#5B1A18] -mb-px bg-white"
-              : "text-[#9b7b7a] hover:text-[#5B1A18]"
-              }`}
-          >
-            {t === "reviews" ? "Reviews (0)" : t.charAt(0).toUpperCase() + t.slice(1)}
-          </button>
-        ))}
-      </div>
-
-      {/* Tab content */}
-      <div className="p-5 sm:p-7">
-        {tab === "description" && (
-          <p className="text-sm text-[#4a2020] leading-relaxed">{description}</p>
-        )}
-        {tab === "details" && (
-          <p className="text-sm text-[#9b7b7a]">No additional details available.</p>
-        )}
-        {tab === "reviews" && (
-          <div className="flex flex-col items-center py-8 text-center">
-            <Star className="w-8 h-8 text-[#f0e8e7] mb-3" />
-            <p className="text-sm font-semibold text-[#2d1010]">No reviews yet</p>
-            <p className="text-xs text-[#9b7b7a] mt-1">Be the first to review this product.</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function ProductPage() {
@@ -136,9 +42,11 @@ export default function ProductPage() {
   const [product, setProduct] = useState<ProductDetailstype | null>(null);
   const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
-  const [wishlisted, setWishlisted] = useState(false);
+  const [addingtoWish, setAddingtoWish] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
   const [addingtoCart, setAddingtoCart] = useState(false)
+  const [wishlisted,setWishlisted] =useState(false)
+  const dispatch=useAppDispatch()
 
   useEffect(() => {
     (async () => {
@@ -176,9 +84,11 @@ export default function ProductPage() {
     try {
       setAddingtoCart(true);
 
-      await addToCart(id, quantity);
+      const res=await addToCart(id, quantity);
+      //console.log('detail res:', res);
+      dispatch(setItemCount(res.data.itemCount));
 
-      toast("Added to your cart.", {
+      toast.success("Added to your cart.", {
         position: "top-center",
         autoClose: 1000,
         hideProgressBar: true,
@@ -199,6 +109,42 @@ export default function ProductPage() {
       setAddingtoCart(false);
     }
   };
+
+  const handleBuyNow = (product: ProductDetailstype) => {
+  saveBuyNowItem(product);
+
+  router.push("/checkout?mode=buy-now");
+};
+
+  const handleAddToWish = async (
+      id: string,
+    ) => {
+      try {
+        setAddingtoWish(true);
+  
+        await addToWish(id);
+  
+        toast("Added to your wishlist.", {
+          position: "top-center",
+          autoClose: 1000, // 0.5 second
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          className: 'cart-success-toast'
+        });
+        setWishlisted(true)
+      } catch (error) {
+        toast.error("Failed to add item", {
+          position: "bottom-right",
+          autoClose: 1500,
+          hideProgressBar: true,
+          className: "error-toast"
+        });
+      } finally {
+        setAddingtoWish(false);
+      }
+    };
 
   return (
     <div className="min-h-screen bg-[#fdf8f7]">
@@ -331,7 +277,8 @@ export default function ProductPage() {
                     {addedToCart ? "Added!" : "Add to Cart"}
                   </button>
                   <button
-                    onClick={() => setWishlisted((w) => !w)}
+                    onClick={()=>{handleAddToWish(product.id)}}
+                    disabled={addingtoWish}
                     className={`px-4 py-3 rounded-xl border-2 transition-all duration-200 ${wishlisted
                       ? "border-[#5B1A18] bg-[#5B1A18] text-white"
                       : "border-[#f0e8e7] text-[#9b7b7a] hover:border-[#5B1A18] hover:text-[#5B1A18]"
@@ -345,7 +292,8 @@ export default function ProductPage() {
                 </div>
 
                 {/* Buy now */}
-                <button className="w-full py-3 rounded-xl border-2 border-[#5B1A18] text-[#5B1A18] text-sm font-semibold hover:bg-[#5B1A18] hover:text-white transition-all duration-200">
+                <button onClick={()=>{handleBuyNow(product)}}
+                className="w-full py-3 rounded-xl border-2 border-[#5B1A18] text-[#5B1A18] text-sm font-semibold hover:bg-[#5B1A18] hover:text-white transition-all duration-200">
                   Buy Now
                 </button>
 

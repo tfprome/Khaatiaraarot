@@ -26,4 +26,5 @@ export interface CartDrawerProps {
 export interface CartState {
   items: CartItem[];
   isOpen: boolean;
+  itemCount: number;
 }

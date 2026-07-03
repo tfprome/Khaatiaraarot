@@ -18,11 +18,15 @@ import { fetchCart, updateCartItem, deleteCartItem } from "@/lib/cartApi";
 import { createOrder } from "@/lib/orderApi";
 import { toast } from 'react-toastify'
 import { useRef } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { checkoutSchema, CheckoutFormData } from "@/zodvalidations/checkoutschema";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import { setItemCount } from "@/store/cartSlice";
+import { useSearchParams } from "next/navigation";
+import { getBuyNowItem, clearBuyNowItem } from "@/lib/cartApi";
 
 type PaymentMethod = "cash" | "online" | "bkash";
-
-// const districts = ["Dhaka", "Chittagong", "Sylhet", "Rajshahi", "Khulna", "Barisal", "Mymensingh"];
-// const thanas = ["Rampura", "Mirpur", "Gulshan", "Banani", "Dhanmondi", "Motijheel", "Uttara"];
 
 const paymentMethods = [
     { id: "cash" as PaymentMethod, label: "Cash On Delivery", Icon: TruckIcon },
@@ -55,24 +59,39 @@ export default function CheckoutPage() {
     const [coupon, setCoupon] = useState("");
     const [notes, setNotes] = useState("");
     const [agreed, setAgreed] = useState(true);
-    const [form, setForm] = useState({
-        name: "",
-        phone: "",
-        address: "",
-        district: "",
-        city: "",
-        billing: "",
-        postalCode: ""
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<CheckoutFormData>({
+        resolver: zodResolver(checkoutSchema),
+        defaultValues: {
+            name: "",
+            phone: "",
+            address: "",
+            district: "",
+            city: "",
+            billing: "",
+            postalCode: "",
+        },
     });
     const [cart, setCart] = useState<CartItem[]>([])
     const router = useRouter();
     //console.log('form',form)
+    const { isAuthenticated } = useAppSelector(
+        (state) => state.auth
+    );
+    const dispatch = useAppDispatch();
 
     const [loading, setLoading] = useState(true);
     const [placingOrder, setPlacingOrder] = useState(false);
     const idempotencyKey = useRef<string>(crypto.randomUUID());
+    // const searchParams = useSearchParams();
 
-    const handlePlaceOrder = async () => {
+    // const isBuyNow =
+    //     searchParams.get("mode") === "buy-now";
+
+    const handlePlaceOrder = async (form: CheckoutFormData) => {
         try {
             setPlacingOrder(true);
 
@@ -95,14 +114,12 @@ export default function CheckoutPage() {
             toast.success("Order placed successfully!");
             idempotencyKey.current = crypto.randomUUID();
 
-            console.log(res.data);
+            //console.log(res.data);
 
             router.push(`/orderdetails/${res.data.data.id}`);
         } catch (error: any) {
             toast.error(
                 error?.response?.data?.message || "Failed to place order", {
-                position: "bottom-right",
-                autoClose: 1500,
                 hideProgressBar: true,
                 className: "error-toast"
             }
@@ -115,8 +132,34 @@ export default function CheckoutPage() {
     useEffect(() => {
         const loadCart = async () => {
             try {
+                //  if (isBuyNow) {
+                //     const buyNowItem = getBuyNowItem();
+
+                //     if (!buyNowItem) {
+                //         router.replace("/");
+                //         return;
+                //     }
+
+                //     setCart([
+                //         {
+                //             id: "buy-now",
+                //             quantity: buyNowItem.quantity,
+                //             product: buyNowItem.product,
+                //         },
+                //     ] as CartItem[]);
+
+                //     setLoading(false);
+                //     return;
+                // }
                 const res = await fetchCart();
                 setCart(res.data.items);
+            } catch (error: any) {
+                toast.error(
+                    error?.message || "Failed to place order", {
+                    hideProgressBar: true,
+                    className: "error-toast"
+                }
+                );
             } finally {
                 setLoading(false);
             }
@@ -136,7 +179,6 @@ export default function CheckoutPage() {
     const handleUpdateQuantity = async (productId: string, quantity: number) => {
         const previousCart = cart;
 
-        // update UI immediately
         setCart((prev) =>
             prev.map((item) =>
                 item.product.id === productId
@@ -146,7 +188,8 @@ export default function CheckoutPage() {
         );
 
         try {
-            await updateCartItem(productId, quantity);
+            const res = await updateCartItem(productId, quantity);
+            dispatch(setItemCount(res.data.itemCount));
         } catch (error) {
             // rollback on failure
             setCart(previousCart);
@@ -155,12 +198,16 @@ export default function CheckoutPage() {
     };
 
     const handleDeleteItem = async (productId: string) => {
+        const previousCart = cart;
         try {
-            await deleteCartItem(productId);
-
-            const res = await fetchCart();
-            setCart(res.data.items);
-        } catch (error) {
+            const res = await deleteCartItem(productId);
+            setCart((prev) =>
+                prev.filter((item) => item.product.id !== productId)
+            );
+            //console.log(res);
+            dispatch(setItemCount(res.data.data.itemCount));
+        } catch (error: any) {
+            setCart(previousCart);
             console.error("Failed to delete cart item", error);
         }
     };
@@ -168,9 +215,9 @@ export default function CheckoutPage() {
 
     const subtotal = cart.reduce((sum: number, item) => sum + item.product.price * item.quantity, 0);
 
-    const handleField = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    };
+    // const handleField = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    //     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    // };
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -191,7 +238,7 @@ export default function CheckoutPage() {
                 <div className="lg:col-span-2 space-y-4">
 
                     {/* Auth bar */}
-                    <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    {!isAuthenticated && (<div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <span className="text-sm text-gray-500">Have any account? please login or register</span>
                         <div className="flex gap-2">
                             <button onClick={() => router.push('/login')} className="px-5 py-2 text-sm border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
@@ -201,7 +248,7 @@ export default function CheckoutPage() {
                                 Register
                             </button>
                         </div>
-                    </div>
+                    </div>)}
 
                     {/* Order review */}
                     <div className="bg-white border border-gray-200 rounded-xl p-4">
@@ -261,66 +308,90 @@ export default function CheckoutPage() {
                             Shipping Address
                         </h2>
                         <div className="space-y-3">
-                            <input
-                                type="text"
-                                name="name"
-                                value={form.name}
-                                onChange={handleField}
-                                placeholder="Your Full Name *"
-                                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5B1A18] focus:border-[#5B1A18] transition-all"
-                            />
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div className="flex rounded-lg border border-gray-200 overflow-hidden focus-within:ring-2 focus-within:ring-[#5B1A18] focus-within:border-[#5B1A18] transition-all">
-                                    <span className="px-3 py-2.5 bg-gray-50 text-sm text-gray-500 border-r border-gray-200 flex-shrink-0">
-                                        88
-                                    </span>
-                                    <input
-                                        type="tel"
-                                        name="phone"
-                                        value={form.phone}
-                                        onChange={handleField}
-                                        placeholder="017••••••••"
-                                        className="flex-1 px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none"
-                                    />
-                                </div>
+                            <div>
                                 <input
-                                    type="text"
-                                    name="postalCode"
-                                    value={form.postalCode}
-                                    onChange={handleField}
-                                    placeholder="Enter your postal code"
+                                    {...register("name")}
+                                    placeholder="Your Full Name *"
                                     className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5B1A18] focus:border-[#5B1A18] transition-all"
                                 />
+                                <p
+                                    className={`text-red-500 text-xs mt-1 h-2 ${!errors.name ? "invisible" : ""}`}
+                                >
+                                    {errors.name?.message || "placeholder"}
+                                </p>
                             </div>
-                            <input
-                                type="text"
-                                name="address"
-                                value={form.address}
-                                onChange={handleField}
-                                placeholder="ex: House no. / building / street / area"
-                                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5B1A18] focus:border-[#5B1A18] transition-all"
-                            />
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <div className="flex rounded-lg border border-gray-200 overflow-hidden focus-within:ring-2 focus-within:ring-[#5B1A18] focus-within:border-[#5B1A18] transition-all">
+                                        <span className="px-3 py-2.5 bg-gray-50 text-sm text-gray-500 border-r border-gray-200 flex-shrink-0">
+                                            88
+                                        </span>
+                                        <input
+                                            {...register("phone")}
+                                            placeholder="017••••••••"
+                                            className="flex-1 px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none"
+                                        />
+                                    </div>
+                                    <p
+                                        className={`text-red-500 text-xs mt-1 h-2 ${!errors.phone ? "invisible" : ""}`}
+                                    >
+                                        {errors.phone?.message || "placeholder"}
+                                    </p>
+                                </div>
+                                <div>
+                                    <input
+                                        {...register("postalCode")}
+                                        placeholder="Enter your postal code"
+                                        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5B1A18] focus:border-[#5B1A18] transition-all"
+                                    />
+                                    <p
+                                        className={`text-red-500 text-xs mt-1 h-2 ${!errors.postalCode ? "invisible" : ""}`}
+                                    >
+                                        {errors.postalCode?.message || "placeholder"}
+                                    </p>
+                                </div>
+                            </div>
+                            <div>
                                 <input
-                                    name="district"
-                                    value={form.district}
-                                    onChange={handleField}
-                                    placeholder="Enter district"
-                                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#5B1A18] focus:border-[#5B1A18] transition-all bg-white"
+                                    {...register("address")}
+                                    placeholder="ex: House no. / building / street / area"
+                                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5B1A18] focus:border-[#5B1A18] transition-all"
+                                />
+                                <p
+                                    className={`text-red-500 text-xs mt-1 h-2 ${!errors.address ? "invisible" : ""}`}
                                 >
-                                    {/* <option value="">Select District</option>
+                                    {errors.address?.message || "placeholder"}
+                                </p>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <input
+                                        {...register("district")}
+                                        placeholder="Enter district"
+                                        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#5B1A18] focus:border-[#5B1A18] transition-all bg-white"
+                                    />
+                                    <p
+                                        className={`text-red-500 text-xs mt-1 h-2 ${!errors.district ? "invisible" : ""}`}
+                                    >
+                                        {errors.district?.message || "placeholder"}
+                                    </p>
+                                </div>
+                                {/* <option value="">Select District</option>
                                     {districts.map((d) => <option key={d}>{d}</option>)} */}
-                                </input>
-                                <input
-                                    name="city"
-                                    value={form.city}
-                                    onChange={handleField}
-                                    placeholder="Enter city"
-                                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#5B1A18] focus:border-[#5B1A18] transition-all bg-white"
-                                >
-                                    {/* <option value="">Select Thana (Optional)</option>
+                                <div>
+                                    <input
+                                        {...register("city")}
+                                        placeholder="Enter city"
+                                        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#5B1A18] focus:border-[#5B1A18] transition-all bg-white"
+                                    />
+                                    <p
+                                        className={`text-red-500 text-xs mt-1 h-2 ${!errors.city ? "invisible" : ""}`}
+                                    >
+                                        {errors.city?.message || "placeholder"}
+                                    </p>
+                                </div>
+                                {/* <option value="">Select Thana (Optional)</option>
                                     {thanas.map((t) => <option key={t}>{t}</option>)} */}
-                                </input>
                             </div>
                         </div>
                     </div>
@@ -331,13 +402,15 @@ export default function CheckoutPage() {
                             Billing Address
                         </h2>
                         <input
-                            type="text"
-                            name="billing"
-                            value={form.billing}
-                            onChange={handleField}
+                            {...register("billing")}
                             placeholder="Same as shipping address"
                             className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5B1A18] focus:border-[#5B1A18] transition-all"
                         />
+                        <p
+                            className={`text-red-500 text-xs mt-1 h-2 ${!errors.billing ? "invisible" : ""}`}
+                        >
+                            {errors.billing?.message || "placeholder"}
+                        </p>
                     </div>
 
                     {/* Payment Method */}
@@ -449,7 +522,7 @@ export default function CheckoutPage() {
                             </span>
                         </label> */}
                         <button
-                            onClick={handlePlaceOrder}
+                            onClick={handleSubmit(handlePlaceOrder)}
                             disabled={!agreed || cart.length === 0 || placingOrder}
                             className="w-full bg-[#5B1A18] hover:bg-[#5B1A18] disabled:bg-[#5B1A18] cursor-pointer disabled:cursor-progress text-white font-semibold py-3.5 rounded-xl transition-colors text-sm tracking-wide"
                         >

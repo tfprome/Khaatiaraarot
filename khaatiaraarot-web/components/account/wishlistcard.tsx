@@ -1,39 +1,65 @@
-import { Heart, ShoppingCart } from "lucide-react";
+"use client";
 
-export interface WishlistItem {
-  id: string;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  image?: string;
+import { Heart, ShoppingCart, Trash2, MapPin } from "lucide-react";
+import { WishlistProduct } from "@/Types/wishTypes";
+import { wishlistType } from "@/Types/wishTypes";
+
+interface WishlistCardProps {
+  item: wishlistType;
+  onRemove: (wishlistId: string) => void;
+  onAddToCart: (productId: string) => void;
 }
 
-export default function WishlistCard({ item }: { item: WishlistItem }) {
+export default function WishlistCard({ item, onRemove, onAddToCart }: WishlistCardProps) {
+  const { product } = item;
+
   return (
-    <div className="flex items-center gap-4 p-4 rounded-2xl border border-[#f0e8e7] bg-white hover:border-[#d4b8b7] transition-colors group">
-      {/* Image placeholder */}
-      <div className="w-14 h-14 rounded-xl bg-[#f9f1f0] flex items-center justify-center flex-shrink-0 overflow-hidden">
-        {item.image ? (
-          <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+    <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-2xl border border-[#f0e8e7] bg-white hover:border-[#d4b8b7] transition-colors group">
+      
+      {/* Image */}
+      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-[#f9f1f0] flex items-center justify-center flex-shrink-0 overflow-hidden">
+        {product.image ? (
+          <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
         ) : (
           <Heart className="w-5 h-5 text-[#d4b8b7]" />
         )}
       </div>
 
+      {/* Info */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-[#2d1010] truncate">{item.name}</p>
-        <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-sm font-bold text-[#5B1A18]">৳{item.price}</span>
-          {item.originalPrice && (
-            <span className="text-xs text-[#9b7b7a] line-through">৳{item.originalPrice}</span>
+        <p className="text-sm font-semibold text-[#2d1010] truncate">{product.name}</p>
+        <div className="flex items-center gap-1 mt-0.5">
+          <MapPin className="w-3 h-3 text-[#9b7b7a] flex-shrink-0" />
+          <span className="text-xs text-[#9b7b7a] truncate">{product.sourceRegion} · {product.unit}</span>
+        </div>
+        <div className="flex items-center gap-2 mt-1">
+          <span className="text-sm font-bold text-[#5B1A18]">৳{product.price}</span>
+          {product.originalPrice && (
+            <span className="text-xs text-[#9b7b7a] line-through">৳{product.originalPrice}</span>
           )}
         </div>
       </div>
 
-      <button className="flex-shrink-0 flex items-center gap-1.5 bg-[#5B1A18] text-white text-xs font-semibold px-3 py-2 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
-        <ShoppingCart className="w-3.5 h-3.5" />
-        Add
-      </button>
+      {/* Actions */}
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <button
+          onClick={() => onAddToCart(product.id)}
+          aria-label={`Add ${product.name} to cart`}
+          className="flex items-center gap-1.5 bg-[#5B1A18] hover:bg-[#7a2320] active:scale-95 text-white text-xs font-semibold px-2.5 sm:px-3 py-2 rounded-xl transition-all duration-150"
+        >
+          <ShoppingCart className="w-3.5 h-3.5 flex-shrink-0" />
+          <span className="hidden sm:inline">Add to cart</span>
+        </button>
+
+        <button
+          onClick={() => onRemove(product.id)}
+          aria-label={`Remove ${product.name} from wishlist`}
+          title={`Remove ${product.name} from wishlist`}
+          className="flex items-center justify-center p-2 rounded-xl border border-[#f0e8e7] text-[#b07070] hover:bg-[#fdf0f0] hover:text-[#c0392b] hover:border-[#f5c6c6] active:scale-95 transition-all duration-150"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+      </div>
     </div>
   );
 }
