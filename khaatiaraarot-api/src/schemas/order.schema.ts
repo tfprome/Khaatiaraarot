@@ -17,6 +17,15 @@ export const placeOrderSchema = z
     paymentMethod: z.enum(['cash', 'card', 'gcash', 'bkash', 'nagad']),
     notes: z.string().max(500).optional(),
     couponCode: z.string().min(1).optional(),
+    items: z
+      .array(
+        z.object({
+          productId: z.string().uuid(),
+          quantity: z.number().int().positive(),
+        }),
+      )
+      .min(1)
+      .optional(),
   })
   .refine((data) => data.addressId || data.address, {
     message: 'Either addressId or an inline address is required',
