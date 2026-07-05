@@ -1,6 +1,6 @@
 import { StaticImageData } from "next/image";
 
-export type Category = {
+export type HomePageCategory = {
   label: string;
   bangla: string;
   slug: string;
@@ -10,7 +10,7 @@ export type Category = {
 };
 
 export type Product = {
-  id: number;
+  id: string;
   name: string;
   unit: string;
   price: number;

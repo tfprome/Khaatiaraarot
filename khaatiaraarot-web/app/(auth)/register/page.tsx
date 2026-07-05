@@ -13,7 +13,7 @@ import {
   UserIcon,
   PhoneIcon,
 } from "@phosphor-icons/react";
-import logo from "../../public/Images/khatiarotlogo-removebg.png";
+import logo from "../../../public/Images/khatiarotlogo-removebg.png";
 import { toast } from "react-toastify";
 import ClipLoader from "react-spinners/ClipLoader";
 
@@ -126,19 +126,10 @@ export default function RegisterPage() {
       const json = await res.json() as { success?: boolean; data?: { accessToken: string; user: { role: string; fullName: string } }; error?: { message?: string } };
       if (!res.ok) {
         toast.error(json.error?.message ?? "Registration failed.Please try again", {
-          position: "bottom-right",
+          position: "top-center",
           autoClose: 1500,
           hideProgressBar: true,
-          style: {
-            background: "#f00808",
-            color: "#ffffff",
-            fontSize: "15px",
-            fontWeight: "600",
-            padding: "16px",
-            minWidth: "320px",
-            minHeight: "70px",
-            borderRadius: "12px",
-          },
+          className:"error-toast"
         });
         throw new Error(json.error?.message ?? 'Registration failed');
       }
@@ -152,16 +143,7 @@ export default function RegisterPage() {
         closeOnClick: true,
         pauseOnHover: false,
         draggable: false,
-        style: {
-          background: "#5B1A18", // dark green
-          color: "#ffffff",
-          fontSize: "16px",
-          fontWeight: "600",
-          padding: "16px",
-          minWidth: "320px",
-          minHeight: "70px",
-          borderRadius: "12px",
-        },
+        className: 'success-toast'
       });
       router.replace('/');
     } catch (err) {
@@ -369,7 +351,7 @@ export default function RegisterPage() {
               type="button"
               onClick={handleSubmit}
               disabled={loading}
-              className="w-full bg-[#8B0000] hover:bg-[#6e0000] disabled:cursor-not-allowed text-white font-semibold text-sm py-3 rounded-xl transition-colors duration-200 mt-2 cursor-pointer"
+              className="w-full bg-[#8B0000] hover:bg-[#6e0000] disabled:cursor-progress text-white font-semibold text-sm py-3 rounded-xl transition-colors duration-200 mt-2 cursor-pointer"
             >
               {loading ? (
                 <div className="flex items-center justify-center">

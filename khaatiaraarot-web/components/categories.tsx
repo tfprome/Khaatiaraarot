@@ -8,9 +8,9 @@ import FruitsPhoto from '../public/Images/khatiarotlogo.jpg';
 import CropsPhoto from '../public/Images/CropsCategories.jpg';
 import SpicePhoto from '../public/Images/SpicesCategories.jpg';
 import ImportedPhoto from '../public/Images/ImportedGoodsCategories.jpg';
-import { Category } from "@/Types/Homepagetypes";
+import { HomePageCategory } from "@/Types/Homepagetypes";
 
-const categories: Category[] = [
+const categories: HomePageCategory[] = [
   {
     label: "Shossho",
     bangla: "শস্য",

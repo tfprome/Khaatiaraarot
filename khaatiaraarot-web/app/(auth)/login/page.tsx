@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { EyeIcon, EyeSlashIcon, LockKeyIcon, EnvelopeSimpleIcon } from "@phosphor-icons/react";
-import logo from "../../public/Images/khatiarotlogo-removebg.png";
+import logo from "../../../public/Images/khatiarotlogo-removebg.png";
 import { toast } from "react-toastify";
 import ClipLoader from "react-spinners/ClipLoader";
+import { useAppDispatch } from "@/store/hooks";
+import { login } from "@/store/authSlice";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -17,6 +19,7 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+    const dispatch=useAppDispatch()
 
     async function handleSubmit() {
         setError('');
@@ -25,24 +28,16 @@ export default function LoginPage() {
             const res = await fetch(`${BASE}/api/v1/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({ email, password }),
             });
             const json = await res.json() as { success?: boolean; data?: { accessToken: string; user: { role: string; fullName: string } }; error?: { message?: string } };
             if (!res.ok) {
                 toast.error(json.error?.message ?? "Login failed.Please try again", {
-                    position: "bottom-right",
-                    autoClose: 1500,
+                    position: "top-center",
+                    autoClose: 1000,
                     hideProgressBar: true,
-                    style: {
-                        background: "#f00808",
-                        color: "#ffffff",
-                        fontSize: "15px",
-                        fontWeight: "600",
-                        padding: "16px",
-                        minWidth: "320px",
-                        minHeight: "70px",
-                        borderRadius: "12px",
-                    },
+                    className: 'error-toast'
                 });
 
                 throw new Error(json.error?.message ?? "Login failed");
@@ -50,24 +45,16 @@ export default function LoginPage() {
 
             localStorage.setItem('userToken', json.data!.accessToken);
             localStorage.setItem('userName', json.data!.user.fullName);
+            dispatch(login())
 
             toast("You're in! Let's fill the cart.", {
-                position: "bottom-right",
+                position: "top-center",
                 autoClose: 1000, // 0.5 second
                 hideProgressBar: true,
                 closeOnClick: true,
                 pauseOnHover: false,
                 draggable: false,
-                style: {
-                    background: "#5B1A18", // dark green
-                    color: "#ffffff",
-                    fontSize: "16px",
-                    fontWeight: "600",
-                    padding: "16px",
-                    minWidth: "320px",
-                    minHeight: "70px",
-                    borderRadius: "12px",
-                },
+                className:'success-toast'
             });
 
             router.replace('/');
@@ -188,7 +175,7 @@ export default function LoginPage() {
                             type="button"
                             onClick={handleSubmit}
                             disabled={loading}
-                            className="w-full bg-[#8B0000] hover:bg-[#6e0000] text-white font-semibold text-sm py-3 rounded-xl transition-colors duration-200 mt-2 cursor-pointer disabled:cursor-not-allowed"
+                            className="w-full bg-[#8B0000] hover:bg-[#6e0000] text-white font-semibold text-sm py-3 rounded-xl transition-colors duration-200 mt-2 cursor-pointer disabled:cursor-progress"
                         >
                             {loading ? (
                                 <div className="flex items-center justify-center">

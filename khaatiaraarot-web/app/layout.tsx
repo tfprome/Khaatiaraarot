@@ -6,6 +6,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import localFont from "next/font/local";
 import Providers from "./providers";
+import Navbar from "@/components/navbar";
+import Footer from "@/components/footer";
 
 const retroFloral = localFont({
   src: "../public/fonts/Retro Floral.ttf",
@@ -45,9 +47,10 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <Providers>
           {children}
-          <CartDrawerWrapper />
         </Providers>
-        <ToastContainer />
+        <ToastContainer
+         position="top-center"
+         autoClose= {1000} />
       </body>
     </html>
   );
