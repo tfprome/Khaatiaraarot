@@ -86,16 +86,14 @@ export default function CheckoutPage() {
     const [loading, setLoading] = useState(true);
     const [placingOrder, setPlacingOrder] = useState(false);
     const idempotencyKey = useRef<string>(crypto.randomUUID());
-    // const searchParams = useSearchParams();
-
-    // const isBuyNow =
-    //     searchParams.get("mode") === "buy-now";
+    const searchParams = useSearchParams();
+    const isBuyNow = searchParams.get("mode") === "buy-now";
 
     const handlePlaceOrder = async (form: CheckoutFormData) => {
         try {
             setPlacingOrder(true);
 
-            const payload = {
+            const payload: Parameters<typeof createOrder>[0] = {
                 paymentMethod: payment,
                 notes,
                 address: {
@@ -109,12 +107,18 @@ export default function CheckoutPage() {
                 },
             };
 
+            if (isBuyNow) {
+                const buyNowItem = getBuyNowItem();
+                if (buyNowItem) {
+                    payload.items = [{ productId: buyNowItem.product.id, quantity: buyNowItem.quantity }];
+                }
+            }
+
             const res = await createOrder(payload, idempotencyKey.current);
 
+            if (isBuyNow) clearBuyNowItem();
             toast.success("Order placed successfully!");
             idempotencyKey.current = crypto.randomUUID();
-
-            //console.log(res.data);
 
             router.push(`/orderdetails/${res.data.data.id}`);
         } catch (error: any) {
@@ -132,25 +136,29 @@ export default function CheckoutPage() {
     useEffect(() => {
         const loadCart = async () => {
             try {
-                //  if (isBuyNow) {
-                //     const buyNowItem = getBuyNowItem();
-
-                //     if (!buyNowItem) {
-                //         router.replace("/");
-                //         return;
-                //     }
-
-                //     setCart([
-                //         {
-                //             id: "buy-now",
-                //             quantity: buyNowItem.quantity,
-                //             product: buyNowItem.product,
-                //         },
-                //     ] as CartItem[]);
-
-                //     setLoading(false);
-                //     return;
-                // }
+                if (isBuyNow) {
+                    const buyNowItem = getBuyNowItem();
+                    if (!buyNowItem) {
+                        router.replace("/");
+                        return;
+                    }
+                    setCart([{
+                        id: "buy-now",
+                        quantity: buyNowItem.quantity,
+                        product: {
+                            id: buyNowItem.product.id,
+                            name: buyNowItem.product.name,
+                            slug: buyNowItem.product.slug,
+                            unit: buyNowItem.product.unit,
+                            price: buyNowItem.product.price,
+                            originalPrice: buyNowItem.product.originalPrice,
+                            stockQty: buyNowItem.product.stockQty,
+                            image: buyNowItem.product.images?.[0] ?? null,
+                        },
+                    }] as CartItem[]);
+                    setLoading(false);
+                    return;
+                }
                 const res = await fetchCart();
                 setCart(res.data.items);
             } catch (error: any) {
@@ -270,33 +278,39 @@ export default function CheckoutPage() {
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium text-gray-800 truncate">{item.product.name}</p>
                                         <div className="flex items-center gap-2 mt-1.5">
-                                            <button
-                                                onClick={() => handleUpdateQuantity(item.product.id, item.quantity - 1)}
-                                                className="w-6 h-6 border border-gray-300 rounded text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm leading-none"
-                                                aria-label="Decrease quantity"
-                                            >
-                                                −
-                                            </button>
+                                            {!isBuyNow && (
+                                                <button
+                                                    onClick={() => handleUpdateQuantity(item.product.id, item.quantity - 1)}
+                                                    className="w-6 h-6 border border-gray-300 rounded text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm leading-none"
+                                                    aria-label="Decrease quantity"
+                                                >
+                                                    −
+                                                </button>
+                                            )}
                                             <span className="text-sm w-5 text-center font-medium">{item.quantity}</span>
-                                            <button
-                                                onClick={() => handleUpdateQuantity(item.product.id, item.quantity + 1)}
-                                                className="w-6 h-6 border border-gray-300 rounded text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm leading-none"
-                                                aria-label="Increase quantity"
-                                            >
-                                                +
-                                            </button>
+                                            {!isBuyNow && (
+                                                <button
+                                                    onClick={() => handleUpdateQuantity(item.product.id, item.quantity + 1)}
+                                                    className="w-6 h-6 border border-gray-300 rounded text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm leading-none"
+                                                    aria-label="Increase quantity"
+                                                >
+                                                    +
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                     <p className="text-sm font-semibold text-gray-800 flex-shrink-0">
                                         ৳{(item.product.price * item.quantity).toLocaleString()}.00
                                     </p>
-                                    <button
-                                        onClick={() => handleDeleteItem(item.product.id)}
-                                        className="w-8 h-8 bg-red-50 text-red-500 rounded-lg flex items-center justify-center hover:bg-red-100 transition-colors flex-shrink-0"
-                                        aria-label={`Remove ${item.product.name}`}
-                                    >
-                                        <TrashSimpleIcon className="w-4 h-4" />
-                                    </button>
+                                    {!isBuyNow && (
+                                        <button
+                                            onClick={() => handleDeleteItem(item.product.id)}
+                                            className="w-8 h-8 bg-red-50 text-red-500 rounded-lg flex items-center justify-center hover:bg-red-100 transition-colors flex-shrink-0"
+                                            aria-label={`Remove ${item.product.name}`}
+                                        >
+                                            <TrashSimpleIcon className="w-4 h-4" />
+                                        </button>
+                                    )}
                                 </div>
                             ))}
                         </div>

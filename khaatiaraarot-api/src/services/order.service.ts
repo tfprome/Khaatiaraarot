@@ -78,6 +78,29 @@ async function getCartWithItems(userId: string) {
   return { cart, items };
 }
 
+async function getBuyNowItems(inputItems: { productId: string; quantity: number }[]) {
+  const productIds = inputItems.map((i) => i.productId);
+  const rows = await db
+    .select({
+      productId: products.id,
+      name: products.name,
+      unit: products.unit,
+      price: products.price,
+      sourceRegion: products.sourceRegion,
+      stockQty: products.stockQty,
+      isActive: products.isActive,
+      ratePlanId: products.ratePlanId,
+    })
+    .from(products)
+    .where(inArray(products.id, productIds));
+
+  return inputItems.map((input) => {
+    const product = rows.find((r) => r.productId === input.productId);
+    if (!product) throw new AppError(404, 'PRODUCT_NOT_FOUND', 'Product not found');
+    return { cartItemId: '' as string, ...product, quantity: input.quantity };
+  });
+}
+
 export async function placeOrder(
   userId: string,
   input: PlaceOrderInput,
@@ -96,9 +119,19 @@ export async function placeOrder(
   }
 
   // Pre-transaction validation
-  const { cart, items } = await getCartWithItems(userId);
-  if (!cart || items.length === 0) {
-    throw new AppError(400, 'EMPTY_CART', 'Cart is empty');
+  const isBuyNow = !!(input.items?.length);
+  let cart: Awaited<ReturnType<typeof getCartWithItems>>['cart'] = null;
+  let items: Awaited<ReturnType<typeof getCartWithItems>>['items'];
+
+  if (isBuyNow) {
+    items = await getBuyNowItems(input.items!);
+  } else {
+    const result = await getCartWithItems(userId);
+    cart = result.cart;
+    items = result.items;
+    if (!cart || items.length === 0) {
+      throw new AppError(400, 'EMPTY_CART', 'Cart is empty');
+    }
   }
 
   const inactive = items.filter((i) => !i.isActive);
@@ -229,8 +262,10 @@ export async function placeOrder(
       changedBy: userId,
     });
 
-    // Clear cart inside transaction for atomicity
-    await tx.delete(cartItems).where(eq(cartItems.cartId, cart.id));
+    // Clear cart inside transaction for atomicity (skip for buy-now)
+    if (!isBuyNow && cart) {
+      await tx.delete(cartItems).where(eq(cartItems.cartId, cart.id));
+    }
 
     return newOrder;
   });

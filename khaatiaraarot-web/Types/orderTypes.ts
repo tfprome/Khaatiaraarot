@@ -9,7 +9,9 @@ export type paymentpayloadtype = {
         city: string;
         district: string;
         postalCode?: string;
-    }};
+    };
+    items?: { productId: string; quantity: number }[];
+};
 
 export interface Order {
   id: string;
