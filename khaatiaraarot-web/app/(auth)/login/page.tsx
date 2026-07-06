@@ -10,26 +10,40 @@ import { toast } from "react-toastify";
 import ClipLoader from "react-spinners/ClipLoader";
 import { useAppDispatch } from "@/store/hooks";
 import { login } from "@/store/authSlice";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema, LoginFormData } from "@/zodvalidations/loginschema";
 
 export default function LoginPage() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState<boolean>(false);
-    const [email, setEmail] = useState<string>("");
-    const [password, setPassword] = useState<string>("");
+    //const [email, setEmail] = useState<string>("");
+    //const [password, setPassword] = useState<string>("");
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+    //const [error, setError] = useState('');
     const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
-    const dispatch=useAppDispatch()
+    const dispatch = useAppDispatch()
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<LoginFormData>({
+        resolver: zodResolver(loginSchema),
+        defaultValues: {
+            email: "",
+            password: "",
+        },
+    });
 
-    async function handleSubmit() {
-        setError('');
+    async function onSubmit(data: LoginFormData) {
+        //setError('');
         setLoading(true);
         try {
             const res = await fetch(`${BASE}/api/v1/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify(data),
             });
             const json = await res.json() as { success?: boolean; data?: { accessToken: string; user: { role: string; fullName: string } }; error?: { message?: string } };
             if (!res.ok) {
@@ -54,12 +68,12 @@ export default function LoginPage() {
                 closeOnClick: true,
                 pauseOnHover: false,
                 draggable: false,
-                className:'success-toast'
+                className: 'success-toast'
             });
 
             router.replace('/');
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Login failed');
+            //setError(err instanceof Error ? err.message : 'Login failed');
         } finally {
             setLoading(false);
         }
@@ -116,12 +130,14 @@ export default function LoginPage() {
                                 <input
                                     id="email"
                                     type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    {...register("email")}
                                     placeholder="your@email.com"
                                     className="flex-1 bg-white text-sm text-black placeholder-[#c8a882] outline-none"
                                 />
                             </div>
+                            <p className="h-1 text-red-500 text-xs mt-1">
+                                        {errors.email?.message}
+                                    </p>
                         </div>
 
                         {/* Password */}
@@ -149,8 +165,7 @@ export default function LoginPage() {
                                 <input
                                     id="password"
                                     type={showPassword ? "text" : "password"}
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    {...register("password")}
                                     placeholder="Enter your password"
                                     className="flex-1 bg-white text-sm text-[#2c1a0e] placeholder-[#c8a882] outline-none"
                                 />
@@ -167,13 +182,18 @@ export default function LoginPage() {
                                     )}
                                 </button>
                             </div>
+                            {/* {errors.password && ( */}
+                                    <p className="h-1 text-red-500 text-xs mt-1">
+                                        {errors.password?.message}
+                                    </p>
+                                {/* )} */}
                         </div>
 
                         {/* Submit */}
                         {/* {error && <p className="text-[11px] text-red-500 text-center">{error}</p>} */}
                         <button
                             type="button"
-                            onClick={handleSubmit}
+                            onClick={handleSubmit(onSubmit)}
                             disabled={loading}
                             className="w-full bg-[#8B0000] hover:bg-[#6e0000] text-white font-semibold text-sm py-3 rounded-xl transition-colors duration-200 mt-2 cursor-pointer disabled:cursor-progress"
                         >

@@ -286,9 +286,9 @@ export default function ProductPage() {
                   >
                     <Heart size={16} fill={wishlisted ? "currentColor" : "none"} />
                   </button>
-                  <button className="px-4 py-3 rounded-xl border-2 border-[#f0e8e7] text-[#9b7b7a] hover:border-[#5B1A18] hover:text-[#5B1A18] transition-all duration-200">
+                  {/* <button className="px-4 py-3 rounded-xl border-2 border-[#f0e8e7] text-[#9b7b7a] hover:border-[#5B1A18] hover:text-[#5B1A18] transition-all duration-200">
                     <Share2 size={16} />
-                  </button>
+                  </button> */}
                 </div>
 
                 {/* Buy now */}

@@ -17,7 +17,7 @@ import { CartDrawerProps } from "@/Types/cartTypes";
 import api from "@/lib/axiosinterceptor";
 import { fetchCart, updateCartItem, deleteCartItem } from "@/lib/cartApi";
 
-const FREE_DELIVERY_THRESHOLD = 500;
+//const FREE_DELIVERY_THRESHOLD = 500;
 
 function fmt(n: number) {
   return `৳${Math.round(n).toLocaleString("en-IN")}`;
@@ -124,8 +124,8 @@ export default function CartDrawer({
     (s, i) => s + ((i.product.originalPrice ?? i.product.price) - i.product.price) * i.quantity,
     0
   );
-  const remaining = Math.max(0, FREE_DELIVERY_THRESHOLD - subtotal);
-  const deliveryPct = Math.min(100, Math.round((subtotal / FREE_DELIVERY_THRESHOLD) * 100));
+  //const remaining = Math.max(0, FREE_DELIVERY_THRESHOLD - subtotal);
+  //const deliveryPct = Math.min(100, Math.round((subtotal / FREE_DELIVERY_THRESHOLD) * 100));
 
   const isFirstRender = useRef(true);
 
@@ -219,7 +219,7 @@ export default function CartDrawer({
 
     loadCart();
   }, [isOpen]);
-  console.log('cart', cart)
+  //console.log('cart', cart)
 
   return (
     <>
@@ -276,7 +276,7 @@ export default function CartDrawer({
         </div>
 
         {/* Delivery banner */}
-        {totalQty > 0 && remaining > 0 && (
+        {/* {totalQty > 0 && remaining > 0 && (
           <div className="px-5 py-3 bg-[#fffbf0] border-b border-[#f0e8c0] shrink-0">
             <p className="text-[11px] text-[#7a6010] mb-1.5">
               Add{" "}
@@ -297,7 +297,7 @@ export default function CartDrawer({
               You unlocked free delivery!
             </p>
           </div>
-        )}
+        )} */}
 
         {/* Items */}
         <div className="flex-1 overflow-y-auto px-5 py-1">

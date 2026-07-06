@@ -19,66 +19,13 @@ import {
   User,
   Hash,
 } from "lucide-react";
+import { ShippingAddress, Orderdetails, StatusHistory, ProductSnapshot, OrderItem } from "@/Types/orderTypes";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-interface ShippingAddress {
-  fullName: string;
-  phone: string;
-  line1: string;
-  line2?: string;
-  city: string;
-  district: string;
-  postalCode?: string;
-}
 
-interface ProductSnapshot {
-  name: string;
-  unit: string;
-  price: string;
-  sourceRegion: string;
-}
 
-interface OrderItem {
-  id: string;
-  orderId: string;
-  productId: string;
-  productSnapshot: ProductSnapshot;
-  quantity: number;
-  unitPrice: string;
-  totalPrice: string;
-}
-
-interface StatusHistory {
-  id: string;
-  orderId: string;
-  status: string;
-  note: string;
-  changedBy: string;
-  createdAt: string;
-}
-
-interface Order {
-  id: string;
-  userId: string;
-  orderNumber: string;
-  status: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
-  paymentMethod: string;
-  paymentStatus: "unpaid" | "paid" | "refunded";
-  subtotal: string;
-  deliveryFee: string;
-  discount: string;
-  total: string;
-  notes: string;
-  source: string;
-  shippingAddressSnapshot: ShippingAddress;
-  createdAt: string;
-  updatedAt: string;
-  items: OrderItem[];
-  statusHistory: StatusHistory[];
-}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-const STATUS_CONFIG: Record<Order["status"], { label: string; color: string; bg: string; border: string; icon: any }> = {
+const STATUS_CONFIG: Record<Orderdetails["status"], { label: string; color: string; bg: string; border: string; icon: any }> = {
   pending:    { label: "Pending",    color: "text-yellow-700", bg: "bg-yellow-50",  border: "border-yellow-200", icon: Clock },
   confirmed:  { label: "Confirmed",  color: "text-blue-700",   bg: "bg-blue-50",    border: "border-blue-200",   icon: CheckCircle },
   processing: { label: "Processing", color: "text-purple-700", bg: "bg-purple-50",  border: "border-purple-200", icon: Package },
@@ -87,7 +34,7 @@ const STATUS_CONFIG: Record<Order["status"], { label: string; color: string; bg:
   cancelled:  { label: "Cancelled",  color: "text-red-700",    bg: "bg-red-50",     border: "border-red-200",    icon: XCircle },
 };
 
-const PAYMENT_STATUS_CONFIG: Record<Order["paymentStatus"], { label: string; color: string }> = {
+const PAYMENT_STATUS_CONFIG: Record<Orderdetails["paymentStatus"], { label: string; color: string }> = {
   unpaid:   { label: "Unpaid",   color: "text-red-600" },
   paid:     { label: "Paid",     color: "text-green-600" },
   refunded: { label: "Refunded", color: "text-blue-600" },
@@ -178,7 +125,7 @@ function StatusTimeline({ history }: { history: StatusHistory[] }) {
   return (
     <div className="space-y-0">
       {history.map((entry, i) => {
-        const cfg = STATUS_CONFIG[entry.status as Order["status"]] ?? STATUS_CONFIG.pending;
+        const cfg = STATUS_CONFIG[entry.status as Orderdetails["status"]] ?? STATUS_CONFIG.pending;
         const Icon = cfg.icon;
         const isLast = i === history.length - 1;
         return (
@@ -218,7 +165,7 @@ function Card({ title, icon: Icon, children }: { title: string; icon: any; child
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const [order, setOrder] = useState<Order | null>(null);
+  const [order, setOrder] = useState<Orderdetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelling, setCancelling] = useState(false);

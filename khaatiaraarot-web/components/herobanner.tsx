@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import HeroBannerPhoto from "../public/Images/HeroBanner.jpg";
+import { useEffect, useState } from "react";
+import HeroBannerSkeleton from "./skeleton/herobannerskeleton";
 
 const sideBanners = [
   {
@@ -25,9 +27,23 @@ const sideBanners = [
 ];
 
 export default function HeroBanner() {
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulating an API call for banner data
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  
   return (
     <section className="bg-[#fdf5ee] py-4 px-4 sm:px-6">
-      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-4 items-stretch">
+      {isLoading ? <HeroBannerSkeleton /> : (
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-4 items-stretch">
 
         {/* ── Main Banner ── */}
         <div className="relative rounded-2xl overflow-hidden border border-[#d4b8a0] w-full lg:flex-1">
@@ -87,7 +103,7 @@ export default function HeroBanner() {
           ))}
         </div>
 
-      </div>
+      </div>)}
     </section>
   );
 }

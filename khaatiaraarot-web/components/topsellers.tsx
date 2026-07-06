@@ -10,6 +10,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { addToCart } from "@/lib/cartApi";
 import {setItemCount} from "@/store/cartSlice";
+import TopSellingSkeleton from "./skeleton/topsellingskeleton";
 
 function getInitial(name: string) {
     const initials = name
@@ -178,16 +179,27 @@ function ProductCard({ product }: { product: Product }) {
 
 export default function TopSellingProducts() {
     const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
     const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
     useEffect(() => {
         const fetchProducts = async () => {
+            try {setLoading(true);
             const products = await axios.get<{ data: Product[] }>(`${BASE}/api/v1/products/top-sellers`);
             // console.log('products', products.data);
             setProducts(products.data.data.slice(0, 4)); // Take only top 4 products
+            } catch (error) {
+                console.error("Error fetching top selling products:", error);
+            } finally {
+                setLoading(false);
+            }
         };
 
         fetchProducts();
     }, []);
+
+    if (loading) {
+        return <TopSellingSkeleton />;
+    }
     return (
         <section className="bg-white py-8 sm:py-10 px-4 sm:px-6">
             <div className="max-w-7xl mx-auto">

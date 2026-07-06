@@ -23,8 +23,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { checkoutSchema, CheckoutFormData } from "@/zodvalidations/checkoutschema";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { setItemCount } from "@/store/cartSlice";
-import { useSearchParams } from "next/navigation";
 import { getBuyNowItem, clearBuyNowItem } from "@/lib/cartApi";
+import { useSearchParams } from "next/navigation";
+import ClipLoader from "react-spinners/ClipLoader";
 
 type PaymentMethod = "cash" | "online" | "bkash";
 
@@ -111,7 +112,15 @@ export default function CheckoutPage() {
 
             const res = await createOrder(payload, idempotencyKey.current);
 
-            toast.success("Order placed successfully!");
+            toast.success("Order placed", {
+                position: "top-center",
+                autoClose: 1000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: false,
+                className: 'cart-success-toast'
+            });
             idempotencyKey.current = crypto.randomUUID();
 
             //console.log(res.data);
@@ -155,7 +164,7 @@ export default function CheckoutPage() {
                 setCart(res.data.items);
             } catch (error: any) {
                 toast.error(
-                    error?.message || "Failed to place order", {
+                    error?.response?.data?.message || "Failed to place order", {
                     hideProgressBar: true,
                     className: "error-toast"
                 }
@@ -177,6 +186,10 @@ export default function CheckoutPage() {
     }, [loading, cart, router]);
 
     const handleUpdateQuantity = async (productId: string, quantity: number) => {
+        if (quantity <= 0) {
+            handleDeleteItem(productId);
+            return;
+        }
         const previousCart = cart;
 
         setCart((prev) =>
@@ -526,7 +539,14 @@ export default function CheckoutPage() {
                             disabled={!agreed || cart.length === 0 || placingOrder}
                             className="w-full bg-[#5B1A18] hover:bg-[#5B1A18] disabled:bg-[#5B1A18] cursor-pointer disabled:cursor-progress text-white font-semibold py-3.5 rounded-xl transition-colors text-sm tracking-wide"
                         >
-                            PLACE ORDER
+                            {placingOrder ? (
+                                <div className="flex items-center justify-center">
+                                    <ClipLoader size={14} color="white" />
+                                    <span className="ml-2">Placing order…</span>
+                                </div>
+                            ) : (
+                                "Place Order"
+                            )}
                         </button>
                     </div>
 

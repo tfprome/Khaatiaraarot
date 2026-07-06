@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { addToWish } from "@/lib/wishlistApi";
 import { useAppDispatch } from "@/store/hooks";
 import { setItemCount } from "@/store/cartSlice";
+import ProductsPageSkeleton from "@/components/skeleton/shopSkeleton";
 
 function getDiscount(price: number, originalPrice: number | null): number | null {
   if (!originalPrice) return null;
@@ -235,6 +236,7 @@ export default function ProductsPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const allCategories = [
     { id: "all", name: "All" },
@@ -243,9 +245,15 @@ export default function ProductsPage() {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const res = await axios.get(`${BASE}/api/v1/products?page=${page}&limit=${limit}&sort=${sortBy}`);
+      try {
+        const res = await axios.get(`${BASE}/api/v1/products?page=${page}&limit=${limit}&sort=${sortBy}`);
       setProducts(res.data.data);
       setTotal(res.data.meta.total);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
+    }
     };
     fetchProducts();
   }, [sortBy, page, limit]);
@@ -259,6 +267,10 @@ export default function ProductsPage() {
     fetchCategories();
   }, []);
   //console.log('categories', categories);
+
+  if (loading) {
+    return <ProductsPageSkeleton />;
+  }
 
   const filtered = products
     .filter((p) => {

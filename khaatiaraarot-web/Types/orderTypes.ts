@@ -75,3 +75,39 @@ export interface Orderdetails {
   items: OrderItem[];
   statusHistory: StatusHistory[];
 }
+
+export interface ShippingAddress {
+  fullName: string;
+  phone: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  district: string;
+  postalCode?: string;
+}
+
+export interface ProductSnapshot {
+  name: string;
+  unit: string;
+  price: string;
+  sourceRegion: string;
+}
+
+export interface OrderItem {
+  id: string;
+  orderId: string;
+  productId: string;
+  productSnapshot: ProductSnapshot;
+  quantity: number;
+  unitPrice: string;
+  totalPrice: string;
+}
+
+export interface StatusHistory {
+  id: string;
+  orderId: string;
+  status: string;
+  note: string;
+  changedBy: string;
+  createdAt: string;
+}
