@@ -21,7 +21,7 @@ import {
   Flame,
 } from "lucide-react";
 import { ProductdetailsPageSkeleton } from "@/components/skeleton/productDetailsPageSkeleton";
-import { addToCart, saveBuyNowItem } from "@/lib/cartApi";
+import { addToCart } from "@/lib/cartApi";
 import { addToWish } from "@/lib/wishlistApi";
 import { toast } from 'react-toastify'
 import { ProductDetailstype } from "@/Types/ProductTypes";
@@ -110,11 +110,10 @@ export default function ProductPage() {
     }
   };
 
-  const handleBuyNow = (product: ProductDetailstype) => {
-  saveBuyNowItem(product);
-
-  router.push("/checkout?mode=buy-now");
-};
+  const handleBuyNow = (product: ProductDetailstype, quantity: number) => {
+    localStorage.setItem("buyNowItem", JSON.stringify({ product, quantity }));
+    router.push("/checkout?mode=buy-now");
+  };
 
   const handleAddToWish = async (
       id: string,
@@ -292,7 +291,7 @@ export default function ProductPage() {
                 </div>
 
                 {/* Buy now */}
-                <button onClick={()=>{handleBuyNow(product)}}
+                <button onClick={()=>{handleBuyNow(product, qty)}}
                 className="w-full py-3 rounded-xl border-2 border-[#5B1A18] text-[#5B1A18] text-sm font-semibold hover:bg-[#5B1A18] hover:text-white transition-all duration-200">
                   Buy Now
                 </button>
