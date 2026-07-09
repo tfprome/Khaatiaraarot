@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { ShoppingCartIcon, LightningIcon, HandbagIcon } from "@phosphor-icons/react";
-import { Product } from "../Types/Homepagetypes";
+import { Product } from "../Types/ProductTypes";
 import { useAppDispatch } from "@/store/hooks";
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
@@ -71,8 +71,24 @@ function ProductCard({ product }: { product: Product }) {
             setLoading(true);
 
             // same as add to cart (reuse backend logic)
-            await addToCart(id, quantity);
-            router.push("/checkout");
+            //await addToCart(id, quantity);
+            localStorage.setItem(
+            "buyNowItem",
+            JSON.stringify({
+                product: {
+                    id: product.id,
+                    name: product.name,
+                    slug: product.slug ?? product.id,
+                    unit: product.unit,
+                    price: product.price,
+                    originalPrice: product.originalPrice ?? null,
+                    stockQty: product.stockQty ?? 1,
+                    images: product.image ? [product.image] : [],
+                },
+                quantity,
+            })
+        );
+            router.push("/checkout?mode=buy-now");
 
         } catch (error) {
             toast.error("Failed to process Buy Now", {
@@ -119,7 +135,7 @@ function ProductCard({ product }: { product: Product }) {
             <div className="flex flex-col justify-center px-3 sm:px-3 md:px-4 lg:px-5 py-3 md:py-4 lg:py-5 flex-1 min-w-0">
 
                 <p className="text-[10px] lg:text-[12px] text-[#a07850] mb-0.5 font-medium truncate">
-                    {product.source}
+                    {product.sourceRegion}
                 </p>
 
                 <h3 className="text-[12px] sm:text-[13px] md:text-sm lg:text-[15px] font-bold text-[#2c1a0e] leading-tight mb-0.5">

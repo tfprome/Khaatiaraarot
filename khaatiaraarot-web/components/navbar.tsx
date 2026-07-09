@@ -29,8 +29,8 @@ import api from "@/lib/axiosinterceptor";
 import { useRouter } from "next/navigation";
 import { logout } from "@/store/authSlice";
 import { motion, AnimatePresence } from "framer-motion";
-// TODO: Replace with your actual product fetch function
 import axios from "axios";
+import { Product } from "@/Types/ProductTypes";
 
 const navLinks = [
     { label: "Home", href: "/", icon: HouseIcon },
@@ -50,8 +50,7 @@ export default function Navbar() {
 
     // --- SEARCH STATE ---
     const [searchQuery, setSearchQuery] = useState("");
-    const [searchResults, setSearchResults] = useState<any[]>([]);
-    const [allProducts, setAllProducts] = useState<any[]>([]);
+    const [searchResults, setSearchResults] = useState<Product[]>([]);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isFetchingProducts, setIsFetchingProducts] = useState(false);
     
@@ -59,7 +58,6 @@ export default function Navbar() {
     const searchRef = useRef<HTMLDivElement>(null);
     const mobileSearchRef = useRef<HTMLDivElement>(null);
     const debounceTimer = useRef<NodeJS.Timeout | null>(null);
-    const hasFetchedProducts = useRef(false);
 
     // --- MOBILE MENU CLOSE ON OUTSIDE CLICK ---
     useEffect(() => {
@@ -87,9 +85,8 @@ export default function Navbar() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // --- DEBOUNCE & FILTER LOGIC ---
+    // --- DEBOUNCE & API SEARCH LOGIC ---
     useEffect(() => {
-        // Clear the previous timer on every keystroke
         if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
         if (!searchQuery.trim()) {
@@ -97,42 +94,35 @@ export default function Navbar() {
             return;
         }
 
-        // Set a new timer to run the filter after 300ms of inactivity
-        debounceTimer.current = setTimeout(() => {
-            const lowerCaseQuery = searchQuery.toLowerCase();
-            const filtered = allProducts.filter((product) =>
-                product.name.toLowerCase().includes(lowerCaseQuery)
-            );
-            setSearchResults(filtered);
-        }, 300); // 300ms debounce delay
-
-        // Cleanup function to clear timer if component unmounts
-        return () => {
-            if (debounceTimer.current) clearTimeout(debounceTimer.current);
-        };
-    }, [searchQuery, allProducts]);
-
-    // --- LAZY FETCH PRODUCTS ON FIRST FOCUS ---
-    const handleSearchFocus = async () => {
-        setIsSearchOpen(true);
-        if (!hasFetchedProducts.current) {
+        // Set a timer to call the API after 300ms of inactivity
+        debounceTimer.current = setTimeout(async () => {
             setIsFetchingProducts(true);
             try {
-                const res = await axios.get(`${BASE}/api/v1/products`);
-                // CHANGE THIS: adjust based on how your API returns the array
-                setAllProducts(res.data.data); 
-                hasFetchedProducts.current = true;
+                // Backend API call with query parameter
+                const res = await axios.get(`${BASE}/api/v1/products?q=${searchQuery.trim()}`);
+                setSearchResults(res.data.data); 
             } catch (error) {
-                console.error("Failed to fetch products for search", error);
+                console.error("Search failed", error);
+                setSearchResults([]);
             } finally {
                 setIsFetchingProducts(false);
             }
-        }
+        }, 3000);
+
+        return () => {
+            if (debounceTimer.current) clearTimeout(debounceTimer.current);
+        };
+    }, [searchQuery, BASE]);
+    //console.log("Search Results:", searchResults);
+
+    // --- SIMPLIFIED FOCUS HANDLER ---
+    const handleSearchFocus = () => {
+        setIsSearchOpen(true);
     };
 
     // --- HANDLE CLICKING A SEARCH RESULT ---
     const handleResultClick = (productId: string) => {
-        router.push(`/shop/${productId}`); // adjust route if needed
+        router.push(`/shop/${productId}`); 
         setSearchQuery("");
         setIsSearchOpen(false);
     };
@@ -176,7 +166,7 @@ export default function Navbar() {
         }
     };
 
-    // --- SEARCH DROPDOWN UI COMPONENT ---
+    // --- SEARCH DROPDOWN UI COMPONENT (100% Unchanged) ---
     const SearchDropdown = () => (
         <AnimatePresence>
             {isSearchOpen && (
@@ -212,8 +202,8 @@ export default function Navbar() {
                     ) : searchQuery.trim() !== "" ? (
                         <div className="p-4 text-center text-sm text-gray-500">No products found for "{searchQuery}"</div>
                     ) : (
-                                <div className="p-4 text-center text-sm text-gray-400">Start typing to search...</div>
-                            )}
+                        <div className="p-4 text-center text-sm text-gray-400">Start typing to search...</div>
+                    )}
                 </motion.div>
             )}
         </AnimatePresence>

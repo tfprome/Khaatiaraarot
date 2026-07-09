@@ -1,7 +1,7 @@
 import api from "./axiosinterceptor";
 import { paymentpayloadtype } from "@/Types/orderTypes";
 
-export const createOrder = async (payload: paymentpayloadtype,idempotecyKey:string) => {
+export const createOrder = async (payload: paymentpayloadtype, idempotecyKey: string) => {
   const token = localStorage.getItem("userToken");
 
   return api.post(
@@ -16,6 +16,14 @@ export const createOrder = async (payload: paymentpayloadtype,idempotecyKey:stri
   );
 };
 
-export const getOrders = async (page:number,limit:number) => {
+export const getOrders = async (page: number, limit: number) => {
   return api.get(`/api/v1/orders?page=${page}&limit=${limit}`);
+};
+
+export const validateCoupon = async (code: string, subtotal: number) => {
+  const res =await api.post("/api/v1/coupons/validate", {
+    code,
+    subtotal,
+  });
+  return res;
 };

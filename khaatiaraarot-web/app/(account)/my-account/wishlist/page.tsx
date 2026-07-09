@@ -11,6 +11,8 @@ import { toast } from 'react-toastify'
 import { wishlistType } from "@/Types/wishTypes";
 import { useAppSelector } from "@/store/hooks";
 import PaginationControls from "@/components/pagination/paginationcontrol";
+import {addToCart} from "@/lib/cartApi";
+import WishlistSkeleton from "@/components/skeleton/wishlistSkeleton";
 
 
 export default function WishlistPage() {
@@ -18,7 +20,10 @@ export default function WishlistPage() {
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(5)
+  const [loading, setLoading] = useState(true);
   const router = useRouter()
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [deletingItem, setDeletingItem] = useState<boolean>(false); // Track the ID of the item being deleted
   const { isAuthenticated } = useAppSelector(
     (state) => state.auth
   );
@@ -28,7 +33,36 @@ export default function WishlistPage() {
       router.replace("/");
     }
   }, [isAuthenticated, router]);
-  console.log(isAuthenticated)
+  //console.log(isAuthenticated)
+
+  const handleAddToCart = async (id: string,quantity: number) => {
+      try {
+        setAddingToCart(true);
+  
+        const res = await addToCart(id, quantity);
+        //dispatch(setItemCount(res.data.itemCount));
+  
+        toast("Added to your cart.", {
+          position: "top-center",
+          autoClose: 1000, // 0.5 second
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          className: 'cart-success-toast'
+        });
+      } catch (error: any) {
+        //console.error("Failed to add item", error.message);
+        toast.error(error.response?.data?.message || "Failed to add item", {
+          position: "bottom-right",
+          autoClose: 1500,
+          hideProgressBar: true,
+          className: "error-toast"
+        });
+      } finally {
+        setAddingToCart(false);
+      }
+    };
 
   useEffect(() => {
     const getWishlist = async () => {
@@ -50,16 +84,20 @@ export default function WishlistPage() {
         }
         //console.log("Failed to fetch orders:", error);
       }
+      finally {
+        setLoading(false);
+      }
     };
     getWishlist();
   }, [page, limit]);
-  
+
   const totalPages = Math.ceil(total / limit);
   //console.log(totalPages)
-  
+
   const handleDeleteItem = async (productId: string) => {
     try {
-      const res=await removefromwishlist(productId);
+      setDeletingItem(true); // Set the ID of the item being deleted
+      const res = await removefromwishlist(productId);
       setWishlist(res.data);
       toast('Wish item deleted', {
         hideProgressBar: true,
@@ -78,8 +116,15 @@ export default function WishlistPage() {
         className: 'error-toast'
       });
     }
+    finally {
+      setDeletingItem(false); // Reset the deleting state
+    }
   };
   console.log(wishlist)
+
+  if(loading) {
+    return <WishlistSkeleton />
+  }
 
   return (
     <>
@@ -98,14 +143,19 @@ export default function WishlistPage() {
               <WishlistCard
                 key={item.id}
                 item={item}
-                onRemove={()=>{handleDeleteItem(item.product.id)}}
-                onAddToCart={(productId) => { /* POST /api/cart */ }}
+                onclick={() => { router.push(`/shop/${item.product.id}`) }}
+                onRemove={() => { handleDeleteItem(item.product.id) }}
+                onAddToCart={()=> {handleAddToCart(item.product.id, 1)}}
+                AddingtoCart={addingToCart}
+                deletingItem={deletingItem}
               />
             ))}
           </div>
         )}
       </div>
-      <PaginationControls page={page} totalPages={totalPages} onPageChange={setPage} />
+      {totalPages > 1 && (
+        <PaginationControls page={page} totalPages={totalPages} onPageChange={setPage} />
+      )}
     </>
   );
 }

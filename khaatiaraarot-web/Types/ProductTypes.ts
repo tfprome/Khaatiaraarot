@@ -40,6 +40,6 @@ export type Category = {
   nameBn: string;
   slug: string;
   imageUrl?: string | StaticImageData;
-  sortOrder?: number;
+  sortOrder: number;
   productCount?: number;
 }

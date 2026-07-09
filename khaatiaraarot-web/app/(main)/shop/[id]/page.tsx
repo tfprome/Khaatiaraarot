@@ -110,10 +110,41 @@ export default function ProductPage() {
     }
   };
 
-  const handleBuyNow = (product: ProductDetailstype, quantity: number) => {
-    localStorage.setItem("buyNowItem", JSON.stringify({ product, quantity }));
-    router.push("/checkout?mode=buy-now");
-  };
+  const handleBuyNow = async (id: string, quantity: number) => {
+        try {
+            setLoading(true);
+
+            // same as add to cart (reuse backend logic)
+            //await addToCart(id, quantity);
+            localStorage.setItem(
+            "buyNowItem",
+            JSON.stringify({
+                product: {
+                    id: product.id,
+                    name: product.name,
+                    slug: product.slug ?? product.id,
+                    unit: product.unit,
+                    price: product.price,
+                    originalPrice: product.originalPrice ?? null,
+                    stockQty: product.stockQty ?? 1,
+                    images: product.images ? [product.images[0]] : [],
+                },
+                quantity,
+            })
+        );
+            router.push("/checkout?mode=buy-now");
+
+        } catch (error) {
+            toast.error("Failed to process Buy Now", {
+                position: "bottom-right",
+                autoClose: 1500,
+                hideProgressBar: true,
+                className: "error-toast"
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
 
   const handleAddToWish = async (
       id: string,
@@ -291,7 +322,7 @@ export default function ProductPage() {
                 </div>
 
                 {/* Buy now */}
-                <button onClick={()=>{handleBuyNow(product, qty)}}
+                <button onClick={()=>{handleBuyNow(product.id, 1)}}
                 className="w-full py-3 rounded-xl border-2 border-[#5B1A18] text-[#5B1A18] text-sm font-semibold hover:bg-[#5B1A18] hover:text-white transition-all duration-200">
                   Buy Now
                 </button>

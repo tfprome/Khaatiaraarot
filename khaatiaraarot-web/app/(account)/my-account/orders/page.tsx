@@ -6,14 +6,16 @@ import EmptyState from "@/components/account/emptystate";
 import OrderCard from "@/components/account/ordercard";
 import { Order } from "@/Types/orderTypes";
 import { useState, useEffect } from "react";
+import axios from "axios";
 import { getOrders } from "@/lib/orderApi";
 import { useAppSelector } from "@/store/hooks";
 import { useRouter } from "next/navigation";
 import { toast } from 'react-toastify'
 import PaginationControls from "@/components/pagination/paginationcontrol";
+import OrdersPageSkeleton from "@/components/skeleton/orderpageSkeleton";
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<any[]>([])
+  const [orders, setOrders] = useState<Order[]>([])
   const { isAuthenticated } = useAppSelector(
     (state) => state.auth
   );
@@ -21,6 +23,7 @@ export default function OrdersPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [total, setTotal] = useState(0);
+   const [isLoading, setIsLoading] = useState(true); 
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -36,7 +39,7 @@ export default function OrdersPage() {
         setOrders(res.data.data);
         setTotal(res.data.total)
       } catch (error: any) {
-        if (error?.status === 401) {
+        if (axios.isAxiosError(error) && error?.response?.status === 401) {
           router.push("/login");
           toast("Please login to view your profile", {
             hideProgressBar: true,
@@ -48,11 +51,23 @@ export default function OrdersPage() {
         }
         //console.log("Failed to fetch orders:", error);
       }
+      finally {
+        setIsLoading(false); // Set loading to false after the request is complete
+      }
     };
     handleOrders();
   }, [page, limit]);
 
   const totalPages = Math.ceil(total / limit);
+
+   if (isLoading) {
+    return (
+      <>
+        <AccountPageHeader title="My Orders" description="Track and view your past orders" />
+        <OrdersPageSkeleton />
+      </>
+    );
+  }
   return (
     <>
       <AccountPageHeader title="My Orders" description="Track and view your past orders" />

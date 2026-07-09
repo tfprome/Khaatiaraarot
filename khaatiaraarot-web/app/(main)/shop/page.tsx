@@ -27,7 +27,7 @@ function StockIndicator({ qty }: { qty: number }) {
   if (qty === 0) return <span className="text-xs text-red-500 font-medium font-bold">Out of Stock</span>;
 }
 
-function ProductCard({ product, categories }: { product: Product; categories: Category[] }) {
+export function ProductCard({ product, categories }: { product: Product; categories: Category[] }) {
 
   const category = categories.find((cat) => cat.id === product.categoryId)?.name ?? "Other";
   const emoji = "📦";
@@ -90,6 +90,40 @@ function ProductCard({ product, categories }: { product: Product; categories: Ca
       });
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to add item", {
+        position: "bottom-right",
+        autoClose: 1500,
+        hideProgressBar: true,
+        className: "error-toast"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBuyNow = async (id: string, quantity: number) => {
+    try {
+      setLoading(true);
+
+      localStorage.setItem(
+        "buyNowItem",
+        JSON.stringify({
+          product: {
+            id: product.id,
+            name: product.name,
+            slug: product.slug ?? product.id,
+            unit: product.unit,
+            price: product.price,
+            originalPrice: product.originalPrice ?? null,
+            stockQty: product.stockQty ?? 1,
+            images: product.image ? [product.image] : [],
+          },
+          quantity,
+        })
+      );
+      router.push("/checkout?mode=buy-now");
+
+    } catch (error) {
+      toast.error("Failed to process Buy Now", {
         position: "bottom-right",
         autoClose: 1500,
         hideProgressBar: true,
@@ -198,7 +232,7 @@ function ProductCard({ product, categories }: { product: Product; categories: Ca
             {/* Buy Now */}
             <button
               title="Buy Now"
-              //onClick={() => handleBuyNow(product.id)}
+              onClick={() => handleBuyNow(product.id, 1)}
               className="w-10 sm:w-12 lg:w-[15%] flex group items-center justify-center cursor-pointer rounded-xl border border-[#5A1B18] text-[#5A1B18] transition-colors py-2 sm:py-2.5"
             >
               <BagIcon
@@ -239,25 +273,34 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
 
   const allCategories = [
-    { id: "all", name: "All" },
+    { id: "all", name: "All", slug: "all" },
     ...categories,
   ];
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get(`${BASE}/api/v1/products?page=${page}&limit=${limit}&sort=${sortBy}`);
-      setProducts(res.data.data);
-      setTotal(res.data.meta.total);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-    } finally {
-      setLoading(false);
-    }
+        let url = `${BASE}/api/v1/products?page=${page}&limit=${limit}&sort=${sortBy}`;
+
+        if (activeCategory !== "all") {
+          url += `&category=${activeCategory}`;
+        }
+        const res = await axios.get(url);
+        setProducts(res.data.data);
+        setTotal(res.data.meta.total);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchProducts();
-  }, [sortBy, page, limit]);
-  //console.log('products', products);
+  }, [sortBy, page, limit, activeCategory]);
+  console.log('products', products);
+
+  useEffect(() => {
+    setPage(1);
+  }, [activeCategory]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -266,7 +309,7 @@ export default function ProductsPage() {
     };
     fetchCategories();
   }, []);
-  //console.log('categories', categories);
+  console.log('categories', categories);
 
   if (loading) {
     return <ProductsPageSkeleton />;
@@ -274,13 +317,13 @@ export default function ProductsPage() {
 
   const filtered = products
     .filter((p) => {
-      const matchCategory =
-        activeCategory === "all" ||
-        p.categoryId === activeCategory;
+      // const matchCategory =
+      //   activeCategory === "all" ||
+      //   p.categoryId === activeCategory;
       const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
         p.sourceRegion.toLowerCase().includes(search.toLowerCase());
       const matchBest = !onlyBestSelling || p.isBestSelling;
-      return matchCategory && matchSearch && matchBest;
+      return matchSearch && matchBest;
     })
     .sort((a, b) => {
       if (sortBy === "price_asc") return a.price - b.price;
@@ -292,30 +335,6 @@ export default function ProductsPage() {
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] font-serif">
-      {/* Header */}
-      {/* <header className="sticky top-0 z-30 bg-[#1B4332] text-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
-              🌿 বাজার<span className="text-amber-400">BD</span>
-            </h1>
-            <p className="text-xs text-emerald-300 mt-0.5 hidden sm:block">
-              Pure products, straight from the source
-            </p>
-          </div>
-          Search
-          <div className="relative w-full sm:w-72">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-sm">🔍</span>
-            <input
-              type="text"
-              placeholder="Search product or region…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-8 pr-4 py-2 rounded-xl text-sm bg-white/10 text-white placeholder-emerald-200 border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-400"
-            />
-          </div>
-        </div>
-      </header> */}
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filters row */}
@@ -325,11 +344,12 @@ export default function ProductsPage() {
             {allCategories.map((cat) => (
               <button
                 key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-all border ${activeCategory === cat.id
-                  ? "bg-[#5A1B18] text-white border-[#1B4332]"
-                  : "bg-white text-stone-600 border-stone-200 hover:border-[#1B4332] hover:text-[#1B4332]"
-                  }`}
+                onClick={() =>
+                  setActiveCategory(
+                    cat.id === "all" ? "all" : cat.slug
+                  )
+                }
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-all border ${activeCategory === cat.slug ? "text-black border-[#5A1B18] shadow-lg scale-105" : "bg-white text-stone-600 border-stone-200 hover:border-[#1B4332] hover:text-[#1B4332]"}`}
               >
                 {cat.name}
               </button>

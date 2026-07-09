@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState,use } from "react";
 import {
     TrashSimpleIcon,
     CaretCircleDownIcon,
@@ -15,7 +15,7 @@ import { CartItem } from "@/Types/cartTypes";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { fetchCart, updateCartItem, deleteCartItem } from "@/lib/cartApi";
-import { createOrder } from "@/lib/orderApi";
+import { createOrder, validateCoupon } from "@/lib/orderApi";
 import { toast } from 'react-toastify'
 import { useRef } from "react";
 import { useForm } from "react-hook-form";
@@ -26,6 +26,7 @@ import { setItemCount } from "@/store/cartSlice";
 import { getBuyNowItem, clearBuyNowItem } from "@/lib/cartApi";
 import { useSearchParams } from "next/navigation";
 import ClipLoader from "react-spinners/ClipLoader";
+import CheckoutPageSkeleton from "@/components/skeleton/checkoutSkeleton";
 
 type PaymentMethod = "cash" | "online" | "bkash";
 
@@ -54,10 +55,15 @@ function getInitial(name: string) {
     );
 }
 
-export default function CheckoutPage() {
+export default function CheckoutPage({searchParams}: { 
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }> 
+}) {
     const [payment, setPayment] = useState<PaymentMethod>("cash");
     const [couponOpen, setCouponOpen] = useState(false);
     const [coupon, setCoupon] = useState("");
+    const [discountAmount, setDiscountAmount] = useState(0);
+    const [couponLoading, setCouponLoading] = useState(false);
+    const [couponApplied, setCouponApplied] = useState(false);
     const [notes, setNotes] = useState("");
     const [agreed, setAgreed] = useState(true);
     const {
@@ -78,17 +84,20 @@ export default function CheckoutPage() {
     });
     const [cart, setCart] = useState<CartItem[]>([])
     const router = useRouter();
-    //console.log('form',form)
+    console.log('form', coupon)
     const { isAuthenticated } = useAppSelector(
         (state) => state.auth
     );
     const dispatch = useAppDispatch();
 
+    const [loadingpage, setLoadingPage] = useState(true);
     const [loading, setLoading] = useState(true);
     const [placingOrder, setPlacingOrder] = useState(false);
     const idempotencyKey = useRef<string>(crypto.randomUUID());
-    const searchParams = useSearchParams();
-    const isBuyNow = searchParams.get("mode") === "buy-now";
+    const params=use(searchParams)
+    //console.log('searchParams', params)
+    const isBuyNow = params.mode === "buy-now";
+    //console.log('isBuyNow', isBuyNow)
 
     const handlePlaceOrder = async (form: CheckoutFormData) => {
         try {
@@ -171,6 +180,7 @@ export default function CheckoutPage() {
                 );
             } finally {
                 setLoading(false);
+                setLoadingPage(false);
             }
         };
 
@@ -178,12 +188,12 @@ export default function CheckoutPage() {
     }, []);
 
     useEffect(() => {
-        if (loading) return;
+        if (loading || loadingpage) return;
 
         if (cart.length === 0) {
             router.replace("/");
         }
-    }, [loading, cart, router]);
+    }, [loading, loadingpage, cart, router]);
 
     const handleUpdateQuantity = async (productId: string, quantity: number) => {
         if (quantity <= 0) {
@@ -225,12 +235,53 @@ export default function CheckoutPage() {
         }
     };
 
+    const handleApplyCoupon = async () => {
+        if (!coupon.trim()) {
+            toast.error("Enter a coupon code");
+            return;
+        }
+
+        try {
+            setCouponLoading(true);
+
+            const res = await validateCoupon(coupon, subtotal);
+            console.log(res)
+
+            setDiscountAmount(res.data.data.discountAmount);
+            setCouponApplied(true);
+
+            toast.success("Coupon applied", {
+                position: "top-center",
+                autoClose: 1000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: false,
+                className: 'success-toast'
+            });
+        } catch (error: any) {
+            //console.log('error', error.response?.data)
+            setDiscountAmount(0);
+            setCouponApplied(false);
+
+            toast.error(error.response?.data?.error?.message || "Invalid coupon", {
+                position: "top-center",
+                autoClose: 1500,
+                hideProgressBar: true,
+                className: "error-toast"
+            });
+        } finally {
+            setCouponLoading(false);
+        }
+    };
+
 
     const subtotal = cart.reduce((sum: number, item) => sum + item.product.price * item.quantity, 0);
+    const total = subtotal - discountAmount;
 
-    // const handleField = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    //     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    // };
+    if (loadingpage) {
+        return <CheckoutPageSkeleton />;
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -409,8 +460,6 @@ export default function CheckoutPage() {
                                         {errors.city?.message || "placeholder"}
                                     </p>
                                 </div>
-                                {/* <option value="">Select Thana (Optional)</option>
-                                    {thanas.map((t) => <option key={t}>{t}</option>)} */}
                             </div>
                         </div>
                     </div>
@@ -495,9 +544,16 @@ export default function CheckoutPage() {
                                         placeholder="Enter coupon code"
                                         className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5B1A18]"
                                     />
-                                    <button className="px-4 py-2 bg-[#5B1A18] text-white text-sm rounded-lg hover:bg-[#5B1A18] transition-colors font-medium">
-                                        Apply
+                                    <button onClick={handleApplyCoupon}
+                                        className="px-4 py-2 bg-[#5B1A18] text-white cursor-pointer text-sm rounded-lg hover:bg-[#5B1A18] transition-colors font-medium">
+                                        {couponLoading ? <ClipLoader size={14} color="white" /> : "Apply"}
                                     </button>
+                                    {couponApplied && (
+                                        <div className="flex justify-between text-green-600">
+                                            <span>Discount</span>
+                                            <span>-৳{discountAmount}</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -519,30 +575,16 @@ export default function CheckoutPage() {
                             </div>
                             <div className="border-t border-gray-100 pt-3 mt-2 flex justify-between font-semibold text-gray-800 text-base">
                                 <span>Total</span>
-                                <span>{subtotal.toLocaleString()}.00 BDT</span>
+                                <span>{total.toLocaleString()}.00 BDT</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Terms + Place Order */}
                     <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-4">
-                        {/* <label className="flex items-start gap-2.5 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                checked={agreed}
-                                onChange={(e) => setAgreed(e.target.checked)}
-                                className="mt-0.5 accent-[#5B1A18] w-4 h-4 flex-shrink-0"
-                            />
-                            <span className="text-xs text-gray-500 leading-relaxed">
-                                I have read and agreed to the{" "}
-                                <a href="#" className="text-orange-500 hover:underline">Terms and Conditions</a>,{" "}
-                                <a href="#" className="text-orange-500 hover:underline">Privacy Policy</a> &{" "}
-                                <a href="#" className="text-orange-500 hover:underline">Refund and Return Policy.</a>
-                            </span>
-                        </label> */}
                         <button
                             onClick={handleSubmit(handlePlaceOrder)}
-                            disabled={!agreed || cart.length === 0 || placingOrder}
+                            disabled={cart.length === 0 || placingOrder}
                             className="w-full bg-[#5B1A18] hover:bg-[#5B1A18] disabled:bg-[#5B1A18] cursor-pointer disabled:cursor-progress text-white font-semibold py-3.5 rounded-xl transition-colors text-sm tracking-wide"
                         >
                             {placingOrder ? (
