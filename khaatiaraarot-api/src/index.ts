@@ -37,7 +37,7 @@ app.use(generalLimiter);
 
 app.use("/api/v1/docs",
   helmet({ contentSecurityPolicy: false }),
-  (req, _res, next) => { req.headers['x-forwarded-proto'] = 'http'; next(); },
+  (req: express.Request, _res: express.Response, next: express.NextFunction) => { req.headers['x-forwarded-proto'] = 'http'; next(); },
   swaggerUi.serve,
   swaggerUi.setup(swaggerSpec)
 );
