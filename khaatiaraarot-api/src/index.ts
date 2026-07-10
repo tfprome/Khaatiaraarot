@@ -26,7 +26,7 @@ import { swaggerSpec } from "./config/swagger";
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.set('trust proxy', 1);
+app.set('trust proxy', false);
 
 app.use(helmet());
 app.use(cors({ origin: process.env.ALLOWED_ORIGIN, credentials: true }));
