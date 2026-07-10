@@ -39,7 +39,11 @@ app.use("/api/v1/docs",
   helmet({ contentSecurityPolicy: false }),
   (req: express.Request, _res: express.Response, next: express.NextFunction) => { req.headers['x-forwarded-proto'] = 'http'; next(); },
   swaggerUi.serve,
-  swaggerUi.setup(swaggerSpec)
+  swaggerUi.setup(swaggerSpec, {
+    swaggerOptions: {
+      oauth2RedirectUrl: `http://${process.env.HOST_URL || '109.199.110.47:4050'}/api/v1/docs/oauth2-redirect.html`,
+    },
+  })
 );
 
 app.use("/api/v1/auth", authLimiter, authRoutes);
