@@ -1,15 +1,14 @@
 "use client";
 
-import { useEffect, useState,use } from "react";
+import { useEffect, useState, use } from "react";
 import {
     TrashSimpleIcon,
     CaretCircleDownIcon,
     CaretCircleUpIcon,
     TruckIcon,
     CreditCardIcon,
-    WalletIcon,
     TagIcon,
-    DeviceMobileIcon,
+    CheckCircleIcon,
 } from "@phosphor-icons/react";
 import { CartItem } from "@/Types/cartTypes";
 import { useRouter } from "next/navigation";
@@ -24,17 +23,17 @@ import { checkoutSchema, CheckoutFormData } from "@/zodvalidations/checkoutschem
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { setItemCount } from "@/store/cartSlice";
 import { getBuyNowItem, clearBuyNowItem } from "@/lib/cartApi";
-import { useSearchParams } from "next/navigation";
 import ClipLoader from "react-spinners/ClipLoader";
 import CheckoutPageSkeleton from "@/components/skeleton/checkoutSkeleton";
+import BkashLogo from "@/public/Images/BKash-Icon-Logo.wine.svg"
+import NagadLogo from "@/public/Images/Nagad-Vertical-Logo.wine.svg"
+import { PaymentMethod, PaymentMethodOption } from "@/Types/orderTypes";
 
-type PaymentMethod = "cash" | "online" | "bkash";
-
-const paymentMethods = [
+const paymentMethods: PaymentMethodOption[] = [
     { id: "cash" as PaymentMethod, label: "Cash On Delivery", Icon: TruckIcon },
     { id: "card" as PaymentMethod, label: "Online Payment", Icon: CreditCardIcon },
-    { id: "bkash" as PaymentMethod, label: "Bkash", Icon: WalletIcon },
-    { id: "nagad" as PaymentMethod, label: "Nagad", Icon: DeviceMobileIcon },
+    { id: "bkash" as PaymentMethod, label: "Bkash", logo: BkashLogo },
+    { id: "nagad" as PaymentMethod, label: "Nagad", logo: NagadLogo },
 ];
 
 const paymentLogos = ["VISA", "Mastercard", "Amex", "Bkash", "Nagad", "Rocket", "Dutch-Bangla", "SSL Commerz"];
@@ -55,8 +54,8 @@ function getInitial(name: string) {
     );
 }
 
-export default function CheckoutPage({searchParams}: { 
-    searchParams: Promise<{ [key: string]: string | string[] | undefined }> 
+export default function CheckoutPage({ searchParams }: {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
     const [payment, setPayment] = useState<PaymentMethod>("cash");
     const [couponOpen, setCouponOpen] = useState(false);
@@ -65,7 +64,6 @@ export default function CheckoutPage({searchParams}: {
     const [couponLoading, setCouponLoading] = useState(false);
     const [couponApplied, setCouponApplied] = useState(false);
     const [notes, setNotes] = useState("");
-    const [agreed, setAgreed] = useState(true);
     const {
         register,
         handleSubmit,
@@ -84,7 +82,7 @@ export default function CheckoutPage({searchParams}: {
     });
     const [cart, setCart] = useState<CartItem[]>([])
     const router = useRouter();
-    console.log('form', coupon)
+    //console.log('form', coupon)
     const { isAuthenticated } = useAppSelector(
         (state) => state.auth
     );
@@ -94,10 +92,10 @@ export default function CheckoutPage({searchParams}: {
     const [loading, setLoading] = useState(true);
     const [placingOrder, setPlacingOrder] = useState(false);
     const idempotencyKey = useRef<string>(crypto.randomUUID());
-    const params=use(searchParams)
+    const params = use(searchParams)
     //console.log('searchParams', params)
     const isBuyNow = params.mode === "buy-now";
-    //console.log('isBuyNow', isBuyNow)
+    console.log('isBuyNow', isBuyNow)
 
     const handlePlaceOrder = async (form: CheckoutFormData) => {
         try {
@@ -132,12 +130,17 @@ export default function CheckoutPage({searchParams}: {
 
             router.push(`/orderdetails/${res.data.data.id}`);
         } catch (error: any) {
-            toast.error(
-                error?.response?.data?.message || "Failed to place order", {
+            error?.status === 401 ? (
+                toast.error("Please log in to place an order", {
+                    hideProgressBar: true,
+                    className: "error-toast"
+                })
+            ) : (toast.error(
+                error?.message || "Failed to place order", {
                 hideProgressBar: true,
                 className: "error-toast"
             }
-            );
+            ))
         } finally {
             setPlacingOrder(false);
         }
@@ -173,7 +176,7 @@ export default function CheckoutPage({searchParams}: {
                 setCart(res.data.items);
             } catch (error: any) {
                 toast.error(
-                    error?.response?.data?.message || "Failed to place order", {
+                    error?.response?.data?.message || "Failed to load cart", {
                     hideProgressBar: true,
                     className: "error-toast"
                 }
@@ -250,7 +253,7 @@ export default function CheckoutPage({searchParams}: {
             setDiscountAmount(res.data.data.discountAmount);
             setCouponApplied(true);
 
-            toast.success("Coupon applied", {
+            toast.success("Coupon applied successfully", {
                 position: "top-center",
                 autoClose: 1000,
                 hideProgressBar: true,
@@ -305,10 +308,10 @@ export default function CheckoutPage({searchParams}: {
                     {!isAuthenticated && (<div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <span className="text-sm text-gray-500">Have any account? please login or register</span>
                         <div className="flex gap-2">
-                            <button onClick={() => router.push('/login')} className="px-5 py-2 text-sm border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                            <button onClick={() => router.push('/login')} className="px-5 py-2 cursor-pointer text-sm border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
                                 Login
                             </button>
-                            <button onClick={() => router.push('/register')} className="px-5 py-2 text-sm bg-[#5B1A18] text-white rounded-lg hover:bg-[#5B1A18] transition-colors font-medium">
+                            <button onClick={() => router.push('/register')} className="px-5 py-2 cursor-pointer text-sm bg-[#5B1A18] text-white rounded-lg hover:bg-[#5B1A18] transition-colors font-medium">
                                 Register
                             </button>
                         </div>
@@ -337,36 +340,32 @@ export default function CheckoutPage({searchParams}: {
                                             {!isBuyNow && (
                                                 <button
                                                     onClick={() => handleUpdateQuantity(item.product.id, item.quantity - 1)}
-                                                    className="w-6 h-6 border border-gray-300 rounded text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm leading-none"
+                                                    className="w-6 h-6 border border-gray-300 rounded text-gray-600 cursor-pointer hover:bg-gray-100 flex items-center justify-center text-sm leading-none"
                                                     aria-label="Decrease quantity"
                                                 >
                                                     −
                                                 </button>
                                             )}
                                             <span className="text-sm w-5 text-center font-medium">{item.quantity}</span>
-                                            {!isBuyNow && (
-                                                <button
-                                                    onClick={() => handleUpdateQuantity(item.product.id, item.quantity + 1)}
-                                                    className="w-6 h-6 border border-gray-300 rounded text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm leading-none"
-                                                    aria-label="Increase quantity"
-                                                >
-                                                    +
-                                                </button>
-                                            )}
+                                            <button
+                                                onClick={() => handleUpdateQuantity(item.product.id, item.quantity + 1)}
+                                                className="w-6 h-6 border border-gray-300 rounded text-gray-600 cursor-pointer hover:bg-gray-100 flex items-center justify-center text-sm leading-none"
+                                                aria-label="Increase quantity"
+                                            >
+                                                +
+                                            </button>
                                         </div>
                                     </div>
                                     <p className="text-sm font-semibold text-gray-800 flex-shrink-0">
                                         ৳{(item.product.price * item.quantity).toLocaleString()}.00
                                     </p>
-                                    {!isBuyNow && (
-                                        <button
-                                            onClick={() => handleDeleteItem(item.product.id)}
-                                            className="w-8 h-8 bg-red-50 text-red-500 rounded-lg flex items-center justify-center hover:bg-red-100 transition-colors flex-shrink-0"
-                                            aria-label={`Remove ${item.product.name}`}
-                                        >
-                                            <TrashSimpleIcon className="w-4 h-4" />
-                                        </button>
-                                    )}
+                                    <button
+                                        onClick={() => handleDeleteItem(item.product.id)}
+                                        className="w-8 h-8 bg-red-50 text-red-500 rounded-lg cursor-pointer flex items-center justify-center hover:bg-red-100 transition-colors flex-shrink-0"
+                                        aria-label={`Remove ${item.product.name}`}
+                                    >
+                                        <TrashSimpleIcon className="w-4 h-4" />
+                                    </button>
                                 </div>
                             ))}
                         </div>
@@ -487,7 +486,7 @@ export default function CheckoutPage({searchParams}: {
                             Payment method
                         </h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                            {paymentMethods.map(({ id, label, Icon }) => (
+                            {paymentMethods.map(({ id, label, Icon, logo }) => (
                                 <button
                                     key={id}
                                     onClick={() => setPayment(id)}
@@ -496,7 +495,17 @@ export default function CheckoutPage({searchParams}: {
                                         : "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50"
                                         }`}
                                 >
-                                    <Icon />
+                                    {Icon ? (
+                                        <Icon className="h-5 w-5 flex-shrink-0" />
+                                    ) : (
+                                        <Image
+                                            src={logo!}
+                                            alt=""
+                                            width={40}
+                                            height={40}
+                                            className="flex-shrink-0 object-contain"
+                                        />
+                                    )}
                                     {label}
                                 </button>
                             ))}
@@ -548,13 +557,16 @@ export default function CheckoutPage({searchParams}: {
                                         className="px-4 py-2 bg-[#5B1A18] text-white cursor-pointer text-sm rounded-lg hover:bg-[#5B1A18] transition-colors font-medium">
                                         {couponLoading ? <ClipLoader size={14} color="white" /> : "Apply"}
                                     </button>
-                                    {couponApplied && (
-                                        <div className="flex justify-between text-green-600">
-                                            <span>Discount</span>
-                                            <span>-৳{discountAmount}</span>
-                                        </div>
-                                    )}
                                 </div>
+                                {couponApplied && (
+                                    <div className="mt-3 flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                                        <div className="flex items-center gap-2 text-green-700">
+                                            <CheckCircleIcon weight="fill" className="w-5 h-5 text-green-500" />
+                                            <span className="text-sm font-medium">Coupon Applied!</span>
+                                        </div>
+                                        <span className="text-sm font-bold text-green-700">-৳{discountAmount}</span>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -573,6 +585,12 @@ export default function CheckoutPage({searchParams}: {
                                 <span>Delivery cost</span>
                                 <span className="text-green-600 font-medium">0 BDT</span>
                             </div>
+                            {couponApplied && (
+                                <div className="flex justify-between text-gray-500">
+                                    <span>Discount</span>
+                                    <span className="text-green-600 font-medium">-৳{discountAmount}</span>
+                                </div>
+                            )}
                             <div className="border-t border-gray-100 pt-3 mt-2 flex justify-between font-semibold text-gray-800 text-base">
                                 <span>Total</span>
                                 <span>{total.toLocaleString()}.00 BDT</span>
@@ -599,7 +617,7 @@ export default function CheckoutPage({searchParams}: {
                     </div>
 
                     {/* Payment logos */}
-                    <div className="bg-white border border-gray-200 rounded-xl p-4">
+                    {/* <div className="bg-white border border-gray-200 rounded-xl p-4">
                         <p className="text-xs text-gray-400 mb-3 font-medium uppercase tracking-wider">Pay With</p>
                         <div className="flex flex-wrap gap-1.5">
                             {paymentLogos.map((logo) => (
@@ -611,7 +629,7 @@ export default function CheckoutPage({searchParams}: {
                                 </span>
                             ))}
                         </div>
-                    </div>
+                    </div> */}
                 </div>
             </div>
         </div>

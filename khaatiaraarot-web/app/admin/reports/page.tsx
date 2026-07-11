@@ -2,14 +2,14 @@
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/adminApi';
 
-interface SalesPoint { date: string; orders: number; revenue: number; }
+interface SalesPoint { period: string; orderCount: number; revenue: number; }
 interface SalesReport {
   data: SalesPoint[];
   summary: { totalOrders: number; totalRevenue: number; totalCancelled: number };
 }
 
-interface RevenueByMethod { paymentMethod: string; revenue: number; orderCount: number; }
-interface RevenueBySource { source: string; revenue: number; orderCount: number; }
+interface RevenueByMethod { paymentMethod: string; revenue: number; count: number; }
+interface RevenueBySource { source: string; revenue: number; count: number; }
 interface RevenueSummary {
   byPaymentMethod: RevenueByMethod[];
   bySource: RevenueBySource[];
@@ -95,15 +95,15 @@ export default function ReportsPage() {
                 <thead>
                   <tr className="border-b border-[#e8d5c4]">
                     <th className="text-left py-2 text-[#a07850] font-medium">Date</th>
-                    <th className="text-right py-2 text-[#a07850] font-medium">Orders</th>
+                    <th className="text-right py-2 text-[#a07850] font-medium">ItemCount</th>
                     <th className="text-right py-2 text-[#a07850] font-medium">Revenue</th>
                   </tr>
                 </thead>
                 <tbody>
                   {sales.data.slice(0, 15).map((row, i) => (
                     <tr key={i} className="border-b border-[#e8d5c4] last:border-0">
-                      <td className="py-2 text-[#2c1a0e]">{row.date}</td>
-                      <td className="py-2 text-right text-[#2c1a0e]">{row.orders}</td>
+                      <td className="py-2 text-[#2c1a0e]">{row.period}</td>
+                      <td className="py-2 text-right text-[#2c1a0e]">{row.orderCount}</td>
                       <td className="py-2 text-right font-medium text-[#8B0000]">{fmt(row.revenue)}</td>
                     </tr>
                   ))}
@@ -126,7 +126,7 @@ export default function ReportsPage() {
               <thead>
                 <tr className="border-b border-[#e8d5c4]">
                   <th className="text-left py-2 text-[#a07850] font-medium">Method</th>
-                  <th className="text-right py-2 text-[#a07850] font-medium">Orders</th>
+                  <th className="text-right py-2 text-[#a07850] font-medium">ItemCount</th>
                   <th className="text-right py-2 text-[#a07850] font-medium">Revenue</th>
                 </tr>
               </thead>
@@ -134,7 +134,7 @@ export default function ReportsPage() {
                 {revenue.byPaymentMethod.map((row, i) => (
                   <tr key={i} className="border-b border-[#e8d5c4] last:border-0">
                     <td className="py-2 text-[#2c1a0e] capitalize">{row.paymentMethod}</td>
-                    <td className="py-2 text-right text-[#2c1a0e]">{row.orderCount}</td>
+                    <td className="py-2 text-right text-[#2c1a0e]">{row.count}</td>
                     <td className="py-2 text-right font-medium text-[#8B0000]">{fmt(row.revenue)}</td>
                   </tr>
                 ))}
@@ -154,7 +154,7 @@ export default function ReportsPage() {
               <thead>
                 <tr className="border-b border-[#e8d5c4]">
                   <th className="text-left py-2 text-[#a07850] font-medium">Source</th>
-                  <th className="text-right py-2 text-[#a07850] font-medium">Orders</th>
+                  <th className="text-right py-2 text-[#a07850] font-medium">ItemCount</th>
                   <th className="text-right py-2 text-[#a07850] font-medium">Revenue</th>
                 </tr>
               </thead>
@@ -162,7 +162,7 @@ export default function ReportsPage() {
                 {revenue.bySource.map((row, i) => (
                   <tr key={i} className="border-b border-[#e8d5c4] last:border-0">
                     <td className="py-2 text-[#2c1a0e] capitalize">{row.source}</td>
-                    <td className="py-2 text-right text-[#2c1a0e]">{row.orderCount}</td>
+                    <td className="py-2 text-right text-[#2c1a0e]">{row.count}</td>
                     <td className="py-2 text-right font-medium text-[#8B0000]">{fmt(row.revenue)}</td>
                   </tr>
                 ))}
