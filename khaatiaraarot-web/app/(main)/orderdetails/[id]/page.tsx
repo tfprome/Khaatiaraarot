@@ -293,7 +293,7 @@ export default function OrderDetailPage() {
 
               {/* Shipping address */}
               <Card title="Delivery Address" icon={MapPin}>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <User size={14} className="text-[#9b7b7a]" />
                     <span className="text-sm font-semibold text-[#2d1010]">
@@ -306,16 +306,27 @@ export default function OrderDetailPage() {
                       {order.shippingAddressSnapshot.phone}
                     </span>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <MapPin size={14} className="text-[#9b7b7a] mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-[#4a2020] leading-relaxed">
-                      {order.shippingAddressSnapshot.line1}
-                      {order.shippingAddressSnapshot.line2 && `, ${order.shippingAddressSnapshot.line2}`}
-                      {`, ${order.shippingAddressSnapshot.city}`}
-                      {`, ${order.shippingAddressSnapshot.district}`}
-                      {order.shippingAddressSnapshot.postalCode && ` - ${order.shippingAddressSnapshot.postalCode}`}
-                    </span>
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold text-[#9b7b7a] uppercase tracking-wide">Shipping Address</p>
+                    <div className="flex items-start gap-2">
+                      <MapPin size={14} className="text-[#9b7b7a] mt-0.5 flex-shrink-0" />
+                      <span className="text-sm text-[#4a2020] leading-relaxed">
+                        {order.shippingAddressSnapshot.line1}, {order.shippingAddressSnapshot.city}, {order.shippingAddressSnapshot.district}
+                        {order.shippingAddressSnapshot.postalCode && ` - ${order.shippingAddressSnapshot.postalCode}`}
+                      </span>
+                    </div>
                   </div>
+                  {order.shippingAddressSnapshot.line2 && (
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold text-[#9b7b7a] uppercase tracking-wide">Billing Address</p>
+                      <div className="flex items-start gap-2">
+                        <MapPin size={14} className="text-[#9b7b7a] mt-0.5 flex-shrink-0" />
+                        <span className="text-sm text-[#4a2020] leading-relaxed">
+                          {order.shippingAddressSnapshot.line2}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </Card>
 
