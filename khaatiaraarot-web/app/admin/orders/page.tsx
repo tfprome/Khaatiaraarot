@@ -3,18 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { adminApi } from '@/lib/adminApi';
 import Link from 'next/link';
 import { MagnifyingGlass, Eye } from '@phosphor-icons/react';
-
-interface Order {
-  id: string;
-  orderNumber: string;
-  total: string | number;
-  status: string;
-  paymentMethod: string;
-  source: string;
-  createdAt: string;
-  user?: { fullName: string; email: string };
-  customerName?: string;
-}
+import { Orderdetails } from '@/Types/orderTypes';
 
 interface Meta { total: number; page: number; limit: number; pages: number; }
 
@@ -40,7 +29,7 @@ function fmt(v: string | number) {
 }
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<Orderdetails[]>([]);
   const [meta, setMeta] = useState<Meta>({ total: 0, page: 1, limit: 20, pages: 1 });
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
@@ -53,7 +42,7 @@ export default function OrdersPage() {
       const params = new URLSearchParams({ page: String(p), limit: '20' });
       if (q) params.set('q', q);
       if (s) params.set('status', s);
-      const res = await adminApi.get<{ data: Order[]; meta: Meta }>(`/orders?${params}`);
+      const res = await adminApi.get<{ data: Orderdetails[]; meta: Meta }>(`/orders?${params}`);
       setOrders(res.data);
       setMeta(res.meta);
     } finally {
@@ -130,7 +119,7 @@ export default function OrdersPage() {
             ) : orders.map(o => (
               <tr key={o.id} className="border-b border-[#e8d5c4] last:border-0 hover:bg-[#fdf5ee] transition-colors">
                 <td className="px-4 py-3 font-medium text-[#2c1a0e]">#{o.orderNumber}</td>
-                <td className="px-4 py-3 text-[#a07850]">{o.customerName ?? o.user?.fullName ?? '—'}</td>
+                <td className="px-4 py-3 text-[#a07850]">{o.shippingAddressSnapshot.fullName}</td>
                 <td className="px-4 py-3 font-semibold text-[#8B0000]">{fmt(o.total)}</td>
                 <td className="px-4 py-3">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLOR[o.status] ?? 'bg-gray-100 text-gray-600'}`}>

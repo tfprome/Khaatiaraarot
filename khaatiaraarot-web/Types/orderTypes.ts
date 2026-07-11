@@ -1,3 +1,7 @@
+import {StaticImageData} from "next/image";
+import {TruckIcon} from "@phosphor-icons/react";
+
+
 export type paymentpayloadtype = {
     paymentMethod: string;
     notes: string;
@@ -113,3 +117,15 @@ export interface StatusHistory {
   changedBy: string;
   createdAt: string;
 }
+
+export type PaymentMethod = "cash" | "online" | "bkash" | "nagad";
+
+export type PaymentIcon = typeof TruckIcon;
+
+export type PaymentMethodOption = {
+    id: PaymentMethod;
+    label: string;
+} & (
+    | { Icon: PaymentIcon; logo?: never }
+    | { logo: StaticImageData; Icon?: never }
+);

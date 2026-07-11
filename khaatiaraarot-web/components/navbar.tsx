@@ -107,7 +107,7 @@ export default function Navbar() {
             } finally {
                 setIsFetchingProducts(false);
             }
-        }, 3000);
+        }, 300);
 
         return () => {
             if (debounceTimer.current) clearTimeout(debounceTimer.current);

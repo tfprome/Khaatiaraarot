@@ -19,12 +19,12 @@ export default function CartPersistence() {
   }, [dispatch]);
 
   // Save whenever cart changes
-  useEffect(() => {
-    localStorage.setItem(
-      "cart",
-      JSON.stringify(items)
-    );
-  }, [items]);
+  // useEffect(() => {
+  //   localStorage.setItem(
+  //     "cart",
+  //     JSON.stringify(items)
+  //   );
+  // }, [items]);
 
   return null;
 }
