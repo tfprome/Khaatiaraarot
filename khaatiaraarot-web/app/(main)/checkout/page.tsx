@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState, use, useCallback } from "react";
 import {
     TrashSimpleIcon,
     CaretCircleDownIcon,
@@ -17,7 +17,7 @@ import { fetchCart, updateCartItem, deleteCartItem } from "@/lib/cartApi";
 import { createOrder, validateCoupon } from "@/lib/orderApi";
 import { toast } from 'react-toastify'
 import { useRef } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { checkoutSchema, CheckoutFormData } from "@/zodvalidations/checkoutschema";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
@@ -64,13 +64,18 @@ export default function CheckoutPage({ searchParams }: {
     const [couponLoading, setCouponLoading] = useState(false);
     const [couponApplied, setCouponApplied] = useState(false);
     const [notes, setNotes] = useState("");
+    const savedForm = typeof window !== "undefined"
+        ? JSON.parse(sessionStorage.getItem("checkoutForm") ?? "null")
+        : null;
+
     const {
         register,
         handleSubmit,
+        control,
         formState: { errors },
     } = useForm<CheckoutFormData>({
         resolver: zodResolver(checkoutSchema),
-        defaultValues: {
+        defaultValues: savedForm ?? {
             name: "",
             phone: "",
             address: "",
@@ -80,6 +85,14 @@ export default function CheckoutPage({ searchParams }: {
             postalCode: "",
         },
     });
+
+    const formValues = useWatch({ control });
+
+    useEffect(() => {
+        if (Object.values(formValues).some(Boolean)) {
+            sessionStorage.setItem("checkoutForm", JSON.stringify(formValues));
+        }
+    }, [formValues]);
     const [cart, setCart] = useState<CartItem[]>([])
     const router = useRouter();
     //console.log('form', coupon)
@@ -93,9 +106,8 @@ export default function CheckoutPage({ searchParams }: {
     const [placingOrder, setPlacingOrder] = useState(false);
     const idempotencyKey = useRef<string>(crypto.randomUUID());
     const params = use(searchParams)
-    //console.log('searchParams', params)
     const isBuyNow = params.mode === "buy-now";
-    console.log('isBuyNow', isBuyNow)
+    const callbackUrl = isBuyNow ? "/checkout?mode=buy-now" : "/checkout";
 
     const handlePlaceOrder = async (form: CheckoutFormData) => {
         try {
@@ -125,6 +137,7 @@ export default function CheckoutPage({ searchParams }: {
             const res = await createOrder(payload, idempotencyKey.current);
 
             if (isBuyNow) clearBuyNowItem();
+            sessionStorage.removeItem("checkoutForm");
             toast.success("Order placed successfully!");
             idempotencyKey.current = crypto.randomUUID();
 
@@ -321,10 +334,10 @@ export default function CheckoutPage({ searchParams }: {
                     {!isAuthenticated && (<div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <span className="text-sm text-gray-500">Have any account? please login or register</span>
                         <div className="flex gap-2">
-                            <button onClick={() => router.push('/login')} className="px-5 py-2 cursor-pointer text-sm border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                            <button onClick={() => router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`)} className="px-5 py-2 cursor-pointer text-sm border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
                                 Login
                             </button>
-                            <button onClick={() => router.push('/register')} className="px-5 py-2 cursor-pointer text-sm bg-[#5B1A18] text-white rounded-lg hover:bg-[#5B1A18] transition-colors font-medium">
+                            <button onClick={() => router.push(`/register?callbackUrl=${encodeURIComponent(callbackUrl)}`)} className="px-5 py-2 cursor-pointer text-sm bg-[#5B1A18] text-white rounded-lg hover:bg-[#5B1A18] transition-colors font-medium">
                                 Register
                             </button>
                         </div>

@@ -16,6 +16,7 @@ import { closeCart, openCart, setItemCount } from "@/store/cartSlice";
 import { CartDrawerProps } from "@/Types/cartTypes";
 import api from "@/lib/axiosinterceptor";
 import { fetchCart, updateCartItem, deleteCartItem } from "@/lib/cartApi";
+import { toast } from "react-toastify";
 
 //const FREE_DELIVERY_THRESHOLD = 500;
 
@@ -206,17 +207,23 @@ export default function CartDrawer({
   };
 
   useEffect(() => {
+    if (!isOpen) return;
     const loadCart = async () => {
       try {
         const res = await fetchCart();
         setCart(res?.data?.items ?? [])
         dispatch(setItemCount(res?.data?.itemCount ?? 0));
-      } catch (err) {
-        console.error(err);
+      } catch (err: any) {
+        if (err?.response?.status === 429) {
+          toast.error("Too many requests. Please wait a moment.", { hideProgressBar: true, className: "error-toast" });
+        } else {
+          console.error(err);
+        }
       }
     };
 
-    loadCart();
+    const timer = setTimeout(loadCart, 300);
+    return () => clearTimeout(timer);
   }, [isOpen]);
   //console.log('cart', cart)
 

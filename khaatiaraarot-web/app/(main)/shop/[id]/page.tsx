@@ -296,7 +296,7 @@ export default function ProductPage() {
                 {/* CTA buttons */}
                 <div className="flex gap-3 group">
                   <button
-                    onClick={() => { handleAddToCart(product.id, 1) }}
+                    onClick={() => { handleAddToCart(product.id, qty) }}
                     disabled={addingtoCart}
                     className={`flex-1 flex items-center cursor-pointer disabled:cursor-progress justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${addedToCart
                       ? "bg-green-600 text-white"
@@ -322,7 +322,7 @@ export default function ProductPage() {
                 </div>
 
                 {/* Buy now */}
-                <button onClick={()=>{handleBuyNow(product.id, 1)}}
+                <button onClick={()=>{handleBuyNow(product.id, qty)}}
                 className="w-full py-3 rounded-xl border-2 border-[#5B1A18] text-[#5B1A18] text-sm font-semibold hover:bg-[#5B1A18] hover:text-white transition-all duration-200">
                   Buy Now
                 </button>

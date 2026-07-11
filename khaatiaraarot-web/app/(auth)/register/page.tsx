@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { z } from "zod";
@@ -63,6 +63,8 @@ type FormErrors = Partial<Record<keyof FormData, string>>;
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") ?? "/";
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -145,7 +147,7 @@ export default function RegisterPage() {
         draggable: false,
         className: 'success-toast'
       });
-      router.replace('/');
+      router.replace(callbackUrl);
     } catch (err) {
       setApiError(err instanceof Error ? err.message : 'Registration failed');
     } finally {
