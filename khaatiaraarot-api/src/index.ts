@@ -26,16 +26,25 @@ import { swaggerSpec } from "./config/swagger";
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.set('trust proxy', 1);
+app.set('trust proxy', false);
 
-app.use(helmet());
+app.use(helmet({ hsts: false }));
 app.use(cors({ origin: process.env.ALLOWED_ORIGIN, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(requestLogger);
 app.use(generalLimiter);
 
-app.use("/api/v1/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/api/v1/docs",
+  helmet({ contentSecurityPolicy: false }),
+  (req: express.Request, _res: express.Response, next: express.NextFunction) => { req.headers['x-forwarded-proto'] = 'http'; next(); },
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    swaggerOptions: {
+      oauth2RedirectUrl: `http://${process.env.HOST_URL || '109.199.110.47:4050'}/api/v1/docs/oauth2-redirect.html`,
+    },
+  })
+);
 
 app.use("/api/v1/auth", authLimiter, authRoutes);
 app.use("/api/v1/products", productRoutes);
