@@ -17,12 +17,8 @@ export const addToCart = async (
 };
 
 export const fetchCart = async () => {
-  try {
-    const { data } = await api.get("/api/v1/cart");
-    return data
-  } catch (err) {
-    console.error("Failed to fetch cart:", err);
-  }
+  const { data } = await api.get("/api/v1/cart");
+  return data;
 };
 
 export const updateCartItem = async (

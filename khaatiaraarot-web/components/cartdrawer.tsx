@@ -186,7 +186,6 @@ export default function CartDrawer({
 
     try {
       const res = await updateCartItem(productId, quantity);
-      console.log('updateCartItem res', res.data.itemCount)
       dispatch(setItemCount(res.data.itemCount));
     } catch (error) {
       // rollback on failure
@@ -200,7 +199,7 @@ export default function CartDrawer({
       await deleteCartItem(productId);
 
       const res = await fetchCart();
-      setCart(res.data.items);
+      setCart(res?.data?.items ?? []);
     } catch (error) {
       console.error("Failed to delete cart item", error);
     }
@@ -210,8 +209,8 @@ export default function CartDrawer({
     const loadCart = async () => {
       try {
         const res = await fetchCart();
-        setCart(res.data.items)
-        dispatch(setItemCount(res.data.itemCount));
+        setCart(res?.data?.items ?? [])
+        dispatch(setItemCount(res?.data?.itemCount ?? 0));
       } catch (err) {
         console.error(err);
       }

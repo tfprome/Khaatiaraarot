@@ -170,7 +170,7 @@ export default function CheckoutPage({searchParams}: {
                     return;
                 }
                 const res = await fetchCart();
-                setCart(res.data.items);
+                setCart(res?.data?.items ?? []);
             } catch (error: any) {
                 toast.error(
                     error?.response?.data?.message || "Failed to place order", {
@@ -194,6 +194,19 @@ export default function CheckoutPage({searchParams}: {
             router.replace("/");
         }
     }, [loading, loadingpage, cart, router]);
+
+    const handleBuyNowUpdateQuantity = (quantity: number) => {
+        if (quantity <= 0) return;
+        const stored = getBuyNowItem();
+        if (!stored) return;
+        const updated = { ...stored, quantity };
+        localStorage.setItem("buyNowItem", JSON.stringify(updated));
+        setCart((prev) =>
+            prev.map((item) =>
+                item.id === "buy-now" ? { ...item, quantity } : item
+            )
+        );
+    };
 
     const handleUpdateQuantity = async (productId: string, quantity: number) => {
         if (quantity <= 0) {
@@ -334,25 +347,25 @@ export default function CheckoutPage({searchParams}: {
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium text-gray-800 truncate">{item.product.name}</p>
                                         <div className="flex items-center gap-2 mt-1.5">
-                                            {!isBuyNow && (
-                                                <button
-                                                    onClick={() => handleUpdateQuantity(item.product.id, item.quantity - 1)}
-                                                    className="w-6 h-6 border border-gray-300 rounded text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm leading-none"
-                                                    aria-label="Decrease quantity"
-                                                >
-                                                    −
-                                                </button>
-                                            )}
+                                            <button
+                                                onClick={() => isBuyNow
+                                                    ? handleBuyNowUpdateQuantity(item.quantity - 1)
+                                                    : handleUpdateQuantity(item.product.id, item.quantity - 1)}
+                                                className="w-6 h-6 border border-gray-300 rounded text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm leading-none"
+                                                aria-label="Decrease quantity"
+                                            >
+                                                −
+                                            </button>
                                             <span className="text-sm w-5 text-center font-medium">{item.quantity}</span>
-                                            {!isBuyNow && (
-                                                <button
-                                                    onClick={() => handleUpdateQuantity(item.product.id, item.quantity + 1)}
-                                                    className="w-6 h-6 border border-gray-300 rounded text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm leading-none"
-                                                    aria-label="Increase quantity"
-                                                >
-                                                    +
-                                                </button>
-                                            )}
+                                            <button
+                                                onClick={() => isBuyNow
+                                                    ? handleBuyNowUpdateQuantity(item.quantity + 1)
+                                                    : handleUpdateQuantity(item.product.id, item.quantity + 1)}
+                                                className="w-6 h-6 border border-gray-300 rounded text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm leading-none"
+                                                aria-label="Increase quantity"
+                                            >
+                                                +
+                                            </button>
                                         </div>
                                     </div>
                                     <p className="text-sm font-semibold text-gray-800 flex-shrink-0">
