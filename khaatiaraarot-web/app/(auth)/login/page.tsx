@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { EyeIcon, EyeSlashIcon, LockKeyIcon, EnvelopeSimpleIcon } from "@phosphor-icons/react";
@@ -16,6 +16,8 @@ import { loginSchema, LoginFormData } from "@/zodvalidations/loginschema";
 
 export default function LoginPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const callbackUrl = searchParams.get("callbackUrl") ?? "/";
     const [showPassword, setShowPassword] = useState<boolean>(false);
     //const [email, setEmail] = useState<string>("");
     //const [password, setPassword] = useState<string>("");
@@ -71,7 +73,7 @@ export default function LoginPage() {
                 className: 'success-toast'
             });
 
-            router.replace('/');
+            router.replace(callbackUrl);
         } catch (err) {
             //setError(err instanceof Error ? err.message : 'Login failed');
         } finally {

@@ -15,6 +15,13 @@
       "when": 1779099719825,
       "tag": "0001_curvy_katie_power",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781592510671,
+      "tag": "0002_dazzling_kat_farrell",
+      "breakpoints": true
     }
   ]
 }

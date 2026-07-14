@@ -16,6 +16,7 @@ import { closeCart, openCart, setItemCount } from "@/store/cartSlice";
 import { CartDrawerProps } from "@/Types/cartTypes";
 import api from "@/lib/axiosinterceptor";
 import { fetchCart, updateCartItem, deleteCartItem } from "@/lib/cartApi";
+import { toast } from "react-toastify";
 
 //const FREE_DELIVERY_THRESHOLD = 500;
 
@@ -186,7 +187,6 @@ export default function CartDrawer({
 
     try {
       const res = await updateCartItem(productId, quantity);
-      console.log('updateCartItem res', res.data.itemCount)
       dispatch(setItemCount(res.data.itemCount));
     } catch (error) {
       // rollback on failure
@@ -200,24 +200,30 @@ export default function CartDrawer({
       await deleteCartItem(productId);
 
       const res = await fetchCart();
-      setCart(res.data.items);
+      setCart(res?.data?.items ?? []);
     } catch (error) {
       console.error("Failed to delete cart item", error);
     }
   };
 
   useEffect(() => {
+    if (!isOpen) return;
     const loadCart = async () => {
       try {
         const res = await fetchCart();
-        setCart(res.data.items)
-        dispatch(setItemCount(res.data.itemCount));
-      } catch (err) {
-        console.error(err);
+        setCart(res?.data?.items ?? [])
+        dispatch(setItemCount(res?.data?.itemCount ?? 0));
+      } catch (err: any) {
+        if (err?.response?.status === 429) {
+          toast.error("Too many requests. Please wait a moment.", { hideProgressBar: true, className: "error-toast" });
+        } else {
+          console.error(err);
+        }
       }
     };
 
-    loadCart();
+    const timer = setTimeout(loadCart, 300);
+    return () => clearTimeout(timer);
   }, [isOpen]);
   //console.log('cart', cart)
 

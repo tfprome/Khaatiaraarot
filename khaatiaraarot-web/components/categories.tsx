@@ -25,30 +25,51 @@ function getInitial(name: string) {
   );
 }
 
+const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+
 export default function FeaturedCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+  const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     const fetchCategories = async () => {
+      setLoading(true);
+      setError(null);
       try {
         const res = await axios.get(`${BASE}/api/v1/categories`);
-        // Sort by sortOrder just in case the backend doesn't return them in order
         const sorted = res.data.data.sort((a: Category, b: Category) => a.sortOrder - b.sortOrder);
         setCategories(sorted);
-      } catch (error) {
-        console.error("Failed to fetch categories", error);
-      }
-       finally {
+      } catch (err: any) {
+        const msg = err?.response?.status === 429
+          ? "Too many requests. Please try again in a moment."
+          : "Failed to load categories.";
+        setError(msg);
+        console.error("Failed to fetch categories", err);
+      } finally {
         setLoading(false);
       }
     };
     fetchCategories();
-  }, []);
+  }, [retryCount]);
 
-  if(loading) {
-    return <CategorySkeleton />;
+  if (loading) return <CategorySkeleton />;
+
+  if (error) {
+    return (
+      <section className="bg-[#fdf5ee] py-10 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto text-center space-y-3">
+          <p className="text-sm text-[#a07850]">{error}</p>
+          <button
+            onClick={() => setRetryCount(c => c + 1)}
+            className="text-sm font-semibold text-[#8B0000] border border-[#8B0000] px-5 py-2 rounded-xl hover:bg-[#8B0000] hover:text-white transition-all duration-200"
+          >
+            Retry
+          </button>
+        </div>
+      </section>
+    );
   }
 
   return (
