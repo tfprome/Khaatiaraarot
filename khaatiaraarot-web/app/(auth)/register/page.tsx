@@ -16,6 +16,8 @@ import {
 import logo from "../../../public/Images/khatiarotlogo-removebg.png";
 import { toast } from "react-toastify";
 import ClipLoader from "react-spinners/ClipLoader";
+import { useAppDispatch } from "@/store/hooks";
+import { login } from "@/store/authSlice";
 
 // ── Zod Schema ──────────────────────────────────────────────────────────────
 
@@ -76,6 +78,7 @@ export default function RegisterPage() {
     password: "",
     confirmPassword: "",
   });
+  const dispatch = useAppDispatch();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
@@ -129,12 +132,13 @@ export default function RegisterPage() {
           position: "top-center",
           autoClose: 1500,
           hideProgressBar: true,
-          className:"error-toast"
+          className: "error-toast"
         });
         throw new Error(json.error?.message ?? 'Registration failed');
       }
       localStorage.setItem('userToken', json.data!.accessToken);
       localStorage.setItem('userName', json.data!.user.fullName);
+      dispatch(login())
 
       toast("Welcome to the family!", {
         position: "bottom-right",
@@ -390,9 +394,18 @@ export default function RegisterPage() {
         </div>
 
         {/* Back to home */}
-        <p className="text-center text-[12px] text-[#a07850] mt-6">
-          <Link href="/" className="hover:text-[#8B0000] transition-colors duration-200">
+        <p className="flex justify-between items-center font-semibold text-center text-[12px] text-[#a07850] mt-6">
+          <Link
+            href="/"
+            className="hover:text-[#8B0000] transition-colors duration-200"
+          >
             ← Back to home
+          </Link>
+          <Link
+            href="/admin/login"
+            className="hover:text-[#8B0000] transition-colors duration-200"
+          >
+            ← Go to Admin Login
           </Link>
         </p>
 

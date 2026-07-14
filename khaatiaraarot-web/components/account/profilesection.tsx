@@ -10,9 +10,9 @@ function getInitial(user: UserProfile): string {
 export default function ProfileSection({ user }: { user: UserProfile }) {
   const joined = user.createdAt
     ? new Date(user.createdAt).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-      })
+      year: "numeric",
+      month: "long",
+    })
     : null;
 
   return (
@@ -41,10 +41,10 @@ export default function ProfileSection({ user }: { user: UserProfile }) {
       {/* Info rows */}
       <div className="bg-white rounded-2xl border border-[#f0e8e7] divide-y divide-[#f0e8e7]">
         {[
-          { label: "Full name",     value: user.fullName  ?? "—" },
+          { label: "Full name", value: user.fullName ?? "—" },
           { label: "Email address", value: user.email ?? "—" },
-          { label: "Account role",  value: user.role  ?? "—" },
-          { label: "Contact number",  value: user.phone  ?? "—" },
+          { label: "Account role", value: user.role ?? "—" },
+          { label: "Contact number", value: user.phone ?? "—" },
         ].map(({ label, value }) => (
           <div key={label} className="flex items-center justify-between px-5 py-4">
             <span className="text-sm text-[#9b7b7a] font-medium w-32 flex-shrink-0">{label}</span>
@@ -53,7 +53,10 @@ export default function ProfileSection({ user }: { user: UserProfile }) {
         ))}
       </div>
 
-      <button className="w-full border-2 border-[#5B1A18] text-[#5B1A18] rounded-xl py-3 text-sm font-semibold hover:bg-[#5B1A18] hover:text-white transition-all duration-200">
+      <button
+        disabled
+        className="w-full border-2 border-[#5B1A18] text-[#5B1A18] rounded-xl py-3 text-sm font-semibold cursor-not-allowed opacity-50 hover:opacity-50"
+      >
         Edit Profile
       </button>
     </div>

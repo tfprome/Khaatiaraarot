@@ -1,13 +1,7 @@
 import { Package } from "lucide-react";
-import { Order } from "@/Types/orderTypes";
+import { Orderdetails } from "@/Types/orderTypes";
 import { useRouter } from "next/navigation";
-
-const STATUS_STYLES: Record<Order["status"], string> = {
-  pending: "bg-yellow-50 text-yellow-700 border-yellow-200",
-  processing: "bg-blue-50 text-blue-700 border-blue-200",
-  delivered: "bg-green-50 text-green-700 border-green-200",
-  cancelled: "bg-red-50 text-red-700 border-red-200",
-};
+import { STATUS_CONFIG } from "../orderdetailspage/statustimeline";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-BD", {
@@ -16,7 +10,7 @@ function formatDate(iso: string) {
   });
 }
 
-export default function OrderCard({ order }: { order: Order }) {
+export default function OrderCard({ order }: { order:Orderdetails }) {
   const router = useRouter()
   return (
     <div onClick={() => { router.push(`/orderdetails/${order.id}`) }}
@@ -26,15 +20,15 @@ export default function OrderCard({ order }: { order: Order }) {
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-sm font-semibold text-[#2d1010] truncate">Order placed on {formatDate(order.createdAt)}</p>
-          <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border flex-shrink-0 ${STATUS_STYLES[order.status]}`}>
-            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+          <p className="text-sm font-semibold text-[#2d1010] truncate">Order Number: {order.orderNumber}</p>
+          <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border flex-shrink-0 ${STATUS_CONFIG[order.status].bg} ${STATUS_CONFIG[order.status].color}`}>
+            {STATUS_CONFIG[order.status].label}
           </span>
         </div>
         <div className="flex items-center gap-3 mt-0.5">
-          <p className="text-xs text-[#9b7b7a]">{order.date}</p>
+          <p className="text-xs text-[#9b7b7a]">{formatDate(order.createdAt)}</p>
           <span className="text-[#d4b8b7]">·</span>
-          <p className="text-xs text-[#9b7b7a]">{order.items} item{order.items !== 1 ? "s" : ""}</p>
+          <p className="text-xs text-[#9b7b7a]">{order.paymentMethod}</p>
           <span className="text-[#d4b8b7]">·</span>
           <p className="text-xs font-semibold text-[#5B1A18]">৳{order.total}</p>
         </div>

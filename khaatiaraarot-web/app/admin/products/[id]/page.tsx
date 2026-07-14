@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { adminApi } from '@/lib/adminApi';
 import Link from 'next/link';
 import { ArrowLeft, Trash, Star } from '@phosphor-icons/react';
-import NextImage from 'next/image';
+import Image from 'next/image';
 
 interface Category { id: string; name: string; }
 interface RatePlan { id: string; name: string; isActive: boolean; }
@@ -125,7 +125,7 @@ export default function EditProductPage() {
   }
 
   async function deleteImage(imageId: string) {
-    await adminApi.del(`/products/${id}/images/${imageId}`);
+    const res=await adminApi.del(`/products/${id}/images/${imageId}`);
     setImages(prev => prev.filter(img => img.id !== imageId));
   }
 
@@ -220,7 +220,7 @@ export default function EditProductPage() {
         <div className="flex flex-wrap gap-3">
           {images.map(img => (
             <div key={img.id} className="relative group w-24 h-24 rounded-xl overflow-hidden border border-[#e8d5c4]">
-              <NextImage src={img.url} alt="product" fill className="object-cover" sizes="96px" />
+              <Image src={img.url} alt="product" fill className="object-cover" sizes="96px" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                 {!img.isPrimary && (
                   <button onClick={() => setPrimary(img.id)} className="p-1 bg-white/90 rounded-lg text-yellow-600 hover:bg-white" title="Set primary">

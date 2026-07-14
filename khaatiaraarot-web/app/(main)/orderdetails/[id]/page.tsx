@@ -10,32 +10,20 @@ import {
   MapPin,
   CreditCard,
   Clock,
-  CheckCircle,
-  XCircle,
-  Truck,
-  AlertCircle,
   Receipt,
-  Phone,
   User,
   Hash,
 } from "lucide-react";
-import { ShippingAddress,StatusHistory,ProductSnapshot,OrderItem, Orderdetails } from "@/Types/orderTypes";
+import { Orderdetails } from "@/Types/orderTypes";
 import { OrderDetailsPageSkeleton } from "@/components/skeleton/orderDetailsPageSkeleton";
+import { CancelModal } from "@/components/orderdetailspage/CancelModal";
+import { StatusTimeline,STATUS_CONFIG } from "@/components/orderdetailspage/statustimeline";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-const STATUS_CONFIG: Record<Orderdetails["status"], { label: string; color: string; bg: string; border: string; icon: any }> = {
-  pending:    { label: "Pending",    color: "text-yellow-700", bg: "bg-yellow-50",  border: "border-yellow-200", icon: Clock },
-  confirmed:  { label: "Confirmed",  color: "text-blue-700",   bg: "bg-blue-50",    border: "border-blue-200",   icon: CheckCircle },
-  processing: { label: "Processing", color: "text-purple-700", bg: "bg-purple-50",  border: "border-purple-200", icon: Package },
-  shipped:    { label: "Shipped",    color: "text-indigo-700", bg: "bg-indigo-50",  border: "border-indigo-200", icon: Truck },
-  delivered:  { label: "Delivered",  color: "text-green-700",  bg: "bg-green-50",   border: "border-green-200",  icon: CheckCircle },
-  cancelled:  { label: "Cancelled",  color: "text-red-700",    bg: "bg-red-50",     border: "border-red-200",    icon: XCircle },
-};
-
-const PAYMENT_STATUS_CONFIG: Record<Orderdetails["paymentStatus"], { label: string; color: string }> = {
-  unpaid:   { label: "Unpaid",   color: "text-red-600" },
-  paid:     { label: "Paid",     color: "text-green-600" },
-  refunded: { label: "Refunded", color: "text-blue-600" },
+const PAYMENT_STATUS_CONFIG: Record<Orderdetails["paymentStatus"], { label: string; color: string; bg: string }> = {
+  unpaid:   { label: "Unpaid",   color: "text-red-600", bg: "bg-red-50" },
+  paid:     { label: "Paid",     color: "text-green-600", bg: "bg-green-50" },
+  refunded: { label: "Refunded", color: "text-blue-600", bg: "bg-blue-50" },
 };
 
 const PAYMENT_METHOD_LABELS: Record<string, string> = {
@@ -52,89 +40,11 @@ function formatDate(iso: string) {
   });
 }
 
-function formatDateShort(iso: string) {
-  return new Date(iso).toLocaleDateString("en-BD", {
-    month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
-  });
-}
-
-
-// ─── Cancel modal ─────────────────────────────────────────────────────────────
-function CancelModal({
-  orderNumber,
-  onConfirm,
-  onClose,
-  loading,
-}: {
-  orderNumber: string;
-  onConfirm: () => void;
-  onClose: () => void;
-  loading: boolean;
-}) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm z-10">
-        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-50 mx-auto mb-4">
-          <AlertCircle className="w-6 h-6 text-red-500" />
-        </div>
-        <h3 className="text-base font-bold text-[#2d1010] text-center mb-1">Cancel Order?</h3>
-        <p className="text-sm text-[#9b7b7a] text-center mb-6">
-          Are you sure you want to cancel <span className="font-semibold text-[#2d1010]">{orderNumber}</span>? This cannot be undone.
-        </p>
-        <div className="flex gap-3">
-          <button
-            onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl border-2 border-[#f0e8e7] text-sm font-semibold text-[#9b7b7a] hover:border-[#d4b8b7] transition-colors"
-          >
-            Keep Order
-          </button>
-          <button
-            onClick={onConfirm}
-            disabled={loading}
-            className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-colors disabled:opacity-60"
-          >
-            {loading ? "Cancelling…" : "Yes, Cancel"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Status timeline ──────────────────────────────────────────────────────────
-function StatusTimeline({ history }: { history: StatusHistory[] }) {
-  return (
-    <div className="space-y-0">
-      {history.map((entry, i) => {
-        const cfg = STATUS_CONFIG[entry.status as Orderdetails["status"]] ?? STATUS_CONFIG.pending;
-        const Icon = cfg.icon;
-        const isLast = i === history.length - 1;
-        return (
-          <div key={entry.id} className="flex gap-3">
-            <div className="flex flex-col items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${cfg.bg} ${cfg.border}`}>
-                <Icon size={14} className={cfg.color} />
-              </div>
-              {!isLast && <div className="w-0.5 h-6 bg-[#f0e8e7] my-1" />}
-            </div>
-            <div className="pb-4 min-w-0">
-              <p className={`text-sm font-semibold ${cfg.color}`}>{cfg.label}</p>
-              <p className="text-xs text-[#9b7b7a]">{entry.note}</p>
-              <p className="text-xs text-[#9b7b7a] mt-0.5">{formatDateShort(entry.createdAt)}</p>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 // ─── Section card ─────────────────────────────────────────────────────────────
-function Card({ title, icon: Icon, children }: { title: string; icon: any; children: React.ReactNode }) {
+function Card({ title, icon: Icon, children, className = "" }: { title: string; icon: any; children: React.ReactNode; className?: string }) {
   return (
-    <div className="bg-white rounded-2xl border border-[#f0e8e7] shadow-sm overflow-hidden">
-      <div className="flex items-center gap-2 px-5 py-4 border-b border-[#f0e8e7]">
+    <div className={`bg-white rounded-2xl border border-[#f0e8e7] shadow-sm overflow-hidden ${className}`}>
+      <div className="flex items-center gap-2 px-5 py-4 border-b border-[#f0e8e7] bg-white">
         <Icon size={16} className="text-[#5B1A18]" />
         <h2 className="text-sm font-bold text-[#2d1010]">{title}</h2>
       </div>
@@ -145,6 +55,7 @@ function Card({ title, icon: Icon, children }: { title: string; icon: any; child
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function OrderDetailPage() {
+  // CHANGED: Use orderNumber instead of id
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [order, setOrder] = useState<Orderdetails | null>(null);
@@ -153,8 +64,10 @@ export default function OrderDetailPage() {
   const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
+    if (!id) return;
     (async () => {
       try {
+        // CHANGED: Fetch by order number string
         const { data } = await api.get(`/api/v1/orders/${id}`);
         setOrder(data.data ?? data);
       } catch {
@@ -172,9 +85,7 @@ export default function OrderDetailPage() {
       await api.patch(`/api/v1/orders/${order.id}/cancel`);
       setOrder((prev) => prev ? { ...prev, status: "cancelled" } : prev);
       setShowCancelModal(false);
-    } catch {
-      // handle error — add toast here if needed
-    } finally {
+    } catch { } finally {
       setCancelling(false);
     }
   };
@@ -186,16 +97,14 @@ export default function OrderDetailPage() {
   const StatusIcon = statusCfg.icon;
   const paymentCfg = PAYMENT_STATUS_CONFIG[order.paymentStatus];
   const canCancel = order.status === "pending" || order.status === "confirmed";
+  
+  // Determine if we should show the "Pay Now" button (Not cash, and unpaid, and not cancelled)
+  const requiresDigitalPayment = order.paymentMethod !== "cash" && order.paymentStatus === "unpaid" && order.status !== "cancelled";
 
   return (
     <>
       {showCancelModal && (
-        <CancelModal
-          orderNumber={order.orderNumber}
-          onConfirm={handleCancel}
-          onClose={() => setShowCancelModal(false)}
-          loading={cancelling}
-        />
+        <CancelModal orderNumber={order.orderNumber} onConfirm={handleCancel} onClose={() => setShowCancelModal(false)} loading={cancelling} />
       )}
 
       <div className="min-h-screen bg-[#fdf8f7]">
@@ -210,133 +119,91 @@ export default function OrderDetailPage() {
             <span className="text-[#2d1010] font-medium">{order.orderNumber}</span>
           </nav>
 
-          {/* Page header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-            <div>
-              <h1 className="text-2xl font-bold text-[#2d1010]">Order Details</h1>
-              <div className="flex items-center gap-2 mt-1">
-                <Hash size={13} className="text-[#9b7b7a]" />
-                <span className="text-sm text-[#9b7b7a] font-medium">{order.orderNumber}</span>
-                <span className="text-[#d4b8b7]">·</span>
-                <span className="text-xs text-[#9b7b7a]">{formatDate(order.createdAt)}</span>
+          {/* ── Catchy Header Banner ── */}
+          <div className="relative bg-gradient-to-r from-[#5B1A18] to-[#8B3A31] rounded-2xl p-6 mb-6 text-white overflow-hidden shadow-lg">
+            <div className="absolute right-0 top-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4" />
+            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-2xl font-bold flex items-center gap-2">
+                  <Hash size={20} className="opacity-80" />
+                  {order.orderNumber}
+                </h1>
+                <p className="text-sm text-white/70 mt-1">Placed on {formatDate(order.createdAt)}</p>
               </div>
-            </div>
-
-            {/* Status badge + cancel */}
-            <div className="flex items-center gap-3">
-              <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${statusCfg.bg} ${statusCfg.color} ${statusCfg.border}`}>
-                <StatusIcon size={13} />
-                {statusCfg.label}
-              </span>
-              {canCancel && (
-                <button
-                  onClick={() => setShowCancelModal(true)}
-                  className="px-4 py-1.5 rounded-full text-xs font-semibold border-2 border-red-200 text-red-500 hover:bg-red-50 transition-colors"
-                >
-                  Cancel Order
-                </button>
-              )}
+              <div className="flex items-center gap-3">
+                <span className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold bg-white/20 backdrop-blur-sm border border-white/20`}>
+                  <StatusIcon size={15} />
+                  {statusCfg.label}
+                </span>
+                {canCancel && (
+                  <button onClick={() => setShowCancelModal(true)} className="px-4 py-2 rounded-xl text-sm font-bold border-2 border-white/30 text-white hover:bg-white/10 transition-colors cursor-pointer">
+                    Cancel
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Main grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            {/* Left column — items + address + payment */}
-            <div className="lg:col-span-2 space-y-4">
+            {/* ── LEFT COLUMN ── */}
+            <div className="lg:col-span-2 space-y-6">
 
               {/* Order items */}
               <Card title="Order Items" icon={Package}>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {order.items.map((item) => (
-                    <div key={item.id} className="flex items-start gap-4 py-3 border-b border-[#f0e8e7] last:border-0 last:pb-0">
-                      {/* Product icon placeholder */}
-                      <div className="w-12 h-12 rounded-xl bg-[#f9f1f0] flex items-center justify-center flex-shrink-0">
-                        <Package size={20} className="text-[#9b7b7a]" />
+                    <div key={item.id} className="flex items-start gap-4 p-3 rounded-xl bg-[#fdf8f7] border border-transparent hover:border-[#f0e8e7] transition-colors">
+                      {/* Catchy Initial Placeholder */}
+                      <div className="w-16 h-16 rounded-xl bg-[#5B1A18]/10 flex items-center justify-center flex-shrink-0 text-[#5B1A18] font-bold text-lg">
+                        {item.productSnapshot.name.charAt(0)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-[#2d1010] truncate">
-                          {item.productSnapshot.name}
-                        </p>
-                        <p className="text-xs text-[#9b7b7a] mt-0.5">
-                          {item.productSnapshot.sourceRegion} · per {item.productSnapshot.unit}
-                        </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs text-[#9b7b7a]">৳{item.unitPrice} × {item.quantity}</span>
+                        <p className="text-sm font-bold text-[#2d1010] truncate">{item.productSnapshot.name}</p>
+                        <p className="text-xs text-[#9b7b7a] mt-1 capitalize">{item.productSnapshot.sourceRegion} · Per {item.productSnapshot.unit}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-xs text-[#9b7b7a] bg-white px-2 py-1 rounded-md border border-[#f0e8e7]">৳{item.unitPrice} × {item.quantity}</span>
+                          <p className="text-sm font-extrabold text-[#2d1010]">৳{item.totalPrice}</p>
                         </div>
                       </div>
-                      <p className="text-sm font-bold text-[#5B1A18] flex-shrink-0">
-                        ৳{item.totalPrice}
-                      </p>
                     </div>
                   ))}
                 </div>
 
-                {/* Price summary */}
-                <div className="mt-4 pt-4 border-t border-[#f0e8e7] space-y-2">
+                {/* Sleek Receipt Summary */}
+                <div className="mt-6 bg-[#fdf8f7] rounded-xl p-4 space-y-3 border border-[#f0e8e7]">
                   {[
-                    { label: "Subtotal",     value: `৳${order.subtotal}` },
-                    { label: "Delivery Fee", value: parseFloat(order.deliveryFee) === 0 ? "Free" : `৳${order.deliveryFee}` },
-                    { label: "Discount",     value: parseFloat(order.discount) > 0 ? `-৳${order.discount}` : "—" },
-                  ].map(({ label, value }) => (
+                    { label: "Subtotal", value: `৳${order.subtotal}`, hide: false },
+                    { label: "Delivery Fee", value: parseFloat(order.deliveryFee) === 0 ? "Free" : `৳${order.deliveryFee}`, hide: false },
+                    { label: "Discount", value: parseFloat(order.discount) > 0 ? `-৳${order.discount}` : "—", hide: false },
+                  ].filter(r => !r.hide).map(({ label, value }) => (
                     <div key={label} className="flex justify-between text-sm">
                       <span className="text-[#9b7b7a]">{label}</span>
-                      <span className="text-[#2d1010]">{value}</span>
+                      <span className={`font-medium ${label === 'Discount' && value !== '—' ? 'text-green-600' : 'text-[#2d1010]'}`}>{value}</span>
                     </div>
                   ))}
-                  <div className="flex justify-between text-base font-bold pt-2 border-t border-[#f0e8e7]">
+                  <div className="flex justify-between text-lg font-extrabold pt-3 border-t border-dashed border-[#d4b8b7]">
                     <span className="text-[#2d1010]">Total</span>
                     <span className="text-[#5B1A18]">৳{order.total}</span>
                   </div>
                 </div>
               </Card>
 
-              {/* Shipping address */}
+              {/* Shipping Address */}
               <Card title="Delivery Address" icon={MapPin}>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <User size={14} className="text-[#9b7b7a]" />
-                    <span className="text-sm font-semibold text-[#2d1010]">
-                      {order.shippingAddressSnapshot.fullName}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Phone size={14} className="text-[#9b7b7a]" />
-                    <span className="text-sm text-[#4a2020]">
-                      {order.shippingAddressSnapshot.phone}
-                    </span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <MapPin size={14} className="text-[#9b7b7a] mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-[#4a2020] leading-relaxed">
-                      {order.shippingAddressSnapshot.line1}
-                      {order.shippingAddressSnapshot.line2 && `, ${order.shippingAddressSnapshot.line2}`}
-                      {`, ${order.shippingAddressSnapshot.city}`}
-                      {`, ${order.shippingAddressSnapshot.district}`}
-                      {order.shippingAddressSnapshot.postalCode && ` - ${order.shippingAddressSnapshot.postalCode}`}
-                    </span>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Payment */}
-              <Card title="Payment Info" icon={CreditCard}>
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-[#9b7b7a]">Method</span>
-                    <span className="text-sm font-semibold text-[#2d1010]">
-                      {PAYMENT_METHOD_LABELS[order.paymentMethod] ?? order.paymentMethod}
-                    </span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-[#f0e8e7] flex items-center justify-center"><User size={14} className="text-[#5B1A18]" /></div>
+                    <div>
+                      <p className="text-sm font-bold text-[#2d1010]">{order.shippingAddressSnapshot.fullName}</p>
+                      <p className="text-xs text-[#9b7b7a]">{order.shippingAddressSnapshot.phone}</p>
+                    </div>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-[#9b7b7a]">Status</span>
-                    <span className={`text-sm font-semibold ${paymentCfg.color}`}>
-                      {paymentCfg.label}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-[#9b7b7a]">Source</span>
-                    <span className="text-sm font-semibold text-[#2d1010] capitalize">{order.source}</span>
+                  <div className="ml-11 pl-4 border-l-2 border-[#f0e8e7]">
+                    <p className="text-sm text-[#4a2020] leading-relaxed">
+                      {order.shippingAddressSnapshot.line1}{order.shippingAddressSnapshot.line2 && `, ${order.shippingAddressSnapshot.line2}`}{`, ${order.shippingAddressSnapshot.city}`}{`, ${order.shippingAddressSnapshot.district}`}{order.shippingAddressSnapshot.postalCode && ` - ${order.shippingAddressSnapshot.postalCode}`}
+                    </p>
                   </div>
                 </div>
               </Card>
@@ -344,31 +211,60 @@ export default function OrderDetailPage() {
               {/* Notes */}
               {order.notes && (
                 <Card title="Order Notes" icon={Receipt}>
-                  <p className="text-sm text-[#4a2020]">{order.notes}</p>
+                  <p className="text-sm text-[#4a2020] italic bg-[#fdf8f7] p-3 rounded-lg border border-[#f0e8e7]">"{order.notes}"</p>
                 </Card>
               )}
             </div>
 
-            {/* Right column — status timeline */}
-            <div className="space-y-4">
+            {/* ── RIGHT COLUMN ── */}
+            <div className="space-y-6">
+              
+              {/* Timeline */}
               <Card title="Order Timeline" icon={Clock}>
                 <StatusTimeline history={order.statusHistory} />
               </Card>
 
-              {/* Cancel reminder on mobile */}
+              {/* Payment Info & Pay Now (Moved Here) */}
+              <div className="bg-white rounded-2xl border border-[#f0e8e7] shadow-sm overflow-hidden">
+                <div className="flex items-center gap-2 px-5 py-4 border-b border-[#f0e8e7]">
+                  <CreditCard size={16} className="text-[#5B1A18]" />
+                  <h2 className="text-sm font-bold text-[#2d1010]">Payment Details</h2>
+                </div>
+                
+                <div className="p-5 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-[#9b7b7a]">Method</span>
+                    <span className="text-sm font-bold px-2.5 text-[#2d1010]">{PAYMENT_METHOD_LABELS[order.paymentMethod] ?? order.paymentMethod}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-[#9b7b7a]">Status</span>
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${paymentCfg.bg} ${paymentCfg.color}`}>{paymentCfg.label}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-[#9b7b7a]">Total Due</span>
+                    <span className="text-xl font-extrabold px-2.5 text-[#5B1A18]">৳{order.total}</span>
+                  </div>
+
+                  {/* ── Catchy Pay Now Button ── */}
+                  {requiresDigitalPayment && (
+                    <button className="w-full mt-2 py-3.5 rounded-xl text-white text-sm font-bold flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 cursor-pointer bg-[#5A1B18] hover:from-pink-600 hover:to-rose-700">
+                      {/* <Zap size={18} /> */}
+                      Pay Now via {PAYMENT_METHOD_LABELS[order.paymentMethod]}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Mobile cancel reminder (only shows if payment is on right side and user is on mobile) */}
               {canCancel && (
                 <div className="lg:hidden bg-red-50 border border-red-200 rounded-2xl p-4">
-                  <p className="text-xs text-red-600 font-medium mb-3">
-                    You can still cancel this order since it hasn't been confirmed yet.
-                  </p>
-                  <button
-                    onClick={() => setShowCancelModal(true)}
-                    className="w-full py-2.5 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-colors"
-                  >
+                  <p className="text-xs text-red-600 font-medium mb-3">Changed your mind? You can cancel this order right now.</p>
+                  <button onClick={() => setShowCancelModal(true)} className="w-full py-2.5 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-colors cursor-pointer">
                     Cancel Order
                   </button>
                 </div>
               )}
+
             </div>
           </div>
         </div>
