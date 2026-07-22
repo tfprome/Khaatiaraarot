@@ -16,8 +16,8 @@ import { loginSchema, LoginFormData } from "@/zodvalidations/loginschema";
 
 export default function LoginPage() {
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const callbackUrl = searchParams.get("callbackUrl") ?? "/";
+    //const searchParams = useSearchParams();
+    //const callbackUrl = searchParams.get("callbackUrl") ?? "/";
     const [showPassword, setShowPassword] = useState<boolean>(false);
     //const [email, setEmail] = useState<string>("");
     //const [password, setPassword] = useState<string>("");
@@ -72,8 +72,9 @@ export default function LoginPage() {
                 draggable: false,
                 className: 'success-toast'
             });
+            router.push('/')
 
-            router.replace(callbackUrl);
+            //router.replace(callbackUrl);
         } catch (err) {
             //setError(err instanceof Error ? err.message : 'Login failed');
         } finally {
