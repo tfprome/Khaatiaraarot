@@ -65,8 +65,8 @@ type FormErrors = Partial<Record<keyof FormData, string>>;
 
 export default function RegisterPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/";
+  //const searchParams = useSearchParams();
+  //const callbackUrl = searchParams.get("callbackUrl") ?? "/";
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -151,7 +151,8 @@ export default function RegisterPage() {
         draggable: false,
         className: 'success-toast'
       });
-      router.replace(callbackUrl);
+      router.push('/')
+      //router.replace(callbackUrl);
     } catch (err) {
       setApiError(err instanceof Error ? err.message : 'Registration failed');
     } finally {
