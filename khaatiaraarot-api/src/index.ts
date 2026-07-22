@@ -29,7 +29,7 @@ const PORT = process.env.PORT || 4000;
 app.set('trust proxy', false);
 
 app.use(helmet({ hsts: false }));
-app.use(cors({ origin: process.env.ALLOWED_ORIGIN, credentials: true }));
+app.use(cors({ origin: process.env.ALLOWED_ORIGIN?.replace(/\/$/, ''), credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(requestLogger);
