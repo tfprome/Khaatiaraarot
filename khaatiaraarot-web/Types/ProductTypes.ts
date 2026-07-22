@@ -30,7 +30,7 @@ export type ProductDetailstype = {
   isBestSelling: boolean;
   isActive: boolean;
   createdAt: string;
-  images: string[];
+  images: ImageType[];
   category: Category;
 }
 
@@ -42,4 +42,13 @@ export type Category = {
   imageUrl?: string | StaticImageData;
   sortOrder: number;
   productCount?: number;
+}
+
+export interface ImageType {
+  id: string;
+  productId: string;
+  url: string;
+  publicId: string;
+  isPrimary: boolean;
+  sortOrder: number;
 }

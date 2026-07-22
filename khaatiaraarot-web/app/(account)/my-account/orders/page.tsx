@@ -4,7 +4,7 @@ import { ShoppingBag } from "lucide-react";
 import AccountPageHeader from "@/components/account/accountpageHeader";
 import EmptyState from "@/components/account/emptystate";
 import OrderCard from "@/components/account/ordercard";
-import { Order } from "@/Types/orderTypes";
+import { Orderdetails } from "@/Types/orderTypes";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { getOrders } from "@/lib/orderApi";
@@ -15,7 +15,7 @@ import PaginationControls from "@/components/pagination/paginationcontrol";
 import OrdersPageSkeleton from "@/components/skeleton/orderpageSkeleton";
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<Order[]>([])
+  const [orders, setOrders] = useState<Orderdetails[]>([])
   const { isAuthenticated } = useAppSelector(
     (state) => state.auth
   );

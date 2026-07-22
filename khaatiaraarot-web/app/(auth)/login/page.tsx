@@ -138,8 +138,8 @@ export default function LoginPage() {
                                 />
                             </div>
                             <p className="h-1 text-red-500 text-xs mt-1">
-                                        {errors.email?.message}
-                                    </p>
+                                {errors.email?.message}
+                            </p>
                         </div>
 
                         {/* Password */}
@@ -185,10 +185,10 @@ export default function LoginPage() {
                                 </button>
                             </div>
                             {/* {errors.password && ( */}
-                                    <p className="h-1 text-red-500 text-xs mt-1">
-                                        {errors.password?.message}
-                                    </p>
-                                {/* )} */}
+                            <p className="h-1 text-red-500 text-xs mt-1">
+                                {errors.password?.message}
+                            </p>
+                            {/* )} */}
                         </div>
 
                         {/* Submit */}
@@ -241,12 +241,18 @@ export default function LoginPage() {
                 </div>
 
                 {/* Back to home */}
-                <p className="text-center text-[12px] text-[#a07850] mt-6">
+                <p className="flex justify-between items-center font-semibold text-center text-[12px] text-[#a07850] mt-6">
                     <Link
                         href="/"
                         className="hover:text-[#8B0000] transition-colors duration-200"
                     >
                         ← Back to home
+                    </Link>
+                    <Link
+                        href="/admin/login"
+                        className="hover:text-[#8B0000] transition-colors duration-200"
+                    >
+                        ← Go to Admin Login
                     </Link>
                 </p>
 

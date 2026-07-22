@@ -145,7 +145,7 @@ export function ProductCard({ product, categories }: { product: Product; categor
           <img
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
           />
         ) : (
           <span role="img" aria-label={category}>
@@ -296,7 +296,7 @@ export default function ProductsPage() {
     };
     fetchProducts();
   }, [sortBy, page, limit, activeCategory]);
-  console.log('products', products);
+  //console.log('products', products);
 
   useEffect(() => {
     setPage(1);
@@ -309,7 +309,7 @@ export default function ProductsPage() {
     };
     fetchCategories();
   }, []);
-  console.log('categories', categories);
+  //console.log('categories', categories);
 
   if (loading) {
     return <ProductsPageSkeleton />;

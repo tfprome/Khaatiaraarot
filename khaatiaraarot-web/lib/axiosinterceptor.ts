@@ -1,5 +1,3 @@
-// lib/api.ts
-
 import axios from "axios";
 
 const BASE =
