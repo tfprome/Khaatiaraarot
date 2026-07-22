@@ -19,10 +19,11 @@ const router = Router();
  *         application/json:
  *           schema:
  *             type: object
- *             required: [name, email, password, phone]
+ *             required: [fullName, email, password]
  *             properties:
- *               name:
+ *               fullName:
  *                 type: string
+ *                 minLength: 2
  *               email:
  *                 type: string
  *                 format: email
